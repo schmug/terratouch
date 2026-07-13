@@ -94,6 +94,9 @@ describe('collapse detection', () => {
     expect(instabilityStep(50, twoOut, content.balance)).toBe(70)
     expect(instabilityStep(2, inside, content.balance)).toBe(0) // floors at 0
     expect(systemsOutOfBand(twoOut)).toEqual(['thermal', 'hydro'])
+    // Era volatility scales accrual (not decay): later worlds punish drift.
+    expect(instabilityStep(50, oneOut, content.balance, 2)).toBe(70)
+    expect(instabilityStep(50, inside, content.balance, 2)).toBe(45)
   })
 
   it('cascade triggers at the threshold', () => {

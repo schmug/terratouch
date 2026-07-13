@@ -134,7 +134,7 @@ export function resolveCard(
   let instability = Math.max(0, run.instability + (choice.effects.instability ?? 0))
 
   // The turn's Instability step (accrual/decay) happens after the deltas land.
-  instability = instabilityStep(instability, systems, content.balance)
+  instability = instabilityStep(instability, systems, content.balance, volatility)
   applied.instability = Math.round((instability - run.instability) * 10) / 10
 
   // History: out-of-band turns per system, peak Habitability.

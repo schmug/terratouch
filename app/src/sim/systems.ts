@@ -60,18 +60,20 @@ export function detectHardFail(
 /**
  * One Instability step, taken once per ACTIVE turn (card resolved) — never
  * on ticks and never offline (SPEC §1.3, §2.4). Each out-of-band system adds
- * accrual; an all-clear turn bleeds Instability back down.
+ * accrual, scaled by the Era's volatility (later worlds punish drift harder,
+ * SPEC §2.3); an all-clear turn bleeds Instability back down at a flat rate.
  */
 export function instabilityStep(
   instability: number,
   systems: Record<SystemId, SystemState>,
   balance: Balance,
+  volatilityMult = 1,
 ): number {
   const out = systemsOutOfBand(systems).length
   if (out === 0) {
     return Math.max(0, instability - balance.instability.decayPerTurn)
   }
-  return instability + out * balance.instability.accrualPerSystemPerTurn
+  return instability + out * balance.instability.accrualPerSystemPerTurn * volatilityMult
 }
 
 /** Cascade fail: Instability past the threshold (SPEC §2.4). */
