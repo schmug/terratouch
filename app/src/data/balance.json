@@ -1,0 +1,13 @@
+{
+  "energy": { "cap": 10, "regenPerSec": 0.0133, "drawCost": 1 },
+  "tap": { "baseRatePerSec": 0.4, "bonusMult": 1.25, "poolCapSec": 120 },
+  "instability": {
+    "accrualPerSystemPerTurn": 6,
+    "decayPerTurn": 4,
+    "cascadeThreshold": 100
+  },
+  "setpoint": { "min": 2, "max": 98 },
+  "era": { "progressDecayMult": 1 },
+  "offline": { "maxHours": 8, "productionMult": 1 },
+  "cards": { "recentExclusion": 3 }
+}
