@@ -372,8 +372,11 @@ type MetaState = {
 
 ### 4.6 Deployment
 
-- **App:** connect the GitHub repo to **Cloudflare Pages**; build command `npm --prefix app run build`,
-  output `app/dist`. Auto-deploy on push to `main`; preview deploys on PRs.
+- **App:** connect the GitHub repo to **Cloudflare Pages**; build command
+  `npm --prefix app ci && npm --prefix app run build`, output `app/dist`. (The explicit
+  `npm ci` matters: the monorepo root has no package.json, so Pages skips its automatic
+  dependency install — verified 2026-07-13 when the install-less command failed with
+  `tsc: not found`.) Auto-deploy on push to `main`; preview deploys on PRs.
 - **Worker:** `wrangler deploy` from `worker/` with the `AI` binding enabled. Route it at
   `/api/*` on the Pages custom domain (or a `*.workers.dev` subdomain referenced by the client via an
   env var) so CORS stays same-origin where possible.
