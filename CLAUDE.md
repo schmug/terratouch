@@ -18,6 +18,13 @@ The repo currently contains **only the spec and this file** — nothing is scaff
 - **Backend:** a single stateless Cloudflare Worker (`POST /api/narrate` → Workers AI) for loss narration only. The game is fully playable with zero backend.
 - **Hosting/CI:** GitHub → Cloudflare Pages (app), `wrangler` (Worker).
 
+## Design decisions (resolved 2026-07-13)
+
+- **Name:** TerraTouch — final for v1; use it in the manifest and user-facing strings.
+- **Tone: bittersweet blend.** Card copy and in-game text are cozy and hopeful; the Chronicle's loss obituaries are elegiac and wistful. The contrast is deliberate — losing a world should sting a little. Write all content (cards.json, templated fallbacks, LLM system prompt) with this split in mind.
+- **Energy cadence:** one active burst ≈ **5 minutes** (~10–15 card draws + building). Tune Energy cap/regen in `balance.json` toward this target.
+- **Monetization: none, ever.** Free/portfolio project. Tune the prestige economy purely for fun — never add store-shaped friction.
+
 ## Non-negotiable rules
 
 These come straight from the spec. Violating them breaks determinism, testability, or the core design — do not.

@@ -4,7 +4,7 @@
 > habitability one swipe at a time — and when it collapses, an AI chronicler writes the
 > obituary of your planet.
 
-**Status:** Design spec v1.0 · **Audience:** Claude Code (implementer) + Cory (designer/owner)
+**Status:** Design spec v1.1 (all open questions resolved) · **Audience:** Claude Code (implementer) + Cory (designer/owner)
 **Last updated:** 2026-07-13
 
 ---
@@ -18,8 +18,12 @@
 | Loss-narration LLM | **Cloudflare Workers AI** | Unified stack; 10k free neurons/day dwarfs our needs; key never touches client |
 | Frontend stack | **React + Vite + TypeScript** | Conventional, great PWA tooling, most reliable for agentic implementation |
 | Source control / CI | **GitHub** → Cloudflare Pages Git integration; `wrangler` for the Worker | |
+| Name | **TerraTouch** (final for v1) | Literal, descriptive; already the working title |
+| Tone | **Bittersweet blend** | Cozy, hopeful play; elegiac, wistful Chronicle obituaries — the contrast is the emotional hook |
+| Energy cadence | **~5 min per active burst** (~10–15 card draws) | Reigns-session length; several returns/day. Tune via `balance.json` |
+| Monetization | **None, ever** (free / portfolio) | Prestige economy tuned purely for fun |
 
-Everything below assumes these four choices.
+Everything below assumes these choices.
 
 ---
 
@@ -521,12 +525,14 @@ Worker cleanly falls back to templates with no user-visible error.
 - **Scope creep from the mash-up.** M1 deliberately ships *without* synthesis or prestige to prove the
   core loop first.
 
-Open for Cory:
-1. Naming/theme flavor (keep "TerraTouch"? tone: hopeful cozy vs. bleak sci-fi — affects card writing
-   and the Chronicle's voice).
-2. Energy cadence target — how long should one "burst" of active play last before you're nudged away?
-3. Monetization stance (pure free/portfolio, cosmetic-only later, or none)? Affects nothing technical
-   in M1 but shapes the prestige economy.
+~~Open for Cory~~ **Resolved 2026-07-13:**
+1. **Name:** keep **TerraTouch**. **Tone: bittersweet blend** — play feels cozy and hopeful; the
+   Chronicle writes elegiac, wistful obituaries. Losing a world should sting a little; that contrast
+   is the emotional hook. Card copy leans warm; loss narration leans mournful.
+2. **Energy cadence:** target **~5 minutes** per active burst (~10–15 card draws plus building) —
+   tune Energy cap/regen in `balance.json` toward this.
+3. **Monetization:** **pure free / portfolio.** No monetization ever; tune the prestige economy
+   purely for fun.
 
 ---
 
