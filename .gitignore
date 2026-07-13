@@ -46,3 +46,6 @@ Thumbs.db
 
 # e2e walk screenshots
 app/tests/e2e/shots/
+
+# Claude worktrees (session-local)
+.claude/worktrees/
