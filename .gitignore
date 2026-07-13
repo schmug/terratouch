@@ -43,3 +43,6 @@ Thumbs.db
 
 # Local Claude settings
 .claude/settings.local.json
+
+# e2e walk screenshots
+app/tests/e2e/shots/

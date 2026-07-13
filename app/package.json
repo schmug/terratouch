@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "harness": "vitest run tests/balance-harness.test.ts --disable-console-intercept",
+    "walk": "node tests/e2e/acceptance-walk.mjs",
     "typecheck": "tsc --noEmit",
     "icons": "node scripts/make-icons.mjs"
   },
@@ -25,6 +26,7 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
+    "playwright-core": "^1.61.1",
     "typescript": "^7.0.2",
     "vite": "^8.1.4",
     "vite-plugin-pwa": "^1.3.0",
