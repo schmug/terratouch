@@ -1,37 +1,80 @@
-// Placeholder shell. The real UI (Planet / Cards / Build / Synthesis / Loss —
-// SPEC §3) is built only after the sim engine is pure and green (SPEC §9).
+// App.tsx — the shell: header (minerals + energy), active screen, tab bar,
+// and the two modal layers (away summary, loss). One-thumb, mobile-first
+// (SPEC §3).
+
+import { useEffect, useState } from 'react'
+import { content } from '../data'
+import { useGame } from '../state/store'
+import { AwayModal } from './AwayModal'
+import { BuildScreen } from './BuildScreen'
+import { CardsScreen } from './CardsScreen'
+import { fmtInt } from './format'
+import { LossModal } from './LossModal'
+import { PlanetScreen } from './PlanetScreen'
+import { SynthesisScreen } from './SynthesisScreen'
+import { TabBar, type Tab } from './TabBar'
+
+function EnergyPips({ energy, cap }: { energy: number; cap: number }) {
+  const whole = Math.floor(energy)
+  const frac = energy - whole
+  return (
+    <span className="energy-pips" aria-label={`Energy ${whole} of ${cap}`}>
+      <span className="energy-glyph" aria-hidden>
+        ⚡
+      </span>
+      {Array.from({ length: cap }, (_, i) => {
+        const fill = i < whole ? 1 : i === whole ? frac : 0
+        return (
+          <span key={i} className="pip" aria-hidden>
+            <span className="pip-fill" style={{ width: `${fill * 100}%` }} />
+          </span>
+        )
+      })}
+    </span>
+  )
+}
 
 export function App() {
+  const loaded = useGame((s) => s.loaded)
+  const run = useGame((s) => s.run)
+  const awaySummary = useGame((s) => s.awaySummary)
+  const [tab, setTab] = useState<Tab>('planet')
+
+  useEffect(() => {
+    void useGame.getState().init()
+  }, [])
+
+  if (!loaded || !run) {
+    return (
+      <main className="splash">
+        <div className="splash-planet" aria-hidden />
+        <h1 className="splash-title">TerraTouch</h1>
+        <p className="splash-sub">waking the world…</p>
+      </main>
+    )
+  }
+
   return (
-    <main
-      style={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '0.75rem',
-        textAlign: 'center',
-        padding: '1rem',
-      }}
-    >
-      <div
-        aria-hidden
-        style={{
-          width: 96,
-          height: 96,
-          borderRadius: '50%',
-          background:
-            'radial-gradient(circle at 35% 30%, #4fe0b8, #1f9d7a 55%, #14504a)',
-          boxShadow: '0 0 48px rgba(45, 212, 167, 0.35)',
-        }}
-      />
-      <h1 style={{ margin: 0, fontSize: '1.5rem', letterSpacing: '0.04em' }}>
-        TerraTouch
-      </h1>
-      <p style={{ margin: 0, color: 'var(--muted)', maxWidth: '24ch' }}>
-        A dead world waits. The sim engine comes first.
-      </p>
-    </main>
+    <div className="app">
+      <header className="app-header">
+        <span className="header-minerals" aria-label={`${fmtInt(run.resources.minerals)} minerals`}>
+          <span aria-hidden>⬦</span> {fmtInt(run.resources.minerals)}
+        </span>
+        <span className="header-title">TerraTouch</span>
+        <EnergyPips energy={run.energy} cap={content.balance.energy.cap} />
+      </header>
+
+      <main className="app-main">
+        {tab === 'planet' && <PlanetScreen goToCards={() => setTab('cards')} />}
+        {tab === 'cards' && <CardsScreen />}
+        {tab === 'build' && <BuildScreen />}
+        {tab === 'synthesis' && <SynthesisScreen />}
+      </main>
+
+      <TabBar tab={tab} onSelect={setTab} />
+
+      {awaySummary && !run.collapse && <AwayModal summary={awaySummary} />}
+      {run.collapse && <LossModal report={run.collapse} />}
+    </div>
   )
 }

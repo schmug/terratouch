@@ -6,11 +6,12 @@
 import { create } from 'zustand'
 import { content } from '../data'
 import { buildOrUpgrade, newRun, setSetpoint, tapCollect } from '../sim/actions'
-import { canDraw, drawCard, resolveCard } from '../sim/cards'
+import { canDraw, cardById, drawCard, resolveCard } from '../sim/cards'
 import { applyOffline } from '../sim/offline'
 import { tick } from '../sim/tick'
 import {
   SimError,
+  type AppliedEffects,
   type AwaySummary,
   type MetaState,
   type RunState,
@@ -45,11 +46,19 @@ function randomSeed(): number {
   return buf[0]!
 }
 
+export type CardOutcome = {
+  cardTitle: string
+  choiceLabel: string
+  applied: AppliedEffects
+}
+
 type GameStore = {
   loaded: boolean
   run: RunState | null
   meta: MetaState
   awaySummary: AwaySummary | null
+  /** The most recent resolved card, for UI feedback. */
+  lastOutcome: CardOutcome | null
 
   init(): Promise<void>
   /** Advance by whole logical ticks (1s each) — called only by the loop. */
@@ -79,6 +88,7 @@ export const useGame = create<GameStore>((set, get) => ({
   run: null,
   meta: freshMeta(),
   awaySummary: null,
+  lastOutcome: null,
 
   async init() {
     if (get().loaded) return
@@ -147,9 +157,11 @@ export const useGame = create<GameStore>((set, get) => ({
 
   resolve(side) {
     const { run, meta } = get()
-    if (!run) return
+    if (!run || !run.activeCardId) return
+    const card = cardById(content, run.activeCardId)
     const result = guard(() => resolveCard(run, content, side))
     if (!result) return
+    const choice = side === 'left' ? card.left : card.right
     let nextMeta = meta
     if (result.run.collapse) {
       // Run ended: fold the post-mortem into persistent stats (SPEC §4.4).
@@ -162,7 +174,15 @@ export const useGame = create<GameStore>((set, get) => ({
         },
       }
     }
-    set({ run: result.run, meta: nextMeta })
+    set({
+      run: result.run,
+      meta: nextMeta,
+      lastOutcome: {
+        cardTitle: card.title,
+        choiceLabel: choice.label,
+        applied: result.applied,
+      },
+    })
     saveNow() // a collapse (or any turn) is worth persisting promptly
   },
 
@@ -192,6 +212,7 @@ export const useGame = create<GameStore>((set, get) => ({
       run: newRun(content, randomSeed(), STARTING_ARCHETYPE),
       meta: { ...meta, stats: { ...meta.stats, runs: meta.stats.runs + 1 } },
       awaySummary: null,
+      lastOutcome: null,
     })
     saveNow()
   },
