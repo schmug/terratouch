@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "harness": "vitest run tests/balance-harness.test.ts --disable-console-intercept",
     "typecheck": "tsc --noEmit",
     "icons": "node scripts/make-icons.mjs"
   },
@@ -20,6 +21,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@types/node": "^24.13.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",

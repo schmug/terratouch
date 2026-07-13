@@ -1,0 +1,91 @@
+[
+  {
+    "id": "barren",
+    "name": "Barren",
+    "advanceHabitability": 45,
+    "stabilizationSec": 40,
+    "volatilityMult": 1.0,
+    "bands": {
+      "thermal": [4, 50],
+      "atmosphere": [3, 45],
+      "hydro": [3, 45],
+      "biosphere": [1, 30]
+    }
+  },
+  {
+    "id": "frost",
+    "name": "Frost",
+    "advanceHabitability": 50,
+    "stabilizationSec": 45,
+    "volatilityMult": 1.1,
+    "bands": {
+      "thermal": [10, 58],
+      "atmosphere": [8, 52],
+      "hydro": [8, 55],
+      "biosphere": [2, 35]
+    }
+  },
+  {
+    "id": "liquid",
+    "name": "Liquid",
+    "advanceHabitability": 55,
+    "stabilizationSec": 50,
+    "volatilityMult": 1.2,
+    "bands": {
+      "thermal": [18, 64],
+      "atmosphere": [14, 58],
+      "hydro": [16, 62],
+      "biosphere": [4, 42]
+    }
+  },
+  {
+    "id": "microbial",
+    "name": "Microbial",
+    "advanceHabitability": 60,
+    "stabilizationSec": 55,
+    "volatilityMult": 1.3,
+    "bands": {
+      "thermal": [26, 70],
+      "atmosphere": [22, 66],
+      "hydro": [24, 68],
+      "biosphere": [10, 52]
+    }
+  },
+  {
+    "id": "flora",
+    "name": "Flora",
+    "advanceHabitability": 65,
+    "stabilizationSec": 60,
+    "volatilityMult": 1.45,
+    "bands": {
+      "thermal": [34, 76],
+      "atmosphere": [30, 72],
+      "hydro": [30, 74],
+      "biosphere": [20, 64]
+    }
+  },
+  {
+    "id": "fauna",
+    "name": "Fauna",
+    "advanceHabitability": 70,
+    "stabilizationSec": 60,
+    "volatilityMult": 1.6,
+    "bands": {
+      "thermal": [42, 82],
+      "atmosphere": [38, 78],
+      "hydro": [36, 80],
+      "biosphere": [30, 74]
+    }
+  },
+  {
+    "id": "habitable",
+    "name": "Habitable",
+    "volatilityMult": 1.75,
+    "bands": {
+      "thermal": [50, 86],
+      "atmosphere": [46, 84],
+      "hydro": [42, 84],
+      "biosphere": [40, 84]
+    }
+  }
+]
