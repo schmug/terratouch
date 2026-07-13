@@ -8,7 +8,7 @@ Guidance for coding agents working in this repo. Read [SPEC.md](SPEC.md) in full
 
 ## Current state
 
-The repo currently contains **only the spec and this file** — nothing is scaffolded yet. The first implementation task is SPEC.md §9 / §4.2: scaffold the monorepo, then build the sim engine before any UI.
+**Scaffolded, no game logic yet.** The monorepo skeleton (SPEC §4.2) is in place and green: `app/` builds as an installable PWA (placeholder shell only), `worker/` typechecks and dry-run-deploys (the `/api/narrate` route returns 501 until M4), CI runs typecheck/test/build. Every `src/sim/*`, `state/`, `persist/`, and `net/` module is a documented stub. **The next task is SPEC §9 step 2: implement `app/src/sim/` as pure functions with unit tests — before any UI.**
 
 ## Locked stack (SPEC §0)
 
@@ -72,13 +72,22 @@ worker/               # Cloudflare Worker (wrangler)
 
 ## Commands
 
-_None yet — the app is not scaffolded. Once `app/` exists, expect roughly:_
-
-```
+```sh
+# app/ (React + Vite + TS PWA)
 npm --prefix app install
-npm --prefix app run dev        # local dev server
-npm --prefix app run build      # → app/dist (Cloudflare Pages output)
-npm --prefix app run test       # vitest
+npm --prefix app run dev        # dev server
+npm --prefix app run typecheck  # tsc --noEmit
+npm --prefix app test           # vitest run (tests/ — pure node env)
+npm --prefix app run build      # typecheck + vite build → app/dist
+npm --prefix app run icons      # regenerate PWA icons (scripts/make-icons.mjs)
+
+# worker/ (Cloudflare Worker)
+npm --prefix worker install
+npm --prefix worker run dev        # wrangler dev
+npm --prefix worker run typecheck  # tsc --noEmit
+npm --prefix worker run deploy     # wrangler deploy (needs CF auth)
 ```
 
-_Update this section with the real scripts once `package.json` exists._
+Toolchain notes:
+- Vite 8 (rolldown) and vitest each bundle their own vite — that's why `vitest.config.ts` is **standalone**, not merged into `vite.config.ts`. Keep it that way; sim tests need no plugins.
+- CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs app typecheck/test/build + worker typecheck via `npm ci` — keep both `package-lock.json` files committed.

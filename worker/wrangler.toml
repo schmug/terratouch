@@ -1,0 +1,16 @@
+# TerraTouch narration Worker — POST /api/narrate → Workers AI (SPEC §5.4).
+# Deploy: npm run deploy (wrangler). The AI binding is credential-free; no
+# secret ever ships to the client (SPEC §1.4).
+name = "terratouch-narrate"
+main = "src/index.ts"
+compatibility_date = "2026-06-01"
+
+[ai]
+binding = "AI"
+
+[vars]
+# Lock CORS to the Pages origin before going live (SPEC §5.4).
+ALLOWED_ORIGIN = "*"
+
+[observability]
+enabled = true
