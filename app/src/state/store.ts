@@ -1,5 +1,283 @@
 // store.ts — Zustand store wrapping the sim + persistence (SPEC §4.3).
 // UI subscribes here; the sim mutates via reducer-style pure calls. The wall
-// clock is read ONLY at the tick-loop boundary and passed into sim as deltas.
-// Stub — implemented after the sim engine is green.
-export {}
+// clock is read ONLY here, at the tick-loop boundary and when actions are
+// initiated — never inside sim/ functions.
+
+import { create } from 'zustand'
+import { content } from '../data'
+import { buildOrUpgrade, newRun, setSetpoint, tapCollect } from '../sim/actions'
+import { canDraw, drawCard, resolveCard } from '../sim/cards'
+import { applyOffline } from '../sim/offline'
+import { tick } from '../sim/tick'
+import {
+  SimError,
+  type AwaySummary,
+  type MetaState,
+  type RunState,
+  type Save,
+  type SystemId,
+} from '../sim/types'
+import { loadSave, writeSave } from '../persist/db'
+
+const STARTING_ARCHETYPE = 'barren'
+/** Hidden gaps at least this long go through the safe offline path. */
+const OFFLINE_GAP_MS = 5_000
+/** Away summaries shorter than this aren't worth a modal. */
+const AWAY_SUMMARY_MIN_MS = 60_000
+const AUTOSAVE_DEBOUNCE_MS = 3_000
+const TICK_INTERVAL_MS = 250
+
+function freshMeta(): MetaState {
+  return {
+    genesisSeeds: 0,
+    upgrades: {},
+    codex: [],
+    unlockedArchetypes: [STARTING_ARCHETYPE],
+    stats: { runs: 0, bestEra: 0, longestRun: 0 },
+  }
+}
+
+function randomSeed(): number {
+  // Boundary code: randomness for NEW runs comes from the platform; inside a
+  // run everything flows from this seed via sim/rng.
+  const buf = new Uint32Array(1)
+  crypto.getRandomValues(buf)
+  return buf[0]!
+}
+
+type GameStore = {
+  loaded: boolean
+  run: RunState | null
+  meta: MetaState
+  awaySummary: AwaySummary | null
+
+  init(): Promise<void>
+  /** Advance by whole logical ticks (1s each) — called only by the loop. */
+  tickBy(steps: number): void
+  offlineBy(elapsedMs: number): void
+  tap(): void
+  draw(): void
+  resolve(side: 'left' | 'right'): void
+  build(typeId: string): void
+  setpoint(system: SystemId, value: number): void
+  beginNewRun(): void
+  dismissAwaySummary(): void
+}
+
+/** Swallow SimError (illegal action — UI races), rethrow real bugs. */
+function guard<T>(fn: () => T): T | undefined {
+  try {
+    return fn()
+  } catch (err) {
+    if (err instanceof SimError) return undefined
+    throw err
+  }
+}
+
+export const useGame = create<GameStore>((set, get) => ({
+  loaded: false,
+  run: null,
+  meta: freshMeta(),
+  awaySummary: null,
+
+  async init() {
+    if (get().loaded) return
+    const save = await loadSave()
+    let run = save?.run ?? null
+    let meta = save?.meta ?? freshMeta()
+    let awaySummary: AwaySummary | null = null
+
+    if (run === null) {
+      run = newRun(content, randomSeed(), STARTING_ARCHETYPE)
+      meta = { ...meta, stats: { ...meta.stats, runs: meta.stats.runs + 1 } }
+    } else if (save && !run.collapse) {
+      const elapsed = Date.now() - save.lastSeenMs
+      if (elapsed >= OFFLINE_GAP_MS) {
+        const caught = applyOffline(run, content, elapsed)
+        run = caught.run
+        if (caught.summary.elapsedMs >= AWAY_SUMMARY_MIN_MS) awaySummary = caught.summary
+      }
+    }
+
+    set({ loaded: true, run, meta, awaySummary })
+    startLoop()
+    scheduleSave()
+  },
+
+  tickBy(steps) {
+    let { run } = get()
+    if (!run || run.collapse) return
+    for (let i = 0; i < steps && !run.collapse; i++) {
+      run = tick(run, content, LOGICAL_TICK_SEC)
+    }
+    set({ run })
+    scheduleSave()
+  },
+
+  offlineBy(elapsedMs) {
+    const { run } = get()
+    if (!run || run.collapse) return
+    const { run: caught, summary } = applyOffline(run, content, elapsedMs)
+    set({
+      run: caught,
+      awaySummary: summary.elapsedMs >= AWAY_SUMMARY_MIN_MS ? summary : get().awaySummary,
+    })
+    scheduleSave()
+  },
+
+  tap() {
+    const { run } = get()
+    if (!run) return
+    const result = guard(() => tapCollect(run, content))
+    if (result) {
+      set({ run: result.run })
+      scheduleSave()
+    }
+  },
+
+  draw() {
+    const { run } = get()
+    if (!run || !canDraw(run, content)) return
+    const result = guard(() => drawCard(run, content))
+    if (result) {
+      set({ run: result.run })
+      scheduleSave()
+    }
+  },
+
+  resolve(side) {
+    const { run, meta } = get()
+    if (!run) return
+    const result = guard(() => resolveCard(run, content, side))
+    if (!result) return
+    let nextMeta = meta
+    if (result.run.collapse) {
+      // Run ended: fold the post-mortem into persistent stats (SPEC §4.4).
+      nextMeta = {
+        ...meta,
+        stats: {
+          ...meta.stats,
+          bestEra: Math.max(meta.stats.bestEra, result.run.era + 1),
+          longestRun: Math.max(meta.stats.longestRun, result.run.turns),
+        },
+      }
+    }
+    set({ run: result.run, meta: nextMeta })
+    saveNow() // a collapse (or any turn) is worth persisting promptly
+  },
+
+  build(typeId) {
+    const { run } = get()
+    if (!run) return
+    const next = guard(() => buildOrUpgrade(run, content, typeId))
+    if (next) {
+      set({ run: next })
+      scheduleSave()
+    }
+  },
+
+  setpoint(system, value) {
+    const { run } = get()
+    if (!run) return
+    const next = guard(() => setSetpoint(run, content, system, value))
+    if (next) {
+      set({ run: next })
+      scheduleSave()
+    }
+  },
+
+  beginNewRun() {
+    const { meta } = get()
+    set({
+      run: newRun(content, randomSeed(), STARTING_ARCHETYPE),
+      meta: { ...meta, stats: { ...meta.stats, runs: meta.stats.runs + 1 } },
+      awaySummary: null,
+    })
+    saveNow()
+  },
+
+  dismissAwaySummary() {
+    set({ awaySummary: null })
+  },
+}))
+
+// ---------------------------------------------------------------------------
+// Tick loop + persistence plumbing (module-level; wall clock lives here only).
+// ---------------------------------------------------------------------------
+
+const LOGICAL_TICK_SEC = 1
+
+let intervalId: ReturnType<typeof setInterval> | null = null
+let lastTickMs = 0
+let accumulatorMs = 0
+let hiddenAtMs: number | null = null
+let saveTimer: ReturnType<typeof setTimeout> | null = null
+let listenersInstalled = false
+
+function currentSave(): Save {
+  const { run, meta } = useGame.getState()
+  return { schemaVersion: 1, run, meta, lastSeenMs: Date.now() }
+}
+
+function saveNow(): void {
+  if (saveTimer) {
+    clearTimeout(saveTimer)
+    saveTimer = null
+  }
+  void writeSave(currentSave()).catch((err) => console.warn('terratouch: save failed', err))
+}
+
+function scheduleSave(): void {
+  saveTimer ??= setTimeout(() => {
+    saveTimer = null
+    saveNow()
+  }, AUTOSAVE_DEBOUNCE_MS)
+}
+
+// Fixed-timestep accumulator (SPEC §4.3): real elapsed time collects here
+// and is spent in whole 1-second logical ticks; the remainder carries over.
+function loopStep(): void {
+  const now = Date.now()
+  accumulatorMs += Math.max(0, now - lastTickMs)
+  lastTickMs = now
+  const steps = Math.floor(accumulatorMs / (LOGICAL_TICK_SEC * 1000))
+  if (steps <= 0) return
+  accumulatorMs -= steps * LOGICAL_TICK_SEC * 1000
+  // A stall this long should have gone through the offline path instead.
+  useGame.getState().tickBy(Math.min(steps, 60))
+}
+
+function startLoop(): void {
+  if (intervalId === null) {
+    lastTickMs = Date.now()
+    accumulatorMs = 0
+    intervalId = setInterval(loopStep, TICK_INTERVAL_MS)
+  }
+  if (!listenersInstalled) {
+    listenersInstalled = true
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        hiddenAtMs = Date.now()
+        stopLoop()
+        saveNow()
+      } else {
+        const gap = hiddenAtMs === null ? 0 : Date.now() - hiddenAtMs
+        hiddenAtMs = null
+        if (gap >= OFFLINE_GAP_MS) useGame.getState().offlineBy(gap)
+        if (intervalId === null) {
+          lastTickMs = Date.now()
+          accumulatorMs = 0
+          intervalId = setInterval(loopStep, TICK_INTERVAL_MS)
+        }
+      }
+    })
+    window.addEventListener('pagehide', () => saveNow())
+  }
+}
+
+function stopLoop(): void {
+  if (intervalId !== null) {
+    clearInterval(intervalId)
+    intervalId = null
+  }
+}
