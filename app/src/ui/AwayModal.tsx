@@ -22,7 +22,7 @@ export function AwayModal({ summary }: { summary: AwaySummary }) {
 
         <div className="away-gains">
           {summary.mineralsGained >= 1 && (
-            <span className="away-gain">⬦ +{fmtInt(summary.mineralsGained)} minerals</span>
+            <span className="away-gain">◇ +{fmtInt(summary.mineralsGained)} minerals</span>
           )}
           {summary.energyGained >= 0.5 && (
             <span className="away-gain">⚡ +{Math.round(summary.energyGained)} energy</span>

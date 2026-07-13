@@ -58,7 +58,7 @@ export function App() {
     <div className="app">
       <header className="app-header">
         <span className="header-minerals" aria-label={`${fmtInt(run.resources.minerals)} minerals`}>
-          <span aria-hidden>⬦</span> {fmtInt(run.resources.minerals)}
+          <span aria-hidden>◇</span> {fmtInt(run.resources.minerals)}
         </span>
         <span className="header-title">TerraTouch</span>
         <EnergyPips energy={run.energy} cap={content.balance.energy.cap} />

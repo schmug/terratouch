@@ -34,7 +34,7 @@ function ChoiceChips({ choice }: { choice: CardChoice }) {
         </span>
       )}
       {choice.effects.minerals !== undefined && (
-        <span className="effect-chip chip-mineral">⬦{choice.effects.minerals > 0 ? '▲' : '▼'}</span>
+        <span className="effect-chip chip-mineral">◇{choice.effects.minerals > 0 ? '▲' : '▼'}</span>
       )}
       {choice.effects.energy !== undefined && choice.effects.energy > 0 && (
         <span className="effect-chip chip-energy">⚡▲</span>
@@ -104,7 +104,7 @@ export function CardsScreen() {
               )}
               {lastOutcome.applied.minerals !== 0 && (
                 <span className="text-mineral">
-                  ⬦ {lastOutcome.applied.minerals > 0 ? '+' : ''}
+                  ◇ {lastOutcome.applied.minerals > 0 ? '+' : ''}
                   {Math.round(lastOutcome.applied.minerals)}
                 </span>
               )}
@@ -138,15 +138,6 @@ export function CardsScreen() {
   return (
     <div className="screen cards-screen">
       <div className="card-arena">
-        <div className="edge-hint edge-left" style={{ opacity: leftHint }} aria-hidden>
-          <span className="edge-label">{card.left.label}</span>
-          <ChoiceChips choice={card.left} />
-        </div>
-        <div className="edge-hint edge-right" style={{ opacity: rightHint }} aria-hidden>
-          <span className="edge-label">{card.right.label}</span>
-          <ChoiceChips choice={card.right} />
-        </div>
-
         <div
           className={`event-card${dragging ? ' dragging' : ''}${leaving ? ' leaving' : ''}`}
           style={{ transform: `translateX(${shownDrag}px) rotate(${rotation}deg)` }}
@@ -174,6 +165,16 @@ export function CardsScreen() {
             setDragX(0)
           }}
         >
+          {/* drag-revealed telegraph, Reigns-style: which way you're leaning */}
+          <div className="card-reveal reveal-left" style={{ opacity: leftHint }} aria-hidden>
+            <span className="edge-label">{card.left.label}</span>
+            <ChoiceChips choice={card.left} />
+          </div>
+          <div className="card-reveal reveal-right" style={{ opacity: rightHint }} aria-hidden>
+            <span className="edge-label">{card.right.label}</span>
+            <ChoiceChips choice={card.right} />
+          </div>
+
           <h2 className="card-title">{card.title}</h2>
           <p className="card-text">{card.text}</p>
           <div className="card-foot" aria-hidden>

@@ -54,7 +54,7 @@ export function BuildScreen() {
                 disabled={!affordable}
                 onClick={() => build(def.id)}
               >
-                {maxed ? 'At full hum' : level === 0 ? `Build — ⬦ ${fmtInt(cost)}` : `Upgrade — ⬦ ${fmtInt(cost)}`}
+                {maxed ? 'At full hum' : level === 0 ? `Build — ◇ ${fmtInt(cost)}` : `Upgrade — ◇ ${fmtInt(cost)}`}
               </button>
             </div>
 

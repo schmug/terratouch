@@ -111,7 +111,10 @@ export const useGame = create<GameStore>((set, get) => ({
 
     set({ loaded: true, run, meta, awaySummary })
     startLoop()
-    scheduleSave()
+    // Persist immediately: offline gains were just credited against the old
+    // lastSeenMs, and a debounced save would leave a window where reloading
+    // re-credits the same elapsed time.
+    saveNow()
   },
 
   tickBy(steps) {
@@ -132,7 +135,7 @@ export const useGame = create<GameStore>((set, get) => ({
       run: caught,
       awaySummary: summary.elapsedMs >= AWAY_SUMMARY_MIN_MS ? summary : get().awaySummary,
     })
-    scheduleSave()
+    saveNow() // same re-credit window as init — persist promptly
   },
 
   tap() {

@@ -459,6 +459,7 @@ body {
   line-height: 1.55;
   color: rgba(232, 227, 213, 0.92);
   flex: 1;
+  text-align: left;
 }
 
 .card-foot {
@@ -471,24 +472,27 @@ body {
   color: var(--muted);
 }
 
-.edge-hint {
+.card-reveal {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  max-width: 34%;
+  top: 10px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 5px;
+  max-width: 62%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(10, 14, 26, 0.82);
+  border: 1px solid rgba(233, 184, 114, 0.3);
   pointer-events: none;
 }
 
-.edge-left {
-  left: 4px;
+.reveal-left {
+  left: 10px;
   text-align: left;
 }
 
-.edge-right {
-  right: 4px;
+.reveal-right {
+  right: 10px;
   text-align: right;
 }
 

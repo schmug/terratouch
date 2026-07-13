@@ -8,7 +8,14 @@ Guidance for coding agents working in this repo. Read [SPEC.md](SPEC.md) in full
 
 ## Current state
 
-**Scaffolded, no game logic yet.** The monorepo skeleton (SPEC §4.2) is in place and green: `app/` builds as an installable PWA (placeholder shell only), `worker/` typechecks and dry-run-deploys (the `/api/narrate` route returns 501 until M4), CI runs typecheck/test/build. Every `src/sim/*`, `state/`, `persist/`, and `net/` module is a documented stub. **The next task is SPEC §9 step 2: implement `app/src/sim/` as pure functions with unit tests — before any UI.**
+**Milestone 1 implemented (2026-07-13): the core loop is playable end-to-end.**
+
+- `app/src/sim/` is a pure, deterministic engine (rng with explicit serializable state on `RunState`; closed-form exponential drift so ticking/offline can never hard-fail; Instability moves only on active turns). 80 vitest tests cover the SPEC §6 list, including offline-safety properties and byte-identical replay on shipped content.
+- Balance harness (`app/tests/harness/`) runs 1000 seeded runs × 3 policies inside `npm test` (so it is a required CI check); `npm run harness` prints the full report. Snapshot + known biosphere hotspot: see [app/src/data/README.md](app/src/data/README.md).
+- Zustand store + IndexedDB (`idb`) with `schemaVersion: 1` migration switch; fixed-timestep 1 s loop; hidden gaps ≥5 s go through the safe offline path; away summary shows for gaps ≥60 s. Saves persist immediately after offline credit (avoids re-crediting on quick reload).
+- UI: Planet dial (arc gauges showing value/band/drift with shape-coded markers), Cards swipe with on-card telegraphing, Build, Loss screen with **templated** chronicle (`VITE_NARRATE_LLM` flag exists, off), away modal, Synthesis placeholder tab. Verified headlessly end-to-end (27-check acceptance walk incl. no-network reload via the service worker).
+- Still stubs by design: `sim/synthesis.ts` (M3), `sim/prestige.ts` (M2 — `seedsAwarded` is always 0), `worker/` 501 (M4).
+- **Not yet done:** deploy to Cloudflare Pages + test on a real phone (SPEC §9 step 5), then M2+.
 
 ## Locked stack (SPEC §0)
 
