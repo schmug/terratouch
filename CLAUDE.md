@@ -15,7 +15,8 @@ Guidance for coding agents working in this repo. Read [SPEC.md](SPEC.md) in full
 - Zustand store + IndexedDB (`idb`) with `schemaVersion: 1` migration switch; fixed-timestep 1 s loop; hidden gaps ≥5 s go through the safe offline path; away summary shows for gaps ≥60 s. Saves persist immediately after offline credit (avoids re-crediting on quick reload).
 - UI: Planet dial (arc gauges showing value/band/drift with shape-coded markers), Cards swipe with on-card telegraphing, Build, Loss screen with **templated** chronicle (`VITE_NARRATE_LLM` flag exists, off), away modal, Synthesis placeholder tab. Verified headlessly end-to-end (27-check acceptance walk incl. no-network reload via the service worker).
 - Still stubs by design: `sim/synthesis.ts` (M3), `sim/prestige.ts` (M2 — `seedsAwarded` is always 0), `worker/` 501 (M4).
-- **Not yet done:** deploy to Cloudflare Pages + test on a real phone (SPEC §9 step 5), then M2+.
+- **Deployed:** https://terratouch.pages.dev via Cloudflare Pages Git integration (build command needs the explicit `npm ci` — see SPEC §4.6). The 27-check acceptance walk passes against production, including SW-served no-network reload.
+- **Not yet done:** hands-on real-phone feel test (install, swipe feel, away moment, obituary tone), then M2+.
 
 ## Locked stack (SPEC §0)
 
