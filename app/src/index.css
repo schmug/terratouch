@@ -193,6 +193,7 @@ body {
 
 .planet-body {
   transition: transform 0.12s ease;
+  transform-origin: 160px 160px;
 }
 
 .planet-dial {
@@ -206,6 +207,7 @@ body {
   font-style: italic;
   font-size: 21px;
   fill: var(--ink);
+  text-shadow: 0 1px 7px rgba(10, 14, 26, 0.65);
 }
 
 .dial-hab {
@@ -213,6 +215,7 @@ body {
   font-weight: 700;
   font-size: 27px;
   fill: var(--accent);
+  text-shadow: 0 1px 7px rgba(10, 14, 26, 0.65);
 }
 
 .dial-hab-label {
@@ -220,6 +223,7 @@ body {
   letter-spacing: 0.22em;
   text-transform: uppercase;
   fill: var(--muted);
+  text-shadow: 0 1px 6px rgba(10, 14, 26, 0.65);
 }
 
 .float-num {
@@ -254,6 +258,184 @@ body {
 
 .gather-hint.dim {
   color: var(--muted);
+}
+
+/* ------------------------------------- the living planet (issue #10) ----
+   Ambient decoration only: every animation is compositor-friendly
+   transform/opacity, and every keyframe ends at a legible rest state so
+   the global prefers-reduced-motion rule leaves a correct static scene. */
+
+.dial-star {
+  fill: rgba(232, 227, 213, 0.9);
+  animation: star-twinkle 5s ease-in-out infinite;
+}
+
+@keyframes star-twinkle {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.12;
+  }
+}
+
+/* era palette cross-fade — the gradient stops ease between era colors */
+.planet-dial stop {
+  transition: stop-color 1.4s ease;
+}
+
+/* habitability glow: slow inhale/exhale, calm and cozy */
+.glow-breathe {
+  animation: glow-breathe 10s ease-in-out infinite;
+}
+
+@keyframes glow-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* clouds circle slowly; coverage (group opacity) tracks the Atmosphere gauge */
+.cloud-cover {
+  transition: opacity 1.2s linear;
+}
+
+.cloud-drift-a {
+  animation: planet-orbit 90s linear infinite;
+  transform-origin: 160px 160px;
+}
+
+.cloud-drift-b {
+  animation: planet-orbit 140s linear infinite reverse;
+  transform-origin: 160px 160px;
+}
+
+/* day/night shadow sweeping the sphere on the UI clock only */
+.terminator {
+  animation: planet-orbit 240s linear infinite;
+  transform-origin: 160px 160px;
+}
+
+@keyframes planet-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.aurora-shimmer {
+  animation: aurora-shimmer 9s ease-in-out infinite;
+}
+
+.aurora-south {
+  animation-delay: -4s;
+}
+
+@keyframes aurora-shimmer {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.life-mote {
+  animation: mote-drift 8s ease-in-out infinite;
+}
+
+@keyframes mote-drift {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: translate(0, 0);
+  }
+  35% {
+    opacity: 0.85;
+    transform: translate(2.5px, -4px);
+  }
+  70% {
+    opacity: 0.5;
+    transform: translate(-2px, -7px);
+  }
+}
+
+/* instability strain: desaturation from the bar's warn step, a faint tremor
+   near cascade — always redundant with the instability meter (colorblind
+   rule: decoration restates information, never carries it alone) */
+.planet-ball {
+  transition: filter 1.5s ease;
+}
+
+.planet-ball.strained {
+  filter: saturate(0.7) brightness(0.93);
+}
+
+.planet-ball.trembling {
+  filter: saturate(0.55) brightness(0.9);
+  animation: tremor 1.2s ease-in-out infinite;
+  transform-origin: 160px 160px;
+}
+
+@keyframes tremor {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  20% {
+    transform: translate(0.7px, -0.4px);
+  }
+  45% {
+    transform: translate(-0.6px, 0.5px);
+  }
+  70% {
+    transform: translate(0.5px, 0.6px);
+  }
+}
+
+/* era transition moment: ring pulse + a gentle swell while the palette
+   cross-fades — the band-shift reward, made visible */
+.era-pulse {
+  transform-origin: 160px 160px;
+  animation: era-pulse 1.8s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes era-pulse {
+  from {
+    opacity: 0.85;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+.era-swell {
+  animation: era-swell 1.6s ease-out;
+}
+
+@keyframes era-swell {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.035);
+  }
+}
+
+/* battery: freeze all ambient animation while the tab is hidden */
+:root.tab-hidden *,
+:root.tab-hidden *::before,
+:root.tab-hidden *::after {
+  animation-play-state: paused !important;
 }
 
 /* ------------------------------------------------------- legend + meters */

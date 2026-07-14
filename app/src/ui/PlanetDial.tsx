@@ -1,13 +1,16 @@
 // PlanetDial.tsx — the astrolabe: a stylized planet ringed by four arc
 // gauges, each showing value, safe band, and drift (SPEC §3). Markers are
 // shape-coded per system and hold fixed positions (top/right/bottom/left)
-// so the encoding survives colorblindness.
+// so the encoding survives colorblindness. The planet itself is painted by
+// PlanetVisuals (era palette + ambient layers, issue #10); the gauges stay
+// on top — they are information, ambiance is not.
 
 import { content } from '../data'
 import { driftDirection } from '../sim/tick'
 import { habitability } from '../sim/systems'
 import { SYSTEM_IDS, type RunState, type SystemId } from '../sim/types'
 import { SYSTEM_META, type MarkerShape } from './meta'
+import { PlanetVisuals, Starfield } from './PlanetVisuals'
 
 const CX = 160
 const CY = 160
@@ -128,17 +131,7 @@ export function PlanetDial({ run }: { run: RunState }) {
       role="img"
       aria-label={`${era?.name ?? ''} era planet, habitability ${hab}`}
     >
-      <defs>
-        <radialGradient id="planet-surface" cx="38%" cy="32%" r="75%">
-          <stop offset="0%" stopColor="#5a6f6e" />
-          <stop offset="45%" stopColor="#3d4a55" />
-          <stop offset="100%" stopColor="#141c2b" />
-        </radialGradient>
-        <radialGradient id="planet-glow" cx="50%" cy="50%" r="50%">
-          <stop offset="70%" stopColor="rgba(233,184,114,0)" />
-          <stop offset="100%" stopColor="rgba(233,184,114,0.14)" />
-        </radialGradient>
-      </defs>
+      <Starfield />
 
       {/* gauge arcs */}
       {SYSTEM_IDS.map((id) => {
@@ -177,30 +170,7 @@ export function PlanetDial({ run }: { run: RunState }) {
       })}
 
       {/* the world itself */}
-      <circle cx={CX} cy={CY} r={92} fill="url(#planet-glow)" />
-      <circle
-        cx={CX}
-        cy={CY}
-        r={76}
-        fill="url(#planet-surface)"
-        className="planet-body"
-      />
-      <ellipse
-        cx={CX - 22}
-        cy={CY - 26}
-        rx={26}
-        ry={14}
-        fill="rgba(220,235,230,0.07)"
-        transform={`rotate(-18 ${CX - 22} ${CY - 26})`}
-      />
-      <ellipse
-        cx={CX + 18}
-        cy={CY + 24}
-        rx={20}
-        ry={10}
-        fill="rgba(0,0,0,0.18)"
-        transform={`rotate(-12 ${CX + 18} ${CY + 24})`}
-      />
+      <PlanetVisuals run={run} />
 
       <text x={CX} y={CY - 8} textAnchor="middle" className="dial-era">
         {era?.name ?? '—'}

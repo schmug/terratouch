@@ -30,7 +30,14 @@ function check(name, ok, detail = '') {
   console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${detail ? ` — ${detail}` : ''}`)
 }
 
-const browser = await chromium.launch({ channel: 'chrome', headless: true })
+// CHROME_PATH points at a bare Chromium binary for environments without a
+// system Chrome install (e.g. CI containers).
+const browser = await chromium.launch({
+  headless: true,
+  ...(process.env.CHROME_PATH
+    ? { executablePath: process.env.CHROME_PATH }
+    : { channel: 'chrome' }),
+})
 const context = await browser.newContext({
   viewport: { width: 390, height: 844 },
   deviceScaleFactor: 2,

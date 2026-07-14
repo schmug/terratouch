@@ -118,6 +118,33 @@ export type Balance = {
   cards: { recentExclusion: number }
 }
 
+/** Decorative overlay kinds painted on the planet (issue #10). */
+export type EraLayerKind =
+  'frost' | 'seas' | 'microbial' | 'flora' | 'clouds' | 'aurora' | 'motes'
+
+export type EraLayer = {
+  kind: EraLayerKind
+  /** Base opacity 0–1. Clouds additionally scale with the Atmosphere gauge. */
+  opacity: number
+  /** Tint override, '#rrggbb'. Each kind has a default in ui/. */
+  color?: string
+  /** Motes only: how many specks drift over the surface (ui/ caps this). */
+  count?: number
+}
+
+/**
+ * Presentation palette for an Era (SPEC §3, issue #10). Pure decoration —
+ * lives on content so the ladder stays data-not-code, but the sim NEVER
+ * reads it; only ui/ does.
+ */
+export type EraVisuals = {
+  /** Radial surface gradient stops: [sunlit, mid, limb], '#rrggbb'. */
+  surface: readonly [string, string, string]
+  /** Habitability glow tint, '#rrggbb'. */
+  glow: string
+  layers?: EraLayer[]
+}
+
 export type EraDef = {
   id: string
   name: string
@@ -128,6 +155,7 @@ export type EraDef = {
   /** Multiplier on event-card system deltas ("baseline volatility", SPEC §2.3). */
   volatilityMult: number
   bands: Record<SystemId, Band>
+  visuals?: EraVisuals
 }
 
 export type ArchetypeSystemDef = {

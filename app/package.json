@@ -12,6 +12,7 @@
     "test:watch": "vitest",
     "harness": "vitest run tests/balance-harness.test.ts --disable-console-intercept",
     "walk": "node tests/e2e/acceptance-walk.mjs",
+    "shots": "node tests/e2e/era-shots.mjs",
     "typecheck": "tsc --noEmit",
     "icons": "node scripts/make-icons.mjs"
   },

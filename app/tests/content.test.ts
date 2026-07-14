@@ -42,6 +42,26 @@ describe('shipped content', () => {
       }
     }
   })
+
+  it('every era paints the planet, and life arrives on ladder (issue #10)', () => {
+    const content = loadContent()
+    const firstEraWith = (kind: string) =>
+      content.eras.findIndex((e) =>
+        e.visuals?.layers?.some((l) => l.kind === kind),
+      )
+    for (const era of content.eras) {
+      expect(era.visuals, `era "${era.id}" has no visuals`).toBeDefined()
+    }
+    // The ladder is named for what you can see: frost caps from Frost, seas
+    // from Liquid, the rust bloom from Microbial (with the first aurora),
+    // green and motes from Flora on.
+    expect(firstEraWith('frost')).toBe(1)
+    expect(firstEraWith('seas')).toBe(2)
+    expect(firstEraWith('microbial')).toBe(3)
+    expect(firstEraWith('aurora')).toBe(3)
+    expect(firstEraWith('flora')).toBe(4)
+    expect(firstEraWith('motes')).toBe(4)
+  })
 })
 
 describe('malformed content fails loudly', () => {
@@ -100,5 +120,36 @@ describe('malformed content fails loudly', () => {
     const bad = raw()
     delete (bad.eras as Record<string, unknown>[])[0]!['advanceHabitability']
     expect(() => parseContent(bad)).toThrow(/no advance threshold/)
+  })
+
+  it('rejects a visuals color that is not #rrggbb', () => {
+    const bad = raw()
+    ;(bad.eras as { visuals: { glow: string } }[])[0]!.visuals.glow = 'tomato'
+    expect(() => parseContent(bad)).toThrow(/#rrggbb/)
+  })
+
+  it('rejects an unknown visual layer kind', () => {
+    const bad = raw()
+    ;(
+      bad.eras as { visuals: { layers: { kind: string }[] } }[]
+    )[0]!.visuals.layers[0]!.kind = 'lava'
+    expect(() => parseContent(bad)).toThrow()
+  })
+
+  it('rejects a mote count on a non-mote layer', () => {
+    const bad = raw()
+    ;(
+      bad.eras as { visuals: { layers: { count?: number }[] } }[]
+    )[1]!.visuals.layers[0]!.count = 3
+    expect(() => parseContent(bad)).toThrow(/only applies to motes/)
+  })
+
+  it('rejects duplicate visual layers', () => {
+    const bad = raw()
+    const layers = (
+      bad.eras as { visuals: { layers: { kind: string }[] } }[]
+    )[1]!.visuals.layers
+    layers.push({ ...layers[0]! })
+    expect(() => parseContent(bad)).toThrow(/duplicate layer/)
   })
 })

@@ -15,6 +15,27 @@ narration; prestige, synthesis, and the live LLM chronicler are next.
 - **[Issues](https://github.com/schmug/terratouch/issues)** — all outstanding
   work: milestones (M2–M6), balance findings, and enhancements
 
+## Watching a world come alive
+
+Seven eras, one sphere. The geography is fixed on purpose — the same seas
+that darken in Liquid grow green shores in Flora — so it reads as one world
+waking up, not seven different planets. Between screenshots the planet is
+never still: clouds drift with the thickening atmosphere, an aurora shimmers
+once the air holds, life motes wander the greenery, a day/night terminator
+sweeps past, and the habitability glow slowly breathes.
+
+<p align="center">
+  <img src="docs/shots/eras.gif" width="336"
+       alt="The planet dial cycling through all seven eras, from grey Barren rock to a living Habitable marble" />
+</p>
+
+| Barren                                            | Liquid                                                              | Flora                                                  | Habitable                                                                      |
+| ------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| ![Barren: grey rock](docs/shots/era-0-barren.png) | ![Liquid: dark seas under thawing ice](docs/shots/era-2-liquid.png) | ![Flora: green continents](docs/shots/era-4-flora.png) | ![Habitable: a living marble with cloud bands](docs/shots/era-6-habitable.png) |
+
+Regenerate with `npm --prefix app run shots` — see
+[docs/shots/README.md](docs/shots/README.md).
+
 ## Layout
 
 | Dir                  | What                                                       | Deploys to                                     |
