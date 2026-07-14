@@ -202,3 +202,41 @@ export const cardSchema = z.strictObject({
 }) satisfies z.ZodType<CardDef>
 
 export const cardsSchema = z.array(cardSchema)
+
+// --------------------------------------------------------------------------
+// Mission Control transmissions (issue #16) — ambient one-liners the Planet
+// screen rotates through. Pure content, selected by ui/ with zero runtime
+// inference; the sim never sees these, so the types live here, not sim/types.
+// --------------------------------------------------------------------------
+
+/**
+ * When a line is eligible. Ambient triggers ('idle' anytime, 'all-clear'
+ * with every system in band, 'drifting' with any system out) rotate on a UI
+ * clock; moment triggers ('era-up', 'machine-built', 'returned') interject
+ * when the matching thing just happened.
+ */
+export const transmissionTriggerSchema = z.enum([
+  'idle',
+  'all-clear',
+  'drifting',
+  'era-up',
+  'machine-built',
+  'returned',
+])
+
+export type TransmissionTrigger = z.infer<typeof transmissionTriggerSchema>
+
+export const transmissionSchema = z.strictObject({
+  id: z.string().min(1),
+  trigger: transmissionTriggerSchema,
+  /** Inclusive 1-based Era range this line may appear in (like card `eras`). */
+  eras: z
+    .tuple([z.number().int().min(1), z.number().int().min(1)])
+    .refine(([min, max]) => min <= max, { message: 'eras min must be <= max' }),
+  /** One strip-sized line; the UI ellipsizes, but keep it short by contract. */
+  text: z.string().min(1).max(100),
+})
+
+export type TransmissionDef = z.infer<typeof transmissionSchema>
+
+export const transmissionsSchema = z.array(transmissionSchema).min(1)

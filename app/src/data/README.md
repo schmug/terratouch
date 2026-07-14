@@ -8,14 +8,15 @@ changes. The sim never imports this directory — `index.ts` exports a validated
 
 Current files (M1):
 
-| File              | Contents                                                                                                                           |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `balance.json`    | All tunables: Energy cap/regen (~5 min/burst target), tap rates, Instability accrual/decay/threshold, setpoint clamps, offline cap |
-| `eras.json`       | The 7-era ladder: per-era safe bands, advance threshold + stabilization window, volatility multiplier                              |
-| `archetypes.json` | Barren only (M1): starting values/setpoints, natural rest points + pull rates, starting minerals                                   |
-| `machines.json`   | 3 machines (thermal/atmosphere/hydro): costs, push rates, passive production                                                       |
-| `cards.json`      | 22 event cards, era-gated, weighted; copy is cozy/hopeful per the tone decision                                                    |
-| `recipes.json`    | (M3 — not yet created) two-slot synthesis recipes                                                                                  |
+| File                 | Contents                                                                                                                           |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `balance.json`       | All tunables: Energy cap/regen (~5 min/burst target), tap rates, Instability accrual/decay/threshold, setpoint clamps, offline cap |
+| `eras.json`          | The 7-era ladder: per-era safe bands, advance threshold + stabilization window, volatility multiplier                              |
+| `archetypes.json`    | Barren only (M1): starting values/setpoints, natural rest points + pull rates, starting minerals                                   |
+| `machines.json`      | 3 machines (thermal/atmosphere/hydro): costs, push rates, passive production                                                       |
+| `cards.json`         | 22 event cards, era-gated, weighted; copy is cozy/hopeful per the tone decision                                                    |
+| `transmissions.json` | 44 Mission Control one-liners (issue #16), trigger- and era-tagged; see the tagging scheme below                                   |
+| `recipes.json`       | (M3 — not yet created) two-slot synthesis recipes                                                                                  |
 
 Semantics worth knowing when tuning:
 
@@ -34,3 +35,38 @@ machine steers it; its band floor climbs) — revisit when M2 adds content.
 
 Tone reminder (SPEC §0): card copy is cozy and hopeful; loss narration is
 elegiac. Write card text accordingly.
+
+## Mission Control transmissions (`transmissions.json`, issue #16)
+
+Ambient one-liners the Planet screen rotates through — the strip is pure
+presentation: `ui/transmissions.ts` selects with a UI-only tick counter and
+never touches the run's seeded rng. This section is the authoring target spec
+for the #12 LLM pipeline; the pipeline writes JSON offline, zod validates it,
+zero inference happens at play time.
+
+Each line is `{ id, trigger, eras, text }`:
+
+- **`id`** — unique kebab-case, conventionally prefixed by trigger
+  (`idle-…`, `era-up-…`).
+- **`trigger`** — when the line is eligible:
+  - `idle` — anytime ambience (state-neutral: must read true whether or not
+    a gauge is drifting).
+  - `all-clear` — every system inside its safe band.
+  - `drifting` — at least one system outside its band. Gently concerned,
+    never doomy: danger communication is the dial's job.
+  - `era-up` — just advanced to a new era (gate = the era arrived in, so
+    these lines start at era 2; `[2,2]` greets Frost, `[7,7]` Habitable).
+  - `machine-built` — just placed a new machine (upgrades don't count).
+  - `returned` — came back from an away gap (shown alongside the summary).
+- **`eras`** — inclusive 1-based ladder range, like card `eras`.
+- **`text`** — one strip-sized line, ≤100 chars (schema-enforced).
+
+Validation beyond the schema (`parseTransmissions` in `index.ts`): unique
+ids, era gates within the ladder, and **coverage** — every trigger must have
+at least one eligible line in every era it can fire in (era 1–7, or 2–7 for
+`era-up`), so the strip never falls silent. Grow the pool freely; you cannot
+shrink it below coverage without the build failing.
+
+Tone: Mission Control lives entirely on the cozy side of the split — warm,
+a little wry, on the player's team. It may be gently concerned (`drifting`)
+but never grim; grief belongs to the Chronicle (`net/templates.ts`).

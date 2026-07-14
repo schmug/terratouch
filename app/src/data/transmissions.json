@@ -1,0 +1,266 @@
+[
+  {
+    "id": "idle-nothing-to-report",
+    "trigger": "idle",
+    "eras": [1, 7],
+    "text": "Mission Control here. Nothing to report, which is its own good news."
+  },
+  {
+    "id": "idle-numbers-twice",
+    "trigger": "idle",
+    "eras": [1, 7],
+    "text": "We ran the numbers twice, just to watch them hold."
+  },
+  {
+    "id": "idle-night-shift-waves",
+    "trigger": "idle",
+    "eras": [1, 7],
+    "text": "The long scopes are pointed your way. The night shift waves hello."
+  },
+  {
+    "id": "idle-taking-notes",
+    "trigger": "idle",
+    "eras": [1, 7],
+    "text": "Quiet shift. The world turns; we take notes."
+  },
+  {
+    "id": "idle-terrible-coffee",
+    "trigger": "idle",
+    "eras": [1, 7],
+    "text": "Telemetry nominal. The coffee down here is terrible, thanks for asking."
+  },
+  {
+    "id": "idle-still-listening",
+    "trigger": "idle",
+    "eras": [1, 7],
+    "text": "Still listening. A planet makes more sounds than you'd think."
+  },
+  {
+    "id": "idle-logged-as-weather",
+    "trigger": "idle",
+    "eras": [1, 2],
+    "text": "The dust settled beautifully today. We logged it as weather."
+  },
+  {
+    "id": "idle-patient-stone",
+    "trigger": "idle",
+    "eras": [1, 2],
+    "text": "Bare stone, patient light. Good bones, this world."
+  },
+  {
+    "id": "idle-morning-poetry",
+    "trigger": "idle",
+    "eras": [2, 3],
+    "text": "Frost lace on the highlands again. The morning report is mostly poetry."
+  },
+  {
+    "id": "idle-sounding-ping",
+    "trigger": "idle",
+    "eras": [3, 5],
+    "text": "The seas returned our sounding ping with interest."
+  },
+  {
+    "id": "idle-camera-four",
+    "trigger": "idle",
+    "eras": [5, 6],
+    "text": "Something green moved on camera four. We replayed it eleven times."
+  },
+  {
+    "id": "idle-calling-it-singing",
+    "trigger": "idle",
+    "eras": [6, 7],
+    "text": "Something sang on the morning feed. We're calling it singing."
+  },
+  {
+    "id": "all-clear-kettle",
+    "trigger": "all-clear",
+    "eras": [1, 7],
+    "text": "Every needle inside the lines. We dimmed the alarms and lit the kettle."
+  },
+  {
+    "id": "all-clear-calm-water",
+    "trigger": "all-clear",
+    "eras": [1, 7],
+    "text": "Steady as she turns. The charts look like calm water."
+  },
+  {
+    "id": "all-clear-high-praise",
+    "trigger": "all-clear",
+    "eras": [1, 7],
+    "text": "Nothing burning, nothing frozen that shouldn't be. High praise."
+  },
+  {
+    "id": "all-clear-crosswords",
+    "trigger": "all-clear",
+    "eras": [1, 7],
+    "text": "In-band across the board. The night shift is doing crosswords."
+  },
+  {
+    "id": "all-clear-take-the-compliment",
+    "trigger": "all-clear",
+    "eras": [1, 7],
+    "text": "You make this look easy. The graphs say otherwise. Take the compliment."
+  },
+  {
+    "id": "all-clear-our-green",
+    "trigger": "all-clear",
+    "eras": [1, 4],
+    "text": "All four systems in the green. Well — our green. Yours is coming."
+  },
+  {
+    "id": "all-clear-good-sky",
+    "trigger": "all-clear",
+    "eras": [4, 7],
+    "text": "The air holds, the water stays, the small lives keep. Good sky today."
+  },
+  {
+    "id": "drifting-kite",
+    "trigger": "drifting",
+    "eras": [1, 7],
+    "text": "One gauge is wandering. We're watching it the way you watch a kite."
+  },
+  {
+    "id": "drifting-bring-it-home",
+    "trigger": "drifting",
+    "eras": [1, 7],
+    "text": "A needle strayed past its line. No drama — bring it home when you can."
+  },
+  {
+    "id": "drifting-worlds-do",
+    "trigger": "drifting",
+    "eras": [1, 7],
+    "text": "Telemetry's leaning. The world lists a little; worlds do."
+  },
+  {
+    "id": "drifting-you-saw-it",
+    "trigger": "drifting",
+    "eras": [1, 7],
+    "text": "Something's out of band. We trust you saw it too."
+  },
+  {
+    "id": "drifting-humming",
+    "trigger": "drifting",
+    "eras": [1, 7],
+    "text": "Drift on the board. We've been humming to it. It doesn't help, but still."
+  },
+  {
+    "id": "drifting-gentle-hands",
+    "trigger": "drifting",
+    "eras": [1, 7],
+    "text": "The charts show a wobble. Gentle hands, no hurry."
+  },
+  {
+    "id": "drifting-leans-listening",
+    "trigger": "drifting",
+    "eras": [4, 7],
+    "text": "The living parts notice the lean before we do. They're leaning back."
+  },
+  {
+    "id": "era-up-fresh-page",
+    "trigger": "era-up",
+    "eras": [2, 7],
+    "text": "New era on the books. The archive got a fresh page today."
+  },
+  {
+    "id": "era-up-frost",
+    "trigger": "era-up",
+    "eras": [2, 2],
+    "text": "Frost! Confirmed frost. The whole room is at the window."
+  },
+  {
+    "id": "era-up-liquid",
+    "trigger": "era-up",
+    "eras": [3, 3],
+    "text": "Liquid water, standing and staying. We toasted with our own."
+  },
+  {
+    "id": "era-up-microbial",
+    "trigger": "era-up",
+    "eras": [4, 4],
+    "text": "Microbes on the sensors. Life! Small, but counting."
+  },
+  {
+    "id": "era-up-flora",
+    "trigger": "era-up",
+    "eras": [5, 5],
+    "text": "Green from orbit. Say it again — green, from orbit."
+  },
+  {
+    "id": "era-up-fauna",
+    "trigger": "era-up",
+    "eras": [6, 6],
+    "text": "Something moved out there that wasn't weather. Welcome, fauna."
+  },
+  {
+    "id": "era-up-habitable",
+    "trigger": "era-up",
+    "eras": [7, 7],
+    "text": "Habitable. We keep reading the word aloud. Habitable."
+  },
+  {
+    "id": "machine-built-in-tune",
+    "trigger": "machine-built",
+    "eras": [1, 7],
+    "text": "New machine on the grid. It hums in tune with the others — mostly."
+  },
+  {
+    "id": "machine-built-skyline",
+    "trigger": "machine-built",
+    "eras": [1, 7],
+    "text": "Construction confirmed. The skyline down there grew a notch."
+  },
+  {
+    "id": "machine-built-bands-feel-it",
+    "trigger": "machine-built",
+    "eras": [1, 7],
+    "text": "Another machine breathing. The bands feel it already."
+  },
+  {
+    "id": "machine-built-sounds-sturdy",
+    "trigger": "machine-built",
+    "eras": [1, 7],
+    "text": "We heard the new build come online. Sounds sturdy. Sounds right."
+  },
+  {
+    "id": "machine-built-long-and-boring",
+    "trigger": "machine-built",
+    "eras": [1, 7],
+    "text": "Fresh hardware in the dirt. May it run long and boring."
+  },
+  {
+    "id": "returned-kept-the-minutes",
+    "trigger": "returned",
+    "eras": [1, 7],
+    "text": "There you are. The world kept turning — we kept the minutes."
+  },
+  {
+    "id": "returned-already-bending",
+    "trigger": "returned",
+    "eras": [1, 7],
+    "text": "Welcome back. Nothing broke that wasn't already bending."
+  },
+  {
+    "id": "returned-steadily",
+    "trigger": "returned",
+    "eras": [1, 7],
+    "text": "You're back! The machines missed you in their way: steadily."
+  },
+  {
+    "id": "returned-mostly-behaved",
+    "trigger": "returned",
+    "eras": [1, 7],
+    "text": "While you were out, the world mostly behaved. Full notes in the summary."
+  },
+  {
+    "id": "returned-saved-your-seat",
+    "trigger": "returned",
+    "eras": [1, 7],
+    "text": "Good to see you. We saved your seat and the planet."
+  },
+  {
+    "id": "returned-same-sky",
+    "trigger": "returned",
+    "eras": [1, 7],
+    "text": "Back on the loop. Same sky, a little more of it than when you left."
+  }
+]

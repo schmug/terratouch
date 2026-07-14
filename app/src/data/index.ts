@@ -10,21 +10,27 @@ import balanceJson from './balance.json'
 import cardsJson from './cards.json'
 import erasJson from './eras.json'
 import machinesJson from './machines.json'
+import transmissionsJson from './transmissions.json'
 import {
   archetypesSchema,
   balanceSchema,
   cardsSchema,
   erasSchema,
   machinesSchema,
+  transmissionsSchema,
+  transmissionTriggerSchema,
+  type TransmissionDef,
 } from './schema'
+
+export type { TransmissionDef, TransmissionTrigger } from './schema'
+
+const dupes = (ids: string[]) => ids.filter((id, i) => ids.indexOf(id) !== i)
 
 /** Cross-file invariants that per-file schemas can't see. Throws on failure. */
 export function validateContent(content: Content): void {
   const problems: string[] = []
   const eraCount = content.eras.length
   const archetypeIds = new Set(content.archetypes.map((a) => a.id))
-
-  const dupes = (ids: string[]) => ids.filter((id, i) => ids.indexOf(id) !== i)
   for (const d of dupes(content.eras.map((e) => e.id)))
     problems.push(`duplicate era id "${d}"`)
   for (const d of dupes(content.cards.map((c) => c.id)))
@@ -114,5 +120,56 @@ export function loadContent(): Content {
   })
 }
 
+/**
+ * Parse and validate the Mission Control transmission pool (issue #16).
+ * Deliberately NOT part of the Content bundle: the sim never reads these, so
+ * they stay out of sim/types entirely — only ui/ consumes them. Beyond the
+ * schema, every trigger must stay audible in every era it can fire in (the
+ * strip must never fall silent), and 'era-up' can only fire from Era 2 on.
+ */
+export function parseTransmissions(
+  raw: unknown,
+  eraCount: number,
+): TransmissionDef[] {
+  const lines = transmissionsSchema.parse(raw)
+  const problems: string[] = []
+
+  for (const d of dupes(lines.map((l) => l.id)))
+    problems.push(`duplicate transmission id "${d}"`)
+
+  for (const line of lines) {
+    if (line.eras[1] > eraCount) {
+      problems.push(
+        `transmission "${line.id}" gates up to era ${line.eras[1]} but only ${eraCount} exist`,
+      )
+    }
+  }
+
+  for (const trigger of transmissionTriggerSchema.options) {
+    const firstEra = trigger === 'era-up' ? 2 : 1
+    for (let era = firstEra; era <= eraCount; era++) {
+      const audible = lines.some(
+        (l) => l.trigger === trigger && era >= l.eras[0] && era <= l.eras[1],
+      )
+      if (!audible) {
+        problems.push(`no "${trigger}" transmission for era ${era}`)
+      }
+    }
+  }
+
+  if (problems.length > 0) {
+    throw new Error(
+      `transmissions validation failed:\n - ${problems.join('\n - ')}`,
+    )
+  }
+  return lines
+}
+
 /** The validated content bundle the app uses. Fails loudly at import time. */
 export const content: Content = loadContent()
+
+/** The validated Mission Control line pool. Fails loudly at import time. */
+export const transmissions: TransmissionDef[] = parseTransmissions(
+  transmissionsJson,
+  content.eras.length,
+)

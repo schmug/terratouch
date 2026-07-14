@@ -1,12 +1,18 @@
 // content.test.ts — shipped content validates (SPEC §5.1) and malformed
 // content fails loudly, including cross-file referential integrity.
 import { describe, expect, it } from 'vitest'
-import { loadContent, parseContent, validateContent } from '../src/data'
+import {
+  loadContent,
+  parseContent,
+  parseTransmissions,
+  validateContent,
+} from '../src/data'
 import archetypesJson from '../src/data/archetypes.json'
 import balanceJson from '../src/data/balance.json'
 import cardsJson from '../src/data/cards.json'
 import erasJson from '../src/data/eras.json'
 import machinesJson from '../src/data/machines.json'
+import transmissionsJson from '../src/data/transmissions.json'
 
 const raw = () => ({
   balance: structuredClone(balanceJson) as unknown,
@@ -15,6 +21,9 @@ const raw = () => ({
   machines: structuredClone(machinesJson) as unknown,
   cards: structuredClone(cardsJson) as unknown,
 })
+
+const rawTransmissions = () =>
+  structuredClone(transmissionsJson) as Record<string, unknown>[]
 
 describe('shipped content', () => {
   it('parses and validates', () => {
@@ -41,6 +50,22 @@ describe('shipped content', () => {
         expect(lo).toBeLessThan(hi)
       }
     }
+  })
+
+  it('Mission Control ships ≥40 lines covering every trigger in every era (issue #16)', () => {
+    const eraCount = loadContent().eras.length
+    const lines = parseTransmissions(transmissionsJson, eraCount)
+    expect(lines.length).toBeGreaterThanOrEqual(40)
+    // parseTransmissions already enforces coverage; spot-check the corners
+    // that only exist because eras gate the pool.
+    const audible = (trigger: string, era: number) =>
+      lines.some(
+        (l) => l.trigger === trigger && era >= l.eras[0] && era <= l.eras[1],
+      )
+    expect(audible('idle', 1)).toBe(true)
+    expect(audible('idle', eraCount)).toBe(true)
+    expect(audible('era-up', 2)).toBe(true)
+    expect(audible('era-up', eraCount)).toBe(true)
   })
 
   it('every era paints the planet, and life arrives on ladder (issue #10)', () => {
@@ -151,5 +176,44 @@ describe('malformed content fails loudly', () => {
     )[1]!.visuals.layers
     layers.push({ ...layers[0]! })
     expect(() => parseContent(bad)).toThrow(/duplicate layer/)
+  })
+
+  it('rejects a duplicate transmission id', () => {
+    const bad = rawTransmissions()
+    bad.push({ ...bad[0]! })
+    expect(() => parseTransmissions(bad, 7)).toThrow(
+      /duplicate transmission id/,
+    )
+  })
+
+  it('rejects a transmission gated past the era ladder', () => {
+    const bad = rawTransmissions()
+    bad[0]!['eras'] = [1, 99]
+    expect(() => parseTransmissions(bad, 7)).toThrow(/only 7 exist/)
+  })
+
+  it('rejects an unknown transmission trigger', () => {
+    const bad = rawTransmissions()
+    bad[0]!['trigger'] = 'doomsday'
+    expect(() => parseTransmissions(bad, 7)).toThrow()
+  })
+
+  it('rejects a transmission too long for the strip', () => {
+    const bad = rawTransmissions()
+    bad[0]!['text'] = 'x'.repeat(101)
+    expect(() => parseTransmissions(bad, 7)).toThrow()
+  })
+
+  it('rejects a trigger left silent in an era it can fire in', () => {
+    const bad = rawTransmissions().filter((l) => l['trigger'] !== 'returned')
+    expect(() => parseTransmissions(bad, 7)).toThrow(
+      /no "returned" transmission for era 1/,
+    )
+  })
+
+  it('rejects unknown transmission keys', () => {
+    const bad = rawTransmissions()
+    bad[0]!['mood'] = 'doom'
+    expect(() => parseTransmissions(bad, 7)).toThrow()
   })
 })

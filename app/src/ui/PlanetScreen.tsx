@@ -10,6 +10,7 @@ import { useGame } from '../state/store'
 import { fmtInt } from './format'
 import { SHAPE_GLYPH, SYSTEM_META } from './meta'
 import { PlanetDial } from './PlanetDial'
+import { TransmissionStrip } from './TransmissionStrip'
 
 type Float = { id: number; amount: number }
 
@@ -75,6 +76,8 @@ export function PlanetScreen({ goToCards }: { goToCards: () => void }) {
       ) : (
         <p className="gather-hint dim">the machines are gathering…</p>
       )}
+
+      <TransmissionStrip run={run} />
 
       {era?.advanceHabitability !== undefined &&
         run.eraProgressSec > 0 &&
