@@ -43,3 +43,7 @@ writes the loss story and always has a local templated fallback.
 Deploy note: Cloudflare Pages must use build command
 `npm --prefix app ci && npm --prefix app run build` (output `app/dist`) —
 the monorepo root has no package.json, so Pages skips its automatic install.
+
+## License
+
+[MIT](LICENSE)
