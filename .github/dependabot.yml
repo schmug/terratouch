@@ -9,7 +9,7 @@ updates:
     groups:
       app-npm:
         patterns:
-          - "*"
+          - '*'
 
   - package-ecosystem: npm
     directory: /worker
@@ -18,7 +18,7 @@ updates:
     groups:
       worker-npm:
         patterns:
-          - "*"
+          - '*'
 
   - package-ecosystem: github-actions
     directory: /
@@ -27,4 +27,4 @@ updates:
     groups:
       actions:
         patterns:
-          - "*"
+          - '*'

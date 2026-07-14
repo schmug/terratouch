@@ -1,6 +1,7 @@
 {
   "name": "terratouch-tooling",
   "private": true,
+  "license": "MIT",
   "description": "Tooling-only root manifest: Prettier + ESLint for app/ and worker/. Plays no role in any build — Cloudflare Pages builds from app/ via its explicit build command (SPEC §4.6).",
   "scripts": {
     "format": "prettier --write .",
