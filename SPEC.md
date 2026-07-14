@@ -11,17 +11,17 @@
 
 ## 0. Decisions locked for v1
 
-| Decision | Choice | Rationale |
-|---|---|---|
-| Platform | **PWA on Cloudflare Pages** | One codebase, installable on mobile, free hosting, no app-store review/fees |
-| Data model | **Local-first, no accounts** | All saves in IndexedDB; the only network call is the loss narration |
-| Loss-narration LLM | **Cloudflare Workers AI** | Unified stack; 10k free neurons/day dwarfs our needs; key never touches client |
-| Frontend stack | **React + Vite + TypeScript** | Conventional, great PWA tooling, most reliable for agentic implementation |
-| Source control / CI | **GitHub** → Cloudflare Pages Git integration; `wrangler` for the Worker | |
-| Name | **TerraTouch** (final for v1) | Literal, descriptive; already the working title |
-| Tone | **Bittersweet blend** | Cozy, hopeful play; elegiac, wistful Chronicle obituaries — the contrast is the emotional hook |
-| Energy cadence | **~5 min per active burst** (~10–15 card draws) | Reigns-session length; several returns/day. Tune via `balance.json` |
-| Monetization | **None, ever** (free / portfolio) | Prestige economy tuned purely for fun |
+| Decision            | Choice                                                                   | Rationale                                                                                      |
+| ------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| Platform            | **PWA on Cloudflare Pages**                                              | One codebase, installable on mobile, free hosting, no app-store review/fees                    |
+| Data model          | **Local-first, no accounts**                                             | All saves in IndexedDB; the only network call is the loss narration                            |
+| Loss-narration LLM  | **Cloudflare Workers AI**                                                | Unified stack; 10k free neurons/day dwarfs our needs; key never touches client                 |
+| Frontend stack      | **React + Vite + TypeScript**                                            | Conventional, great PWA tooling, most reliable for agentic implementation                      |
+| Source control / CI | **GitHub** → Cloudflare Pages Git integration; `wrangler` for the Worker |                                                                                                |
+| Name                | **TerraTouch** (final for v1)                                            | Literal, descriptive; already the working title                                                |
+| Tone                | **Bittersweet blend**                                                    | Cozy, hopeful play; elegiac, wistful Chronicle obituaries — the contrast is the emotional hook |
+| Energy cadence      | **~5 min per active burst** (~10–15 card draws)                          | Reigns-session length; several returns/day. Tune via `balance.json`                            |
+| Monetization        | **None, ever** (free / portfolio)                                        | Prestige economy tuned purely for fun                                                          |
 
 Everything below assumes these choices.
 
@@ -32,8 +32,8 @@ Everything below assumes these choices.
 ### 1.1 Verdict
 
 **Feasible and cheap.** This is a solo-buildable game whose entire production stack sits inside
-free tiers, and whose most exotic feature (an LLM writing your loss story) is the *cheapest* part
-of the whole thing. The design is also *coherent* — but only after resolving one genuine tension,
+free tiers, and whose most exotic feature (an LLM writing your loss story) is the _cheapest_ part
+of the whole thing. The design is also _coherent_ — but only after resolving one genuine tension,
 described in §1.3. That reconciliation is the single most important design idea in this document.
 
 ### 1.2 The genre mash-up, and why it works
@@ -42,16 +42,16 @@ The pitch combines five patterns. They are not obviously compatible, so here is 
 a single coherent loop rather than five bolted-on subsystems.
 
 - **Reigns (swipe-to-decide, meters that kill you).** Reigns gives you 4 meters and you die if any
-  one empties *or* overfills. This is the *tension* engine. In TerraTouch, each planetary system is
+  one empties _or_ overfills. This is the _tension_ engine. In TerraTouch, each planetary system is
   a gauge with a lethal low end and a lethal high end, and binary swipe-cards nudge them.
 - **The Planet Crafter (raise indices toward a Terraform Index; cross thresholds to unlock stages).**
-  This is the *progression* engine — the monotonic sense of a world coming alive. In TerraTouch the
-  same gauges you're keeping alive are also the gauges you're *ratcheting upward* through Eras.
-- **Clicker / idle + prestige.** The *accumulation* engine: tap to collect, machines produce
+  This is the _progression_ engine — the monotonic sense of a world coming alive. In TerraTouch the
+  same gauges you're keeping alive are also the gauges you're _ratcheting upward_ through Eras.
+- **Clicker / idle + prestige.** The _accumulation_ engine: tap to collect, machines produce
   passively, and a prestige reset trades a run's progress for permanent multipliers.
-- **Roguelike.** The *variety + permadeath* engine: each planet is a randomized archetype; runs end;
+- **Roguelike.** The _variety + permadeath_ engine: each planet is a randomized archetype; runs end;
   meta-progression persists.
-- **Little Alchemy (combine two things to discover a third).** The *depth + collection* engine: a
+- **Little Alchemy (combine two things to discover a third).** The _depth + collection_ engine: a
   Synthesis screen where resources combine into new machines, lifeforms, catalysts, and cards, all
   tracked in a Codex.
 
@@ -63,7 +63,7 @@ one elegant, mobile-legible model (see §2).
 ### 1.3 The one real tension — and its resolution
 
 **Conflict:** Reigns is high-tension and punishes inattention with death. Idle/offline games reward
-*being away*. If planetary gauges can drift into a lethal zone while the player is offline, the
+_being away_. If planetary gauges can drift into a lethal zone while the player is offline, the
 player loses with zero agency — which is enraging and kills retention.
 
 **Resolution (design rule, non-negotiable):**
@@ -81,21 +81,21 @@ Concretely:
 - **Event cards** (the things that swing gauges hard and can push you into danger) **only draw while
   you are in the app**, and each draw is player-initiated (costs Energy — see §2.5).
 
-Result: you come back from offline to a *richer, safer* planet and a refilled Energy bar, then choose
+Result: you come back from offline to a _richer, safer_ planet and a refilled Energy bar, then choose
 to spend that Energy pushing your luck with event cards. Idle = safe growth. Active play = tension.
 Both loops stay intact and stop fighting each other.
 
 ### 1.4 Technical feasibility (all figures current as of July 2026)
 
-| Concern | Finding | Verdict |
-|---|---|---|
-| Host the PWA | Cloudflare Pages: unlimited static requests, free custom domain, Git-connected CI | ✅ Free |
-| Loss-narration LLM | **Cloudflare Workers AI: 10,000 free neurons/day.** A ~200-token generation on a small model (Llama 3.2 1B / Mistral 7B) costs a tiny fraction of that; you could serve thousands of losses/day free | ✅ Effectively free |
-| API for the Worker | Cloudflare Workers free plan: 100,000 requests/day | ✅ Free |
-| Optional cloud save/leaderboards *(deferred)* | D1 free tier (5M row reads/day, 100k writes/day, 5GB) and Durable Objects free tier (100k req/day) are ample for hobby scale | ✅ Available if we ever want it |
-| Offline advancement | Standard idle technique: persist `lastSeen` timestamp, compute elapsed delta on resume, run bounded catch-up simulation. Pure client-side | ✅ Solved pattern |
-| Secret handling | Workers AI runs server-side in the Worker via the `AI` binding — no API key is ever shipped to the client | ✅ Secure by construction |
-| iOS PWA caveats | iOS supports installable PWAs and (iOS 16.4+) web push when installed to Home Screen, but with quirks. v1 does not depend on push | ⚠️ Note, not a blocker |
+| Concern                                       | Finding                                                                                                                                                                                              | Verdict                         |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| Host the PWA                                  | Cloudflare Pages: unlimited static requests, free custom domain, Git-connected CI                                                                                                                    | ✅ Free                         |
+| Loss-narration LLM                            | **Cloudflare Workers AI: 10,000 free neurons/day.** A ~200-token generation on a small model (Llama 3.2 1B / Mistral 7B) costs a tiny fraction of that; you could serve thousands of losses/day free | ✅ Effectively free             |
+| API for the Worker                            | Cloudflare Workers free plan: 100,000 requests/day                                                                                                                                                   | ✅ Free                         |
+| Optional cloud save/leaderboards _(deferred)_ | D1 free tier (5M row reads/day, 100k writes/day, 5GB) and Durable Objects free tier (100k req/day) are ample for hobby scale                                                                         | ✅ Available if we ever want it |
+| Offline advancement                           | Standard idle technique: persist `lastSeen` timestamp, compute elapsed delta on resume, run bounded catch-up simulation. Pure client-side                                                            | ✅ Solved pattern               |
+| Secret handling                               | Workers AI runs server-side in the Worker via the `AI` binding — no API key is ever shipped to the client                                                                                            | ✅ Secure by construction       |
+| iOS PWA caveats                               | iOS supports installable PWAs and (iOS 16.4+) web push when installed to Home Screen, but with quirks. v1 does not depend on push                                                                    | ⚠️ Note, not a blocker          |
 
 **Alternative considered:** Google Gemini free tier (1,500 requests/day, no credit card, higher-quality
 prose via Gemini 2.5 Flash). Rejected for v1 only to keep the stack unified on Cloudflare; the Worker
@@ -119,14 +119,14 @@ world **collapses**: the run ends, the AI chronicler writes its post-mortem, and
 ### 2.2 The four planetary systems (the heart of the game)
 
 Every planet is described by **four gauges**, each `0–100`. These are simultaneously your
-Reigns-style kill meters *and* your Planet-Crafter-style progression indices.
+Reigns-style kill meters _and_ your Planet-Crafter-style progression indices.
 
-| System | Lethal-low failure | Lethal-high failure |
-|---|---|---|
-| 🌡️ **Thermal** | Frozen solid | Scorched / runaway greenhouse |
-| 🌫️ **Atmosphere** | Airless / too thin | Toxic / crushing pressure |
-| 💧 **Hydro** | Bone-dry | Drowned / global flood |
-| 🌱 **Biosphere** | Barren / sterile | Blight / uncontrolled overgrowth |
+| System            | Lethal-low failure | Lethal-high failure              |
+| ----------------- | ------------------ | -------------------------------- |
+| 🌡️ **Thermal**    | Frozen solid       | Scorched / runaway greenhouse    |
+| 🌫️ **Atmosphere** | Airless / too thin | Toxic / crushing pressure        |
+| 💧 **Hydro**      | Bone-dry           | Drowned / global flood           |
+| 🌱 **Biosphere**  | Barren / sterile   | Blight / uncontrolled overgrowth |
 
 Each system has, at any moment:
 
@@ -136,7 +136,7 @@ Each system has, at any moment:
 
 **The safe band moves.** Each Era shifts every band's target upward — early on you're keeping a frozen
 rock merely "not lethally frozen"; later you're holding a temperate, breathable, watered, living
-world. Progression *is* the band climbing, and the challenge *is* keeping `value` inside the band
+world. Progression _is_ the band climbing, and the challenge _is_ keeping `value` inside the band
 while it climbs.
 
 ### 2.3 Eras (the Planet Crafter progression axis)
@@ -162,7 +162,7 @@ Two ways a run ends in failure:
 
 1. **Hard fail** — any system's `value` hits `0` or `100`. Instant collapse. (Only reachable through
    event cards / active play, per §1.3.)
-2. **Cascade fail** — **Instability** accumulates past a threshold. Each *active* turn a system spends
+2. **Cascade fail** — **Instability** accumulates past a threshold. Each _active_ turn a system spends
    **outside its safe band** adds Instability; turns fully inside all bands bleed it back down.
    Enough sustained mismanagement → cascade → collapse.
 
@@ -179,7 +179,7 @@ On collapse the game records a **CollapseReport** (§5.3) that drives both the l
   **subtle directional hints** on the card edges (Reigns-style "which meter moves" telegraphing,
   revealed as the card is dragged).
 - Drawing a card costs **1 Energy**. Energy regenerates over real time (and refills while offline),
-  capping the active-play burst length — this is what makes it *casual* and ties the idle layer to
+  capping the active-play burst length — this is what makes it _casual_ and ties the idle layer to
   the tension layer.
 - Cards are drawn from a **weighted pool** gated by Archetype + current Era + Codex unlocks, using the
   run's **seeded RNG** (deterministic, §5.2).
@@ -190,9 +190,9 @@ On collapse the game records a **CollapseReport** (§5.3) that drives both the l
 - **Tap-to-collect:** the planet screen accumulates resources; tapping collects (with a small
   tap-bonus so active tapping matters but isn't mandatory).
 - **Machines:** placeable/upgradeable units that (a) produce resources passively and (b) set a
-  **setpoint** and push-rate for one system. Example: a *Heater* raises Thermal's setpoint;
-  a *Hydrolyzer* raises Atmosphere via oxygen; a *Condenser* raises Hydro.
-- Machines are how the player *steers* the passive/offline drift safely between card-driven bursts.
+  **setpoint** and push-rate for one system. Example: a _Heater_ raises Thermal's setpoint;
+  a _Hydrolyzer_ raises Atmosphere via oxygen; a _Condenser_ raises Hydro.
+- Machines are how the player _steers_ the passive/offline drift safely between card-driven bursts.
 - Upgrades cost resources; deeper upgrades unlock via Era + Codex.
 
 ### 2.7 Synthesis (the Little Alchemy layer)
@@ -218,13 +218,13 @@ On collapse the game records a **CollapseReport** (§5.3) that drives both the l
 Each new run rolls (or the player selects, once unlocked) an **Archetype** that sets starting system
 values, hazards, weighted card pool, and unique recipes. Launch set:
 
-| Archetype | Flavor | Twist |
-|---|---|---|
-| **Barren** (starter) | Grey rock | Balanced, gentle — the tutorial planet |
-| **Frozen** | Ice world | Thermal starts near-lethal-low; warming is job #1 |
-| **Volcanic** | Molten | Thermal near-lethal-high; venting heat |
-| **Toxic** | Poison skies | Atmosphere near-lethal-high; scrubbing |
-| **Oceanic** | Water world | Hydro near-lethal-high; drainage/land-making |
+| Archetype            | Flavor       | Twist                                             |
+| -------------------- | ------------ | ------------------------------------------------- |
+| **Barren** (starter) | Grey rock    | Balanced, gentle — the tutorial planet            |
+| **Frozen**           | Ice world    | Thermal starts near-lethal-low; warming is job #1 |
+| **Volcanic**         | Molten       | Thermal near-lethal-high; venting heat            |
+| **Toxic**            | Poison skies | Atmosphere near-lethal-high; scrubbing            |
+| **Oceanic**          | Water world  | Hydro near-lethal-high; drainage/land-making      |
 
 More archetypes unlock with Seeds. Archetypes are pure data (`archetypes.json`).
 
@@ -321,7 +321,7 @@ makes the game deterministic, unit-testable, offline-catch-up-able, and auto-bal
 
 - **Store:** Zustand holding `GameState`. UI subscribes; the sim mutates via reducer-style pure calls.
 - **Tick loop:** a fixed-timestep accumulator (e.g., logical tick = 1s) driving `sim/tick.ts`. Wall
-  clock is read *only* at the loop boundary and converted to a delta passed into pure sim code.
+  clock is read _only_ at the loop boundary and converted to a delta passed into pure sim code.
 - **Autosave:** debounced write to IndexedDB (e.g., every few seconds + on visibility-change/pagehide).
   Persist `lastSeenMs`.
 - **Offline resume:** on load, `elapsed = now - lastSeenMs`; clamp to a Seed-upgradable max (e.g., 8h
@@ -336,8 +336,8 @@ switch, because content/balance will churn.
 ```ts
 type Save = {
   schemaVersion: 1
-  run: RunState | null          // current run; null between runs
-  meta: MetaState               // persists across runs
+  run: RunState | null // current run; null between runs
+  meta: MetaState // persists across runs
   lastSeenMs: number
 }
 
@@ -345,19 +345,22 @@ type RunState = {
   seed: number
   archetypeId: string
   era: number
-  systems: Record<SystemId, { value: number; band: [number, number]; setpoint: number }>
+  systems: Record<
+    SystemId,
+    { value: number; band: [number, number]; setpoint: number }
+  >
   instability: number
   resources: Record<ResourceId, number>
   machines: Array<{ id: string; typeId: string; level: number }>
   energy: number
-  turns: number                 // active turns taken (cards drawn)
-  history: RunHistory           // compact rolling stats for the CollapseReport
+  turns: number // active turns taken (cards drawn)
+  history: RunHistory // compact rolling stats for the CollapseReport
 }
 
 type MetaState = {
   genesisSeeds: number
-  upgrades: Record<string, number>   // meta-upgrade id → level
-  codex: string[]                    // persistent discoveries
+  upgrades: Record<string, number> // meta-upgrade id → level
+  codex: string[] // persistent discoveries
   unlockedArchetypes: string[]
   stats: { runs: number; bestEra: number; longestRun: number }
 }
@@ -404,17 +407,17 @@ required for the offline catch-up, for tests, and for the balance harness.
 
 ```ts
 type CollapseReport = {
-  archetype: string          // "Frozen"
-  eraReached: string         // "Microbial"
+  archetype: string // "Frozen"
+  eraReached: string // "Microbial"
   turnsSurvived: number
   cause: {
-    kind: "hard-fail" | "cascade"
-    system: SystemId         // e.g. "atmosphere"
-    direction: "low" | "high"// which lethal edge
+    kind: 'hard-fail' | 'cascade'
+    system: SystemId // e.g. "atmosphere"
+    direction: 'low' | 'high' // which lethal edge
   }
-  systemsFinal: Record<SystemId, number>   // final values
+  systemsFinal: Record<SystemId, number> // final values
   peakHabitability: number
-  notableStats: string[]     // e.g. ["atmosphere spent 9 turns in the red", "3 lifeforms discovered"]
+  notableStats: string[] // e.g. ["atmosphere spent 9 turns in the red", "3 lifeforms discovered"]
   seedsAwarded: number
 }
 ```
@@ -459,7 +462,7 @@ verification tool for free:
   target curve (e.g., first runs die fast and cheap; skilled play reaches Habitable in a satisfying
   arc). This is the primary "is it fun-shaped?" instrument and a required CI check.
 - **Manual playtest checklist** per milestone: does a fresh player understand the swipe? Does offline
-  feel rewarding? Does a loss feel *fair* and the chronicle land?
+  feel rewarding? Does a loss feel _fair_ and the chronicle land?
 
 ---
 
@@ -469,7 +472,9 @@ Each milestone is independently shippable and testable. **Milestone 1 is the "is
 everything else is depth on a proven core.
 
 ### Milestone 1 — Playable core (the vertical slice)
+
 **Goal:** a mobile PWA you can install and lose to, with the core tension working.
+
 - One Archetype (**Barren**); the four systems with safe bands; Era 1→2 transition working.
 - ~20 event cards; swipe-to-decide with edge telegraphing; Energy gating (regen + offline refill).
 - Tap-to-collect + 3 machines with setpoints.
@@ -485,6 +490,7 @@ network required. Sim unit tests green; a 1,000-run harness pass produces a non-
 turns-survived distribution.
 
 ### Milestone 2 — Prestige & meta-progression
+
 - Genesis Seeds yield on collapse/Ascension; meta-upgrade shop; Seed-gated Archetype unlocks.
 - Add 2 Archetypes (**Frozen**, **Volcanic**).
 - Persistent stats; "Begin New World → Ascend" fully wired.
@@ -493,12 +499,14 @@ turns-survived distribution.
 shows Seeds/run rising with policy skill.
 
 ### Milestone 3 — Synthesis & Codex
+
 - Two-slot combine, `recipes.json`, catalysts, lifeforms, Codex (persistent).
 - Cards/machines that grant combinable resources; discoveries unlock content.
 
 **Acceptance:** discovering a recipe unlocks a usable machine/catalyst/card; Codex persists across runs.
 
 ### Milestone 4 — The AI chronicler (real LLM)
+
 - Cloudflare Worker `POST /api/narrate` → Workers AI; CORS + validation + timeout + rate heuristic.
 - Client flips the flag from templated to live, keeping the fallback path.
 
@@ -506,10 +514,12 @@ shows Seeds/run rising with policy skill.
 Worker cleanly falls back to templates with no user-visible error.
 
 ### Milestone 5 — Depth & polish
+
 - More cards/archetypes/recipes; audio/haptics; animation polish; onboarding; balance pass driven by
   the harness + real playtests.
 
-### Milestone 6 *(optional, deferred)* — Cloud save & leaderboards
+### Milestone 6 _(optional, deferred)_ — Cloud save & leaderboards
+
 - Only if wanted. D1/Durable Objects on the free tier; the save layer was built cloud-swappable in M1.
 
 ---
@@ -525,10 +535,11 @@ Worker cleanly falls back to templates with no user-visible error.
   templated fallback. Cache identical CollapseReports if ever needed.
 - **iOS PWA limits.** v1 avoids push and any iOS-restricted API. Revisit if we want re-engagement pings.
 - **Content scale.** Data-driven JSON + zod validation keeps content growth cheap and safe.
-- **Scope creep from the mash-up.** M1 deliberately ships *without* synthesis or prestige to prove the
+- **Scope creep from the mash-up.** M1 deliberately ships _without_ synthesis or prestige to prove the
   core loop first.
 
 ~~Open for Cory~~ **Resolved 2026-07-13:**
+
 1. **Name:** keep **TerraTouch**. **Tone: bittersweet blend** — play feels cozy and hopeful; the
    Chronicle writes elegiac, wistful obituaries. Losing a world should sting a little; that contrast
    is the emotional hook. Card copy leans warm; loss narration leans mournful.

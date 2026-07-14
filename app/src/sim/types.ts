@@ -5,7 +5,12 @@
 // mutates its inputs, never reads the wall clock, never touches I/O. Time
 // arrives as deltas; randomness arrives as explicit rng state on RunState.
 
-export const SYSTEM_IDS = ['thermal', 'atmosphere', 'hydro', 'biosphere'] as const
+export const SYSTEM_IDS = [
+  'thermal',
+  'atmosphere',
+  'hydro',
+  'biosphere',
+] as const
 export type SystemId = (typeof SYSTEM_IDS)[number]
 
 export type ResourceId = 'minerals'
@@ -215,7 +220,10 @@ export type AwaySummary = {
 
 /** Thrown on illegal actions (not enough energy/minerals, run over, …). */
 export class SimError extends Error {
-  constructor(readonly code: string, message?: string) {
+  constructor(
+    readonly code: string,
+    message?: string,
+  ) {
     super(message ?? code)
     this.name = 'SimError'
   }

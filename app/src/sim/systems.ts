@@ -38,7 +38,9 @@ export function habitability(systems: Record<SystemId, SystemState>): number {
 }
 
 /** Ids of systems currently outside their safe band. */
-export function systemsOutOfBand(systems: Record<SystemId, SystemState>): SystemId[] {
+export function systemsOutOfBand(
+  systems: Record<SystemId, SystemState>,
+): SystemId[] {
   return SYSTEM_IDS.filter((id) => !inBand(systems[id]))
 }
 
@@ -73,7 +75,10 @@ export function instabilityStep(
   if (out === 0) {
     return Math.max(0, instability - balance.instability.decayPerTurn)
   }
-  return instability + out * balance.instability.accrualPerSystemPerTurn * volatilityMult
+  return (
+    instability +
+    out * balance.instability.accrualPerSystemPerTurn * volatilityMult
+  )
 }
 
 /** Cascade fail: Instability past the threshold (SPEC §2.4). */
@@ -98,7 +103,11 @@ export function cascadeCause(run: RunState): CollapseCause {
   }
   const s = run.systems[worst]
   const mid = (s.band[0] + s.band[1]) / 2
-  return { kind: 'cascade', system: worst, direction: s.value < mid ? 'low' : 'high' }
+  return {
+    kind: 'cascade',
+    system: worst,
+    direction: s.value < mid ? 'low' : 'high',
+  }
 }
 
 const SYSTEM_LABEL: Record<SystemId, string> = {
@@ -124,7 +133,10 @@ export function buildCollapseReport(
   const notable: string[] = []
   for (const id of SYSTEM_IDS) {
     const t = run.history.turnsOutOfBand[id]
-    if (t >= 3) notable.push(`the ${SYSTEM_LABEL[id]} spent ${t} turns outside the safe band`)
+    if (t >= 3)
+      notable.push(
+        `the ${SYSTEM_LABEL[id]} spent ${t} turns outside the safe band`,
+      )
   }
   notable.sort() // deterministic order regardless of accumulation order
   if (run.history.peakHabitability > 0) {

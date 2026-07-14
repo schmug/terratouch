@@ -105,7 +105,8 @@ export const useGame = create<GameStore>((set, get) => ({
       if (elapsed >= OFFLINE_GAP_MS) {
         const caught = applyOffline(run, content, elapsed)
         run = caught.run
-        if (caught.summary.elapsedMs >= AWAY_SUMMARY_MIN_MS) awaySummary = caught.summary
+        if (caught.summary.elapsedMs >= AWAY_SUMMARY_MIN_MS)
+          awaySummary = caught.summary
       }
     }
 
@@ -133,7 +134,8 @@ export const useGame = create<GameStore>((set, get) => ({
     const { run: caught, summary } = applyOffline(run, content, elapsedMs)
     set({
       run: caught,
-      awaySummary: summary.elapsedMs >= AWAY_SUMMARY_MIN_MS ? summary : get().awaySummary,
+      awaySummary:
+        summary.elapsedMs >= AWAY_SUMMARY_MIN_MS ? summary : get().awaySummary,
     })
     saveNow() // same re-credit window as init — persist promptly
   },
@@ -248,7 +250,9 @@ function saveNow(): void {
     clearTimeout(saveTimer)
     saveTimer = null
   }
-  void writeSave(currentSave()).catch((err) => console.warn('terratouch: save failed', err))
+  void writeSave(currentSave()).catch((err) =>
+    console.warn('terratouch: save failed', err),
+  )
 }
 
 function scheduleSave(): void {

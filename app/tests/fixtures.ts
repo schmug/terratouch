@@ -10,7 +10,11 @@ export function makeTestContent(overrides: Partial<Content> = {}): Content {
     balance: {
       energy: { cap: 10, regenPerSec: 0.02, drawCost: 1 },
       tap: { baseRatePerSec: 1, bonusMult: 1.5, poolCapSec: 100 },
-      instability: { accrualPerSystemPerTurn: 10, decayPerTurn: 5, cascadeThreshold: 100 },
+      instability: {
+        accrualPerSystemPerTurn: 10,
+        decayPerTurn: 5,
+        cascadeThreshold: 100,
+      },
       setpoint: { min: 2, max: 98 },
       era: { progressDecayMult: 1 },
       offline: { maxHours: 8, productionMult: 1 },
@@ -49,10 +53,30 @@ export function makeTestContent(overrides: Partial<Content> = {}): Content {
         blurb: 'A rock for tests.',
         startingMinerals: 100,
         systems: {
-          thermal: { start: 40, setpoint: 40, naturalRest: 25, naturalRatePerSec: 0.01 },
-          atmosphere: { start: 40, setpoint: 40, naturalRest: 25, naturalRatePerSec: 0.01 },
-          hydro: { start: 40, setpoint: 40, naturalRest: 25, naturalRatePerSec: 0.01 },
-          biosphere: { start: 30, setpoint: 30, naturalRest: 15, naturalRatePerSec: 0.01 },
+          thermal: {
+            start: 40,
+            setpoint: 40,
+            naturalRest: 25,
+            naturalRatePerSec: 0.01,
+          },
+          atmosphere: {
+            start: 40,
+            setpoint: 40,
+            naturalRest: 25,
+            naturalRatePerSec: 0.01,
+          },
+          hydro: {
+            start: 40,
+            setpoint: 40,
+            naturalRest: 25,
+            naturalRatePerSec: 0.01,
+          },
+          biosphere: {
+            start: 30,
+            setpoint: 30,
+            naturalRest: 15,
+            naturalRatePerSec: 0.01,
+          },
         },
       },
     ],

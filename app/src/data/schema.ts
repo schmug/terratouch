@@ -73,7 +73,8 @@ export const erasSchema = z
     eras.forEach((era, i) => {
       const isLast = i === eras.length - 1
       const hasAdvance =
-        era.advanceHabitability !== undefined && era.stabilizationSec !== undefined
+        era.advanceHabitability !== undefined &&
+        era.stabilizationSec !== undefined
       if (!isLast && !hasAdvance) {
         ctx.addIssue({
           code: 'custom',

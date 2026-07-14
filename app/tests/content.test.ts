@@ -26,7 +26,9 @@ describe('shipped content', () => {
   })
 
   it('M1 scope: a machine steers thermal, atmosphere, and hydro', () => {
-    const systems = loadContent().machines.map((m) => m.system).sort()
+    const systems = loadContent()
+      .machines.map((m) => m.system)
+      .sort()
     expect(systems).toEqual(['atmosphere', 'hydro', 'thermal'])
   })
 
@@ -51,13 +53,17 @@ describe('malformed content fails loudly', () => {
 
   it('rejects an inverted band', () => {
     const bad = raw()
-    ;(bad.eras as { bands: { thermal: [number, number] } }[])[0]!.bands.thermal = [60, 20]
+    ;(
+      bad.eras as { bands: { thermal: [number, number] } }[]
+    )[0]!.bands.thermal = [60, 20]
     expect(() => parseContent(bad)).toThrow(/lo must be </)
   })
 
   it('rejects a band touching a lethal edge', () => {
     const bad = raw()
-    ;(bad.eras as { bands: { biosphere: [number, number] } }[])[0]!.bands.biosphere = [0, 30]
+    ;(
+      bad.eras as { bands: { biosphere: [number, number] } }[]
+    )[0]!.bands.biosphere = [0, 30]
     expect(() => parseContent(bad)).toThrow()
   })
 

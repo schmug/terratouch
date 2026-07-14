@@ -35,14 +35,22 @@ export function migrateSave(raw: unknown): Save | null {
   switch (candidate.schemaVersion) {
     case 1: {
       const save = raw as Save
-      if (typeof save.lastSeenMs !== 'number' || save.meta === undefined) return null
-      if (save.run !== undefined && save.run !== null && typeof save.run.seed !== 'number') {
+      if (typeof save.lastSeenMs !== 'number' || save.meta === undefined)
+        return null
+      if (
+        save.run !== undefined &&
+        save.run !== null &&
+        typeof save.run.seed !== 'number'
+      ) {
         return null
       }
       return save
     }
     default:
-      console.warn('terratouch: unknown save schemaVersion, starting fresh', candidate.schemaVersion)
+      console.warn(
+        'terratouch: unknown save schemaVersion, starting fresh',
+        candidate.schemaVersion,
+      )
       return null
   }
 }

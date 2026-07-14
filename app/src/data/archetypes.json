@@ -5,10 +5,30 @@
     "blurb": "A patient grey rock, holding its breath. Nothing here yet — which means room for everything.",
     "startingMinerals": 30,
     "systems": {
-      "thermal": { "start": 16, "setpoint": 27, "naturalRest": 8, "naturalRatePerSec": 0.004 },
-      "atmosphere": { "start": 10, "setpoint": 24, "naturalRest": 5, "naturalRatePerSec": 0.003 },
-      "hydro": { "start": 8, "setpoint": 24, "naturalRest": 4, "naturalRatePerSec": 0.003 },
-      "biosphere": { "start": 2, "setpoint": 15, "naturalRest": 2, "naturalRatePerSec": 0.002 }
+      "thermal": {
+        "start": 16,
+        "setpoint": 27,
+        "naturalRest": 8,
+        "naturalRatePerSec": 0.004
+      },
+      "atmosphere": {
+        "start": 10,
+        "setpoint": 24,
+        "naturalRest": 5,
+        "naturalRatePerSec": 0.003
+      },
+      "hydro": {
+        "start": 8,
+        "setpoint": 24,
+        "naturalRest": 4,
+        "naturalRatePerSec": 0.003
+      },
+      "biosphere": {
+        "start": 2,
+        "setpoint": 15,
+        "naturalRest": 2,
+        "naturalRatePerSec": 0.002
+      }
     }
   }
 ]

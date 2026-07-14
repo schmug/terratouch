@@ -19,6 +19,8 @@ export function fmtInt(n: number): string {
 /** Signed delta chip text: "+7" / "−4". */
 export function fmtDelta(n: number): string {
   const rounded = Math.round(n * 10) / 10
-  const text = Number.isInteger(rounded) ? `${Math.abs(rounded)}` : `${Math.abs(rounded)}`
+  const text = Number.isInteger(rounded)
+    ? `${Math.abs(rounded)}`
+    : `${Math.abs(rounded)}`
   return rounded >= 0 ? `+${text}` : `−${text}`
 }

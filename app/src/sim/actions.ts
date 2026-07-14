@@ -15,9 +15,14 @@ import {
 } from './types'
 
 /** Start a fresh run of the given archetype from a seed. */
-export function newRun(content: Content, seed: number, archetypeId: string): RunState {
+export function newRun(
+  content: Content,
+  seed: number,
+  archetypeId: string,
+): RunState {
   const arch = content.archetypes.find((a) => a.id === archetypeId)
-  if (!arch) throw new SimError('unknown-archetype', `unknown archetype ${archetypeId}`)
+  if (!arch)
+    throw new SimError('unknown-archetype', `unknown archetype ${archetypeId}`)
   const era0 = content.eras[0]
   if (!era0) throw new Error('content has no eras')
 
@@ -25,7 +30,11 @@ export function newRun(content: Content, seed: number, archetypeId: string): Run
   const turnsOutOfBand = {} as Record<SystemId, number>
   for (const id of SYSTEM_IDS) {
     const def = arch.systems[id]
-    systems[id] = { value: def.start, band: era0.bands[id], setpoint: def.setpoint }
+    systems[id] = {
+      value: def.start,
+      band: era0.bands[id],
+      setpoint: def.setpoint,
+    }
     turnsOutOfBand[id] = 0
   }
 
@@ -50,15 +59,22 @@ export function newRun(content: Content, seed: number, archetypeId: string): Run
 }
 
 /** Collect the tap pool with the active-play bonus (SPEC §2.6). */
-export function tapCollect(run: RunState, content: Content): { run: RunState; collected: number } {
+export function tapCollect(
+  run: RunState,
+  content: Content,
+): { run: RunState; collected: number } {
   if (run.collapse) throw new SimError('run-over')
-  const collected = Math.round(run.uncollected * content.balance.tap.bonusMult * 10) / 10
+  const collected =
+    Math.round(run.uncollected * content.balance.tap.bonusMult * 10) / 10
   if (collected <= 0) return { run, collected: 0 }
   return {
     run: {
       ...run,
       uncollected: 0,
-      resources: { ...run.resources, minerals: run.resources.minerals + collected },
+      resources: {
+        ...run.resources,
+        minerals: run.resources.minerals + collected,
+      },
     },
     collected,
   }
@@ -84,7 +100,11 @@ export function machineOfType(run: RunState, typeId: string) {
  * Build a machine (level 1) or upgrade the existing one by a level, paying
  * minerals. M1 keeps one instance per machine type.
  */
-export function buildOrUpgrade(run: RunState, content: Content, typeId: string): RunState {
+export function buildOrUpgrade(
+  run: RunState,
+  content: Content,
+  typeId: string,
+): RunState {
   if (run.collapse) throw new SimError('run-over')
   const def = machineDef(content, typeId)
   const existing = machineOfType(run, typeId)
@@ -94,7 +114,9 @@ export function buildOrUpgrade(run: RunState, content: Content, typeId: string):
   if (run.resources.minerals < cost) throw new SimError('no-minerals')
 
   const machines = existing
-    ? run.machines.map((m) => (m.id === existing.id ? { ...m, level: targetLevel } : m))
+    ? run.machines.map((m) =>
+        m.id === existing.id ? { ...m, level: targetLevel } : m,
+      )
     : [...run.machines, { id: `m-${typeId}`, typeId, level: 1 }]
 
   return {
@@ -119,12 +141,17 @@ export function setSetpoint(
   value: number,
 ): RunState {
   if (run.collapse) throw new SimError('run-over')
-  const hasMachine = run.machines.some((m) => machineDef(content, m.typeId).system === system)
+  const hasMachine = run.machines.some(
+    (m) => machineDef(content, m.typeId).system === system,
+  )
   if (!hasMachine) throw new SimError('no-machine-for-system')
   const { min, max } = content.balance.setpoint
   const clamped = Math.min(max, Math.max(min, value))
   return {
     ...run,
-    systems: { ...run.systems, [system]: { ...run.systems[system], setpoint: clamped } },
+    systems: {
+      ...run.systems,
+      [system]: { ...run.systems[system], setpoint: clamped },
+    },
   }
 }

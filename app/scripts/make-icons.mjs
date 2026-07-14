@@ -108,6 +108,9 @@ mkdirSync(OUT, { recursive: true })
 writeFileSync(join(OUT, 'icon-192.png'), draw(192))
 writeFileSync(join(OUT, 'icon-512.png'), draw(512))
 // maskable: shrink the planet into the safe zone so OS masks don't clip it
-writeFileSync(join(OUT, 'icon-512-maskable.png'), draw(512, { planetScale: 0.3 }))
+writeFileSync(
+  join(OUT, 'icon-512-maskable.png'),
+  draw(512, { planetScale: 0.3 }),
+)
 writeFileSync(join(OUT, 'apple-touch-icon.png'), draw(180))
 console.log('icons written to', OUT)

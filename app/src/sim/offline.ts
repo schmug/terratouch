@@ -69,11 +69,15 @@ export function applyOffline(
   }
 
   // Production goes straight to the balance (no tap pool while away).
-  const mineralsGained = productionRate(run, content) * sec * balance.offline.productionMult
+  const mineralsGained =
+    productionRate(run, content) * sec * balance.offline.productionMult
   const minerals = run.resources.minerals + mineralsGained
 
   // Energy refills on real time, up to the cap.
-  const energy = Math.min(balance.energy.cap, run.energy + balance.energy.regenPerSec * sec)
+  const energy = Math.min(
+    balance.energy.cap,
+    run.energy + balance.energy.regenPerSec * sec,
+  )
   const energyGained = energy - run.energy
 
   return {

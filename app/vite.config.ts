@@ -11,7 +11,8 @@ export default defineConfig({
       manifest: {
         name: 'TerraTouch',
         short_name: 'TerraTouch',
-        description: 'Raise a dead world toward habitability, one swipe at a time.',
+        description:
+          'Raise a dead world toward habitability, one swipe at a time.',
         theme_color: '#0b1020',
         background_color: '#0b1020',
         display: 'standalone',

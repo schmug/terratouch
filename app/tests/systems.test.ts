@@ -16,7 +16,10 @@ import {
 import type { SystemState } from '../src/sim/types'
 import { makeRun, makeTestContent } from './fixtures'
 
-const sys = (value: number, band: [number, number] = [20, 60]): SystemState => ({
+const sys = (
+  value: number,
+  band: [number, number] = [20, 60],
+): SystemState => ({
   value,
   band,
   setpoint: 40,
@@ -116,7 +119,11 @@ describe('collapse detection', () => {
         turnsOutOfBand: { thermal: 2, atmosphere: 0, hydro: 9, biosphere: 1 },
       },
     }
-    expect(cascadeCause(run)).toEqual({ kind: 'cascade', system: 'hydro', direction: 'high' })
+    expect(cascadeCause(run)).toEqual({
+      kind: 'cascade',
+      system: 'hydro',
+      direction: 'high',
+    })
   })
 })
 
@@ -153,10 +160,16 @@ describe('collapse report', () => {
     expect(report.archetype).toBe('Test Rock')
     expect(report.eraReached).toBe('One')
     expect(report.turnsSurvived).toBe(23)
-    expect(report.cause).toEqual({ kind: 'hard-fail', system: 'thermal', direction: 'high' })
+    expect(report.cause).toEqual({
+      kind: 'hard-fail',
+      system: 'thermal',
+      direction: 'high',
+    })
     expect(report.peakHabitability).toBe(61)
     expect(report.seedsAwarded).toBe(0)
-    expect(report.notableStats.join(' ')).toContain('thermal balance spent 9 turns')
+    expect(report.notableStats.join(' ')).toContain(
+      'thermal balance spent 9 turns',
+    )
     expect(report.notableStats.join(' ')).toContain('habitability peaked at 61')
   })
 })

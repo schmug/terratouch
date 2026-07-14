@@ -2,7 +2,12 @@
 // state, across the full action surface (ticks, taps, builds, setpoints,
 // draws, swipes, offline gaps).
 import { describe, expect, it } from 'vitest'
-import { buildOrUpgrade, newRun, setSetpoint, tapCollect } from '../src/sim/actions'
+import {
+  buildOrUpgrade,
+  newRun,
+  setSetpoint,
+  tapCollect,
+} from '../src/sim/actions'
 import { canDraw, drawCard, resolveCard } from '../src/sim/cards'
 import { applyOffline } from '../src/sim/offline'
 import { tick } from '../src/sim/tick'
@@ -11,10 +16,23 @@ import { loadContent } from '../src/data'
 import { makeTestContent } from './fixtures'
 
 /** A fixed action script exercising every sim entry point. */
-function playScript(content: Content, seed: number, archetypeId: string): string[] {
+function playScript(
+  content: Content,
+  seed: number,
+  archetypeId: string,
+): string[] {
   let run: RunState = newRun(content, seed, archetypeId)
   const snapshots: string[] = [JSON.stringify(run)]
-  const sides = ['left', 'right', 'right', 'left', 'right', 'left', 'left', 'right'] as const
+  const sides = [
+    'left',
+    'right',
+    'right',
+    'left',
+    'right',
+    'left',
+    'left',
+    'right',
+  ] as const
 
   for (let i = 0; i < sides.length; i++) {
     run = tick(run, content, 17)

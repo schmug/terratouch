@@ -90,6 +90,12 @@ worker/               # Cloudflare Worker (wrangler)
 ## Commands
 
 ```sh
+# repo root (tooling only: Prettier + ESLint — run both before committing)
+npm install            # installs the tooling-only root package.json
+npm run format         # prettier --write . (app/ + worker/ + md/json)
+npm run format:check   # what CI runs
+npm run lint           # eslint . (flat config at eslint.config.mjs)
+
 # app/ (React + Vite + TS PWA)
 npm --prefix app install
 npm --prefix app run dev        # dev server
@@ -106,8 +112,10 @@ npm --prefix worker run deploy     # wrangler deploy (needs CF auth)
 ```
 
 Toolchain notes (verified against the npm registry 2026-07-13):
+
 - Key versions: Vite 8 (rolldown-based), vitest 4 (peer-deps our vite — one vite in the tree), React 19.2, TypeScript 7 (native compiler), zod 4, zustand 5, wrangler 4.
 - `vitest.config.ts` is **standalone**, not merged into `vite.config.ts` — sim tests are pure node and need no plugins. Keep it that way.
 - Node: `.nvmrc` says 24 (LTS); CI runs 24. Engines floor across deps is effectively >=22.12.
 - CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs app typecheck/test/build + worker typecheck via `npm ci` — keep both `package-lock.json` files committed.
 - When adding a dependency, sanity-check `npm view <pkg> dist-tags` — resolver under-picks happen (vitest initially resolved to 3.x when 4.x was latest).
+- **Formatting/linting (issue #14):** the root `package.json` is tooling-only (private; Prettier 3 + ESLint 10 flat config + typescript-eslint + react-hooks). It plays no build role — the Cloudflare Pages build command installs explicitly inside `app/` (SPEC §4.6). The root `typescript` is pinned to 6.x solely as typescript-eslint's parser peer (`<6.1.0`); app/worker build with TypeScript 7. CI runs `format:check` + `lint` as a first gate — run `npm run format && npm run lint` before committing. The one-time reformat commit is in `.git-blame-ignore-revs` (GitHub honors it automatically; locally, `git config blame.ignoreRevsFile .git-blame-ignore-revs`).

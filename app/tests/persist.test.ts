@@ -37,7 +37,9 @@ describe('save migration switch', () => {
     expect(migrateSave(42)).toBeNull()
     expect(migrateSave({})).toBeNull()
     expect(migrateSave({ schemaVersion: 1 })).toBeNull() // missing fields
-    expect(migrateSave({ schemaVersion: 1, meta: {}, lastSeenMs: 'later' })).toBeNull()
+    expect(
+      migrateSave({ schemaVersion: 1, meta: {}, lastSeenMs: 'later' }),
+    ).toBeNull()
   })
 
   it('returns null for unknown future schema versions', () => {

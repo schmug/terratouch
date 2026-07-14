@@ -36,11 +36,17 @@ describe('drawing', () => {
 
   it('refuses to draw without energy, mid-card, or after collapse', () => {
     const run = makeRun(content)
-    expect(() => drawCard({ ...run, energy: 0.5 }, content)).toThrow('no-energy')
+    expect(() => drawCard({ ...run, energy: 0.5 }, content)).toThrow(
+      'no-energy',
+    )
     expect(canDraw({ ...run, energy: 0.5 }, content)).toBe(false)
     const { run: drawn } = drawCard(run, content)
     expect(() => drawCard(drawn, content)).toThrow('card-active')
-    const { run: dead } = resolveCard(drawSpecific(run, 'haymaker'), content, 'left')
+    const { run: dead } = resolveCard(
+      drawSpecific(run, 'haymaker'),
+      content,
+      'left',
+    )
     expect(dead.collapse).not.toBeNull()
     expect(() => drawCard(dead, content)).toThrow('run-over')
   })
@@ -77,36 +83,65 @@ describe('drawing', () => {
 describe('resolving', () => {
   it('applies system deltas, resource and energy effects', () => {
     const run = makeRun(content)
-    const { run: after, applied } = resolveCard(drawSpecific(run, 'nudge'), content, 'right')
+    const { run: after, applied } = resolveCard(
+      drawSpecific(run, 'nudge'),
+      content,
+      'right',
+    )
     expect(after.systems.thermal.value).toBe(45) // 40 + 5 × volatility 1
     expect(applied.systems.thermal).toBe(5)
     expect(after.turns).toBe(1)
     expect(after.activeCardId).toBeNull()
 
-    const { run: paid, applied: a2 } = resolveCard(drawSpecific(run, 'windfall'), content, 'left')
+    const { run: paid, applied: a2 } = resolveCard(
+      drawSpecific(run, 'windfall'),
+      content,
+      'left',
+    )
     expect(paid.resources.minerals).toBe(120)
     expect(a2.minerals).toBe(20)
   })
 
   it('scales system deltas by the era volatility multiplier', () => {
     let run = { ...makeRun(content), era: 1 } // era two: volatility 2
-    run = { ...run, systems: { ...run.systems, thermal: { ...run.systems.thermal, value: 50 } } }
-    const { run: after } = resolveCard(drawSpecific(run, 'nudge'), content, 'right')
+    run = {
+      ...run,
+      systems: {
+        ...run.systems,
+        thermal: { ...run.systems.thermal, value: 50 },
+      },
+    }
+    const { run: after } = resolveCard(
+      drawSpecific(run, 'nudge'),
+      content,
+      'right',
+    )
     expect(after.systems.thermal.value).toBe(60) // 50 + 5 × 2
   })
 
   it('instability accrues on out-of-band turns and decays on clean ones', () => {
     // 'nudge' left cools thermal 40 → 35, still inside [20, 60]: clean turn.
     const run = { ...makeRun(content), instability: 20 }
-    const { run: clean } = resolveCard(drawSpecific(run, 'nudge'), content, 'left')
+    const { run: clean } = resolveCard(
+      drawSpecific(run, 'nudge'),
+      content,
+      'left',
+    )
     expect(clean.instability).toBe(15) // decayPerTurn 5
 
     // Force thermal far below band, then take a turn: accrual 10 for 1 system.
     const outState = {
       ...run,
-      systems: { ...run.systems, thermal: { ...run.systems.thermal, value: 10 } },
+      systems: {
+        ...run.systems,
+        thermal: { ...run.systems.thermal, value: 10 },
+      },
     }
-    const { run: out } = resolveCard(drawSpecific(outState, 'windfall'), content, 'left')
+    const { run: out } = resolveCard(
+      drawSpecific(outState, 'windfall'),
+      content,
+      'left',
+    )
     expect(out.instability).toBe(30)
     expect(out.history.turnsOutOfBand.thermal).toBe(1)
   })
@@ -114,20 +149,32 @@ describe('resolving', () => {
   it('direct instability effects clamp at zero', () => {
     const run = { ...makeRun(content), instability: 4 }
     // windfall right: instability -10, then clean-turn decay 5 → stays 0.
-    const { run: after } = resolveCard(drawSpecific(run, 'windfall'), content, 'right')
+    const { run: after } = resolveCard(
+      drawSpecific(run, 'windfall'),
+      content,
+      'right',
+    )
     expect(after.instability).toBe(0)
   })
 
   it('hard fail: a lethal edge collapses the run with the right cause', () => {
     const run = makeRun(content)
-    const { run: frozen } = resolveCard(drawSpecific(run, 'haymaker'), content, 'left')
+    const { run: frozen } = resolveCard(
+      drawSpecific(run, 'haymaker'),
+      content,
+      'left',
+    )
     expect(frozen.systems.thermal.value).toBe(0)
     expect(frozen.collapse?.cause).toEqual({
       kind: 'hard-fail',
       system: 'thermal',
       direction: 'low',
     })
-    const { run: boiled } = resolveCard(drawSpecific(run, 'haymaker'), content, 'right')
+    const { run: boiled } = resolveCard(
+      drawSpecific(run, 'haymaker'),
+      content,
+      'right',
+    )
     expect(boiled.collapse?.cause).toEqual({
       kind: 'hard-fail',
       system: 'thermal',
@@ -141,13 +188,20 @@ describe('resolving', () => {
     // Put atmosphere out of band so the turn accrues 10 → 105 ≥ 100.
     run = {
       ...run,
-      systems: { ...run.systems, atmosphere: { ...run.systems.atmosphere, value: 5 } },
+      systems: {
+        ...run.systems,
+        atmosphere: { ...run.systems.atmosphere, value: 5 },
+      },
       history: {
         ...run.history,
         turnsOutOfBand: { thermal: 0, atmosphere: 6, hydro: 0, biosphere: 0 },
       },
     }
-    const { run: dead } = resolveCard(drawSpecific(run, 'windfall'), content, 'left')
+    const { run: dead } = resolveCard(
+      drawSpecific(run, 'windfall'),
+      content,
+      'left',
+    )
     expect(dead.collapse?.cause.kind).toBe('cascade')
     expect(dead.collapse?.cause.system).toBe('atmosphere')
     expect(dead.collapse?.cause.direction).toBe('low')
@@ -156,7 +210,11 @@ describe('resolving', () => {
   it('refuses to resolve with no active card or after collapse', () => {
     const run = makeRun(content)
     expect(() => resolveCard(run, content, 'left')).toThrow('no-active-card')
-    const { run: dead } = resolveCard(drawSpecific(run, 'haymaker'), content, 'left')
+    const { run: dead } = resolveCard(
+      drawSpecific(run, 'haymaker'),
+      content,
+      'left',
+    )
     expect(() => resolveCard(dead, content, 'left')).toThrow('run-over')
   })
 })

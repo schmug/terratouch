@@ -18,7 +18,8 @@ export function BuildScreen() {
   return (
     <div className="screen build-screen">
       <p className="build-intro">
-        Machines steer the world while you're away — each pushes one system toward its setpoint.
+        Machines steer the world while you're away — each pushes one system
+        toward its setpoint.
       </p>
 
       {content.machines.map((def) => {
@@ -43,9 +44,15 @@ export function BuildScreen() {
             </div>
 
             <div className="machine-controls">
-              <span className="machine-level" aria-label={`level ${level} of ${def.maxLevel}`}>
+              <span
+                className="machine-level"
+                aria-label={`level ${level} of ${def.maxLevel}`}
+              >
                 {Array.from({ length: def.maxLevel }, (_, i) => (
-                  <span key={i} className={`level-dot${i < level ? ' on' : ''}`} />
+                  <span
+                    key={i}
+                    className={`level-dot${i < level ? ' on' : ''}`}
+                  />
                 ))}
               </span>
               <button
@@ -54,14 +61,21 @@ export function BuildScreen() {
                 disabled={!affordable}
                 onClick={() => build(def.id)}
               >
-                {maxed ? 'At full hum' : level === 0 ? `Build — ◇ ${fmtInt(cost)}` : `Upgrade — ◇ ${fmtInt(cost)}`}
+                {maxed
+                  ? 'At full hum'
+                  : level === 0
+                    ? `Build — ◇ ${fmtInt(cost)}`
+                    : `Upgrade — ◇ ${fmtInt(cost)}`}
               </button>
             </div>
 
             {level > 0 && (
               <label className="setpoint-row">
                 <span className="setpoint-label">
-                  setpoint <strong style={{ color: meta.color }}>{Math.round(sp)}</strong>
+                  setpoint{' '}
+                  <strong style={{ color: meta.color }}>
+                    {Math.round(sp)}
+                  </strong>
                 </span>
                 <input
                   type="range"
@@ -80,7 +94,8 @@ export function BuildScreen() {
       })}
 
       <p className="build-note">
-        The biosphere has no machine yet — living things answer only to the cards.
+        The biosphere has no machine yet — living things answer only to the
+        cards.
       </p>
     </div>
   )

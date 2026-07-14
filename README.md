@@ -17,9 +17,9 @@ narration; prestige, synthesis, and the live LLM chronicler are next.
 
 ## Layout
 
-| Dir | What | Deploys to |
-|---|---|---|
-| [`app/`](app/) | React + Vite + TS PWA (sim engine, UI, persistence) | Cloudflare Pages |
+| Dir                  | What                                                       | Deploys to                                     |
+| -------------------- | ---------------------------------------------------------- | ---------------------------------------------- |
+| [`app/`](app/)       | React + Vite + TS PWA (sim engine, UI, persistence)        | Cloudflare Pages                               |
 | [`worker/`](worker/) | Loss-narration endpoint (`POST /api/narrate` → Workers AI) | Cloudflare Workers (M4 — currently a 501 stub) |
 
 ## Develop

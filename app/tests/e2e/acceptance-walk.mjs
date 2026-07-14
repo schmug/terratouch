@@ -99,8 +99,9 @@ const swReady = await page.evaluate(async () => {
 check('service worker active (installable/offline-capable)', swReady)
 
 // ------------------------------------------------- 2. play a burst
-const save0 = await readSave().catch(() => null)
-const energyBefore = await page.evaluate(() => document.querySelectorAll('.pip-fill').length)
+const energyBefore = await page.evaluate(
+  () => document.querySelectorAll('.pip-fill').length,
+)
 check('energy pips rendered', energyBefore > 0, `${energyBefore} pips`)
 
 // tap-to-collect (give the pool a moment to accrue)
@@ -129,17 +130,32 @@ for (let i = 0; i < 5; i++) {
     await page.screenshot({ path: `${SHOTS}04-card-drag.png` })
     await page.mouse.up()
   } else {
-    await page.click(i % 2 === 0 ? '.choice-buttons .btn-choice:first-child' : '.choice-buttons .btn-choice:last-child')
+    await page.click(
+      i % 2 === 0
+        ? '.choice-buttons .btn-choice:first-child'
+        : '.choice-buttons .btn-choice:last-child',
+    )
   }
-  await page.waitForSelector('.event-card', { state: 'detached', timeout: 5000 })
+  await page.waitForSelector('.event-card', {
+    state: 'detached',
+    timeout: 5000,
+  })
   resolved++
   if (await page.isVisible('.loss-sheet')) break
 }
-check('cards draw and resolve (swipe + buttons)', resolved >= 3, `${resolved} resolved`)
+check(
+  'cards draw and resolve (swipe + buttons)',
+  resolved >= 3,
+  `${resolved} resolved`,
+)
 await page.screenshot({ path: `${SHOTS}05-after-cards.png` })
 
 let save1 = await readSave()
-check('turns recorded in save', (save1?.run?.turns ?? 0) >= resolved, `turns=${save1?.run?.turns}`)
+check(
+  'turns recorded in save',
+  (save1?.run?.turns ?? 0) >= resolved,
+  `turns=${save1?.run?.turns}`,
+)
 check(
   'energy spent by draws',
   (save1?.run?.energy ?? 99) <= 10 - resolved + 2,
@@ -160,13 +176,21 @@ const buildBtn = page.locator('.machine-row .btn-secondary').first()
 await buildBtn.click()
 await page.waitForTimeout(3500) // debounced autosave
 const save2 = await readSave()
-check('machine built and paid for', (save2?.run?.machines?.length ?? 0) >= 1, JSON.stringify(save2?.run?.machines))
+check(
+  'machine built and paid for',
+  (save2?.run?.machines?.length ?? 0) >= 1,
+  JSON.stringify(save2?.run?.machines),
+)
 const slider = page.locator('.setpoint-row input[type="range"]').first()
 check('setpoint slider appears once built', await slider.isVisible())
 await slider.fill('60')
 await page.waitForTimeout(3500) // debounced autosave
 const save3 = await readSave()
-check('setpoint persisted', save3?.run?.systems?.thermal?.setpoint === 60, `setpoint=${save3?.run?.systems?.thermal?.setpoint}`)
+check(
+  'setpoint persisted',
+  save3?.run?.systems?.thermal?.setpoint === 60,
+  `setpoint=${save3?.run?.systems?.thermal?.setpoint}`,
+)
 await page.screenshot({ path: `${SHOTS}07-build-after.png` })
 
 // ------------------------------------- 4. offline gap → safe growth + summary
@@ -180,19 +204,38 @@ await page.reload({ waitUntil: 'load' })
 await page.waitForSelector('.away-sheet', { timeout: 10_000 })
 await page.screenshot({ path: `${SHOTS}08-away.png` })
 const awayText = await page.textContent('.away-sheet')
-check('away summary shown after a 2h gap', awayText?.includes('While you were away') ?? false)
+check(
+  'away summary shown after a 2h gap',
+  awayText?.includes('While you were away') ?? false,
+)
 
 const after = await readSave()
-check('offline NEVER adds instability', after.run.instability === instabilityBefore, `${instabilityBefore} → ${after.run.instability}`)
-check('offline grants minerals', after.run.resources.minerals > mineralsBefore, `${mineralsBefore.toFixed(0)} → ${after.run.resources.minerals.toFixed(0)}`)
-check('offline never advances era progress', after.run.eraProgressSec === eraProgressBefore, `${eraProgressBefore} → ${after.run.eraProgressSec}`)
+check(
+  'offline NEVER adds instability',
+  after.run.instability === instabilityBefore,
+  `${instabilityBefore} → ${after.run.instability}`,
+)
+check(
+  'offline grants minerals',
+  after.run.resources.minerals > mineralsBefore,
+  `${mineralsBefore.toFixed(0)} → ${after.run.resources.minerals.toFixed(0)}`,
+)
+check(
+  'offline never advances era progress',
+  after.run.eraProgressSec === eraProgressBefore,
+  `${eraProgressBefore} → ${after.run.eraProgressSec}`,
+)
 const bandsOk = Object.entries(after.run.systems).every(([id, s]) => {
   const b = before.run.systems[id]
   const wasIn = b.value >= b.band[0] && b.value <= b.band[1]
   return wasIn ? s.value >= s.band[0] && s.value <= s.band[1] : true
 })
 check('offline drift stays inside safe bands', bandsOk)
-check('offline refills energy toward cap', after.run.energy >= before.run.energy, `${before.run.energy.toFixed(1)} → ${after.run.energy.toFixed(1)}`)
+check(
+  'offline refills energy toward cap',
+  after.run.energy >= before.run.energy,
+  `${before.run.energy.toFixed(1)} → ${after.run.energy.toFixed(1)}`,
+)
 await page.click('.away-sheet .btn-primary')
 
 // --------------------------------------------------- 5. collapse + chronicle
@@ -218,10 +261,23 @@ await page.waitForFunction(() => {
 await page.screenshot({ path: `${SHOTS}09-loss.png` })
 const chronicle = await page.textContent('.chronicle-text')
 const lossText = await page.textContent('.loss-sheet')
-check('cascade collapse reaches the loss screen', Boolean(lossText?.includes('A World, Concluded')))
-check('templated chronicle rendered (no network)', (chronicle?.length ?? 0) > 60, `${chronicle?.split(' ').length} words`)
-check('chronicle names the cascade', chronicle?.toLowerCase().includes('cascade') ?? false)
-check('chronicle stays ≤120 words', (chronicle?.split(/\s+/).length ?? 999) <= 120)
+check(
+  'cascade collapse reaches the loss screen',
+  Boolean(lossText?.includes('A World, Concluded')),
+)
+check(
+  'templated chronicle rendered (no network)',
+  (chronicle?.length ?? 0) > 60,
+  `${chronicle?.split(' ').length} words`,
+)
+check(
+  'chronicle names the cascade',
+  chronicle?.toLowerCase().includes('cascade') ?? false,
+)
+check(
+  'chronicle stays ≤120 words',
+  (chronicle?.split(/\s+/).length ?? 999) <= 120,
+)
 
 // persistence of the loss across reload
 await page.reload({ waitUntil: 'load' })
@@ -232,8 +288,17 @@ check('loss state survives reload', true)
 await page.click('.begin-btn')
 await page.waitForTimeout(400)
 const fresh = await readSave()
-check('Begin New World starts a fresh run', fresh.run.collapse === null && fresh.run.turns === 0 && fresh.run.instability === 0)
-check('meta stats persist across runs', fresh.meta.stats.runs >= 2 && fresh.meta.stats.longestRun > 0, JSON.stringify(fresh.meta.stats))
+check(
+  'Begin New World starts a fresh run',
+  fresh.run.collapse === null &&
+    fresh.run.turns === 0 &&
+    fresh.run.instability === 0,
+)
+check(
+  'meta stats persist across runs',
+  fresh.meta.stats.runs >= 2 && fresh.meta.stats.longestRun > 0,
+  JSON.stringify(fresh.meta.stats),
+)
 await page.screenshot({ path: `${SHOTS}10-newworld.png` })
 
 // --------------------------------------------------- 6. hard-fail collapse
@@ -264,16 +329,27 @@ for (let i = 0; i < 10 && !hardFailed; i++) {
 }
 if (hardFailed) {
   const text = await page.textContent('.loss-sheet')
-  check('hard-fail collapse path works in UI', true, text?.includes('edge') ? 'edge named' : '')
+  check(
+    'hard-fail collapse path works in UI',
+    true,
+    text?.includes('edge') ? 'edge named' : '',
+  )
   await page.screenshot({ path: `${SHOTS}11-hardfail.png` })
 } else {
-  check('hard-fail collapse path works in UI', false, 'no hard fail in 12 turns from 97 thermal (may be ok — cards drifted cool)')
+  check(
+    'hard-fail collapse path works in UI',
+    false,
+    'no hard fail in 12 turns from 97 thermal (may be ok — cards drifted cool)',
+  )
 }
 
 // --------------------------------------------------- 7. fully offline reload
 await context.setOffline(true)
 await page.reload({ waitUntil: 'load' }).catch(() => {})
-const offlineOk = await page.waitForSelector('.app-header', { timeout: 10_000 }).then(() => true).catch(() => false)
+const offlineOk = await page
+  .waitForSelector('.app-header', { timeout: 10_000 })
+  .then(() => true)
+  .catch(() => false)
 check('app loads with NO network (service worker)', offlineOk)
 await page.screenshot({ path: `${SHOTS}12-offline.png` })
 await context.setOffline(false)
@@ -289,11 +365,18 @@ if (await rmPage.isVisible('.loss-sheet')) {
   await rmPage.waitForSelector('.loss-sheet', { state: 'detached' })
 }
 await rmPage.click('.planet-tap')
-check('works under prefers-reduced-motion', await rmPage.isVisible('.planet-dial'))
+check(
+  'works under prefers-reduced-motion',
+  await rmPage.isVisible('.planet-dial'),
+)
 await rmPage.screenshot({ path: `${SHOTS}13-reduced-motion.png` })
 await rmPage.close()
 
-check('no console errors during the walk', consoleErrors.length === 0, consoleErrors.slice(0, 3).join(' | '))
+check(
+  'no console errors during the walk',
+  consoleErrors.length === 0,
+  consoleErrors.slice(0, 3).join(' | '),
+)
 
 console.log('\n==== SUMMARY ====')
 const failed = results.filter((r) => !r.ok)
