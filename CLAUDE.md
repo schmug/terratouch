@@ -34,6 +34,14 @@ Guidance for coding agents working in this repo. Read [SPEC.md](SPEC.md) in full
 - **Energy cadence:** one active burst ≈ **5 minutes** (~10–15 card draws + building). Tune Energy cap/regen in `balance.json` toward this target.
 - **Monetization: none, ever.** Free/portfolio project. Tune the prestige economy purely for fun — never add store-shaped friction.
 
+## Branch & merge policy (owner decision 2026-07-13)
+
+Every push to `main` auto-deploys to production (https://terratouch.pages.dev). There is no enforced branch ruleset (private repo, free plan), so this is a convention — follow it exactly:
+
+- **Never push to `main` directly** — not even for docs, tooling, or content-JSON tweaks. Always work on a branch and open a PR.
+- **Merge only when both CI checks are green:** `App (typecheck · test · build)` and `Worker (typecheck)`.
+- Dependabot opens grouped **monthly** version-update PRs ([.github/dependabot.yml](.github/dependabot.yml)) for npm (`app/`, `worker/`) and GitHub Actions. They go through the same gate: CI green before merge, and sanity-check `dist-tags` per the toolchain notes below.
+
 ## Non-negotiable rules
 
 These come straight from the spec. Violating them breaks determinism, testability, or the core design — do not.

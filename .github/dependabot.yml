@@ -1,0 +1,30 @@
+# Grouped, monthly version updates (owner decision, issue #15).
+# Security alerts/updates are separate and stay on GitHub's defaults.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /app
+    schedule:
+      interval: monthly
+    groups:
+      app-npm:
+        patterns:
+          - "*"
+
+  - package-ecosystem: npm
+    directory: /worker
+    schedule:
+      interval: monthly
+    groups:
+      worker-npm:
+        patterns:
+          - "*"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns:
+          - "*"
