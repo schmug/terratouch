@@ -1,0 +1,4 @@
+# Machine-generated — never hand-formatted
+package-lock.json
+
+# Prettier 3 already respects .gitignore (node_modules/, dist/, dev-dist/, …)

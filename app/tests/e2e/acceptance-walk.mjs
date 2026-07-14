@@ -99,7 +99,6 @@ const swReady = await page.evaluate(async () => {
 check('service worker active (installable/offline-capable)', swReady)
 
 // ------------------------------------------------- 2. play a burst
-const save0 = await readSave().catch(() => null)
 const energyBefore = await page.evaluate(() => document.querySelectorAll('.pip-fill').length)
 check('energy pips rendered', energyBefore > 0, `${energyBefore} pips`)
 

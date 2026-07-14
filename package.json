@@ -1,0 +1,19 @@
+{
+  "name": "terratouch-tooling",
+  "private": true,
+  "description": "Tooling-only root manifest: Prettier + ESLint for app/ and worker/. Plays no role in any build — Cloudflare Pages builds from app/ via its explicit build command (SPEC §4.6).",
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.7.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.7.0",
+    "prettier": "^3.9.5",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.64.0"
+  }
+}

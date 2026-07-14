@@ -12,7 +12,7 @@ export function seedRng(seed: number): number {
 
 /** One mulberry32 step. Returns the next state and a float in [0, 1). */
 export function nextFloat(state: number): RngResult {
-  let a = (state + 0x6d2b79f5) | 0
+  const a = (state + 0x6d2b79f5) | 0
   const nextState = a
   let t = Math.imul(a ^ (a >>> 15), 1 | a)
   t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t

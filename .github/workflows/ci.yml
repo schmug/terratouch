@@ -6,8 +6,25 @@ on:
   pull_request:
 
 jobs:
+  # Fast first gate: format + lint from the tooling-only root install
+  # (no app/worker deps needed — ESLint runs the non-type-checked presets).
+  lint:
+    name: Lint (prettier · eslint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
+
   app:
     name: App (typecheck · test · build)
+    needs: lint
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -26,6 +43,7 @@ jobs:
 
   worker:
     name: Worker (typecheck)
+    needs: lint
     runs-on: ubuntu-latest
     defaults:
       run:
