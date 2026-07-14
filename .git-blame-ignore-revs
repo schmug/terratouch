@@ -1,0 +1,5 @@
+# Commits to skip in git blame (GitHub honors this file automatically;
+# locally: git config blame.ignoreRevsFile .git-blame-ignore-revs)
+
+# One-time mechanical Prettier reformat of the whole repo (issue #14)
+d069135751bc714697f614b130fc40d2abc6cb36
