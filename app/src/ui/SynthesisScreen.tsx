@@ -10,8 +10,8 @@ export function SynthesisScreen() {
         </span>
         <h2 className="synth-title">The combining bench</h2>
         <p className="synth-text">
-          Someday you'll press two small things together and get a third, better thing. The bench
-          is still being carried up the hill.
+          Someday you'll press two small things together and get a third, better
+          thing. The bench is still being carried up the hill.
         </p>
       </div>
     </div>

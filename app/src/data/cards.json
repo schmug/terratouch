@@ -5,8 +5,14 @@
     "text": "Overnight, frost lace spreads across the basalt plains. It glitters like a promise.",
     "eras": [1, 2],
     "weight": 10,
-    "left": { "label": "Let it linger", "effects": { "systems": { "thermal": -6, "hydro": 7 } } },
-    "right": { "label": "Warm it away", "effects": { "systems": { "thermal": 6, "hydro": -3 } } }
+    "left": {
+      "label": "Let it linger",
+      "effects": { "systems": { "thermal": -6, "hydro": 7 } }
+    },
+    "right": {
+      "label": "Warm it away",
+      "effects": { "systems": { "thermal": 6, "hydro": -3 } }
+    }
   },
   {
     "id": "deep-vent",
@@ -14,8 +20,17 @@
     "text": "A fissure exhales warm, mineral breath from the deep crust. The ground hums, patient.",
     "eras": [1, 3],
     "weight": 10,
-    "left": { "label": "Cap it gently", "effects": { "systems": { "thermal": -2 }, "instability": -8 } },
-    "right": { "label": "Open it wide", "effects": { "systems": { "thermal": 9, "atmosphere": 5 }, "instability": 6 } }
+    "left": {
+      "label": "Cap it gently",
+      "effects": { "systems": { "thermal": -2 }, "instability": -8 }
+    },
+    "right": {
+      "label": "Open it wide",
+      "effects": {
+        "systems": { "thermal": 9, "atmosphere": 5 },
+        "instability": 6
+      }
+    }
   },
   {
     "id": "mineral-seam",
@@ -24,7 +39,14 @@
     "eras": [1, 4],
     "weight": 10,
     "left": { "label": "Mine it slowly", "effects": { "minerals": 30 } },
-    "right": { "label": "Blast it free", "effects": { "minerals": 70, "systems": { "thermal": 3 }, "instability": 7 } }
+    "right": {
+      "label": "Blast it free",
+      "effects": {
+        "minerals": 70,
+        "systems": { "thermal": 3 },
+        "instability": 7
+      }
+    }
   },
   {
     "id": "ice-comet",
@@ -32,8 +54,14 @@
     "text": "A small comet requests a landing, the way comets do — by falling.",
     "eras": [1, 3],
     "weight": 8,
-    "left": { "label": "Welcome it down", "effects": { "systems": { "hydro": 12, "thermal": -6, "atmosphere": 3 } } },
-    "right": { "label": "Shatter it in orbit", "effects": { "systems": { "hydro": 4 }, "minerals": 25 } }
+    "left": {
+      "label": "Welcome it down",
+      "effects": { "systems": { "hydro": 12, "thermal": -6, "atmosphere": 3 } }
+    },
+    "right": {
+      "label": "Shatter it in orbit",
+      "effects": { "systems": { "hydro": 4 }, "minerals": 25 }
+    }
   },
   {
     "id": "solar-flare",
@@ -41,8 +69,17 @@
     "text": "The star clears its throat. Charged wind combs the thin sky into ribbons.",
     "eras": [1, 4],
     "weight": 8,
-    "left": { "label": "Raise the dust shields", "effects": { "minerals": -20 } },
-    "right": { "label": "Let it wash over", "effects": { "systems": { "thermal": 8, "atmosphere": -7 }, "instability": 5 } }
+    "left": {
+      "label": "Raise the dust shields",
+      "effects": { "minerals": -20 }
+    },
+    "right": {
+      "label": "Let it wash over",
+      "effects": {
+        "systems": { "thermal": 8, "atmosphere": -7 },
+        "instability": 5
+      }
+    }
   },
   {
     "id": "aquifer-echo",
@@ -50,7 +87,10 @@
     "text": "Sounding pulses find water sleeping beneath the plains. It has waited a long time.",
     "eras": [1, 3],
     "weight": 9,
-    "left": { "label": "Drill down to it", "effects": { "systems": { "hydro": 10 }, "instability": 4 } },
+    "left": {
+      "label": "Drill down to it",
+      "effects": { "systems": { "hydro": 10 }, "instability": 4 }
+    },
     "right": { "label": "Let it sleep", "effects": { "minerals": 15 } }
   },
   {
@@ -59,8 +99,14 @@
     "text": "Fine dust rides the young wind, drawing a soft grey veil across the sun.",
     "eras": [1, 2],
     "weight": 9,
-    "left": { "label": "Wash it down", "effects": { "systems": { "hydro": -4, "atmosphere": 6 } } },
-    "right": { "label": "Let it drift", "effects": { "systems": { "thermal": -7, "atmosphere": 2 } } }
+    "left": {
+      "label": "Wash it down",
+      "effects": { "systems": { "hydro": -4, "atmosphere": 6 } }
+    },
+    "right": {
+      "label": "Let it drift",
+      "effects": { "systems": { "thermal": -7, "atmosphere": 2 } }
+    }
   },
   {
     "id": "lichen-spores",
@@ -68,8 +114,14 @@
     "text": "Inside a cracked meteorite: spores, hardy and hopeful, dreaming of stone to hold.",
     "eras": [1, 3],
     "weight": 10,
-    "left": { "label": "Plant them in the lee", "effects": { "systems": { "biosphere": 9, "hydro": -3 } } },
-    "right": { "label": "Archive them for later", "effects": { "minerals": 10, "systems": { "biosphere": 2 } } }
+    "left": {
+      "label": "Plant them in the lee",
+      "effects": { "systems": { "biosphere": 9, "hydro": -3 } }
+    },
+    "right": {
+      "label": "Archive them for later",
+      "effects": { "minerals": 10, "systems": { "biosphere": 2 } }
+    }
   },
   {
     "id": "magnetic-hiccup",
@@ -77,8 +129,18 @@
     "text": "The young magnetic field hiccups. Auroras spill over the horizon, curious and green.",
     "eras": [2, 4],
     "weight": 7,
-    "left": { "label": "Ground the arrays", "effects": { "minerals": -15, "instability": -6 } },
-    "right": { "label": "Enjoy the light show", "effects": { "systems": { "atmosphere": -5 }, "instability": 4, "energy": 1 } }
+    "left": {
+      "label": "Ground the arrays",
+      "effects": { "minerals": -15, "instability": -6 }
+    },
+    "right": {
+      "label": "Enjoy the light show",
+      "effects": {
+        "systems": { "atmosphere": -5 },
+        "instability": 4,
+        "energy": 1
+      }
+    }
   },
   {
     "id": "warm-mudpots",
@@ -86,8 +148,14 @@
     "text": "Mudpots blup and simmer in the lowlands, cozy as a kitchen at dusk.",
     "eras": [2, 4],
     "weight": 9,
-    "left": { "label": "Stir in the spores", "effects": { "systems": { "biosphere": 8, "thermal": 3 } } },
-    "right": { "label": "Bottle the minerals", "effects": { "minerals": 25, "systems": { "biosphere": -2 } } }
+    "left": {
+      "label": "Stir in the spores",
+      "effects": { "systems": { "biosphere": 8, "thermal": 3 } }
+    },
+    "right": {
+      "label": "Bottle the minerals",
+      "effects": { "minerals": 25, "systems": { "biosphere": -2 } }
+    }
   },
   {
     "id": "thin-air-song",
@@ -95,8 +163,14 @@
     "text": "The wind has just enough air to whistle now. It practices on the ridgelines.",
     "eras": [1, 2],
     "weight": 8,
-    "left": { "label": "Vent the deep gases", "effects": { "systems": { "atmosphere": 9 }, "instability": 4 } },
-    "right": { "label": "Keep the air gentle", "effects": { "systems": { "atmosphere": 3 } } }
+    "left": {
+      "label": "Vent the deep gases",
+      "effects": { "systems": { "atmosphere": 9 }, "instability": 4 }
+    },
+    "right": {
+      "label": "Keep the air gentle",
+      "effects": { "systems": { "atmosphere": 3 } }
+    }
   },
   {
     "id": "rogue-cloud",
@@ -104,8 +178,14 @@
     "text": "A single cloud — the planet's first — wanders the sky like a lost sheep.",
     "eras": [2, 4],
     "weight": 8,
-    "left": { "label": "Shepherd it to the basin", "effects": { "systems": { "hydro": 8, "atmosphere": -2 } } },
-    "right": { "label": "Let it roam", "effects": { "systems": { "atmosphere": 5, "hydro": 2 } } }
+    "left": {
+      "label": "Shepherd it to the basin",
+      "effects": { "systems": { "hydro": 8, "atmosphere": -2 } }
+    },
+    "right": {
+      "label": "Let it roam",
+      "effects": { "systems": { "atmosphere": 5, "hydro": 2 } }
+    }
   },
   {
     "id": "crust-settling",
@@ -113,8 +193,18 @@
     "text": "The crust settles with a long, low groan. Somewhere, new stone finds its posture.",
     "eras": [1, 3],
     "weight": 9,
-    "left": { "label": "Brace the machines", "effects": { "minerals": -10, "instability": -7 } },
-    "right": { "label": "Let the ground shrug", "effects": { "systems": { "thermal": 4 }, "instability": 5, "minerals": 10 } }
+    "left": {
+      "label": "Brace the machines",
+      "effects": { "minerals": -10, "instability": -7 }
+    },
+    "right": {
+      "label": "Let the ground shrug",
+      "effects": {
+        "systems": { "thermal": 4 },
+        "instability": 5,
+        "minerals": 10
+      }
+    }
   },
   {
     "id": "salt-flats",
@@ -122,8 +212,14 @@
     "text": "White salt flats stretch to the horizon, patient as blank paper.",
     "eras": [1, 3],
     "weight": 8,
-    "left": { "label": "Flood them shallow", "effects": { "systems": { "hydro": 9, "biosphere": 2 } } },
-    "right": { "label": "Harvest the brine", "effects": { "minerals": 25, "systems": { "hydro": -4 } } }
+    "left": {
+      "label": "Flood them shallow",
+      "effects": { "systems": { "hydro": 9, "biosphere": 2 } }
+    },
+    "right": {
+      "label": "Harvest the brine",
+      "effects": { "minerals": 25, "systems": { "hydro": -4 } }
+    }
   },
   {
     "id": "greenhouse-whisper",
@@ -131,8 +227,20 @@
     "text": "The air is learning to hold warmth overnight. The dark side is less afraid.",
     "eras": [2, 5],
     "weight": 8,
-    "left": { "label": "Thicken the blanket", "effects": { "systems": { "thermal": 7, "atmosphere": 4 }, "instability": 3 } },
-    "right": { "label": "Thin it back", "effects": { "systems": { "thermal": -5, "atmosphere": -2 }, "instability": -3 } }
+    "left": {
+      "label": "Thicken the blanket",
+      "effects": {
+        "systems": { "thermal": 7, "atmosphere": 4 },
+        "instability": 3
+      }
+    },
+    "right": {
+      "label": "Thin it back",
+      "effects": {
+        "systems": { "thermal": -5, "atmosphere": -2 },
+        "instability": -3
+      }
+    }
   },
   {
     "id": "polar-melt",
@@ -140,8 +248,14 @@
     "text": "Meltwater braids silver channels down the polar cap. The rivers are learning to run.",
     "eras": [2, 4],
     "weight": 8,
-    "left": { "label": "Guide them to the plains", "effects": { "systems": { "hydro": 9, "thermal": 2 } } },
-    "right": { "label": "Refreeze the cap", "effects": { "systems": { "thermal": -8, "hydro": -3 } } }
+    "left": {
+      "label": "Guide them to the plains",
+      "effects": { "systems": { "hydro": 9, "thermal": 2 } }
+    },
+    "right": {
+      "label": "Refreeze the cap",
+      "effects": { "systems": { "thermal": -8, "hydro": -3 } }
+    }
   },
   {
     "id": "microbe-bloom",
@@ -149,8 +263,17 @@
     "text": "In a warm shallows, a bloom of microbes paints the water rust and rose.",
     "eras": [3, 5],
     "weight": 9,
-    "left": { "label": "Let it bloom wild", "effects": { "systems": { "biosphere": 11, "atmosphere": 3 }, "instability": 4 } },
-    "right": { "label": "Culture it slowly", "effects": { "systems": { "biosphere": 5 } } }
+    "left": {
+      "label": "Let it bloom wild",
+      "effects": {
+        "systems": { "biosphere": 11, "atmosphere": 3 },
+        "instability": 4
+      }
+    },
+    "right": {
+      "label": "Culture it slowly",
+      "effects": { "systems": { "biosphere": 5 } }
+    }
   },
   {
     "id": "oxygen-garden",
@@ -158,8 +281,14 @@
     "text": "The first oxygen gardens exhale together at dawn. You can almost hear it.",
     "eras": [3, 6],
     "weight": 8,
-    "left": { "label": "Expand the gardens", "effects": { "systems": { "atmosphere": 8, "biosphere": 4, "hydro": -3 } } },
-    "right": { "label": "Prune them back", "effects": { "systems": { "atmosphere": 2 }, "minerals": 15 } }
+    "left": {
+      "label": "Expand the gardens",
+      "effects": { "systems": { "atmosphere": 8, "biosphere": 4, "hydro": -3 } }
+    },
+    "right": {
+      "label": "Prune them back",
+      "effects": { "systems": { "atmosphere": 2 }, "minerals": 15 }
+    }
   },
   {
     "id": "meteor-drizzle",
@@ -167,7 +296,10 @@
     "text": "A drizzle of pebble-sized meteors freckles the highlands. Souvenirs from an older sky.",
     "eras": [1, 4],
     "weight": 7,
-    "left": { "label": "Sweep for metals", "effects": { "minerals": 35, "instability": 3 } },
+    "left": {
+      "label": "Sweep for metals",
+      "effects": { "minerals": 35, "instability": 3 }
+    },
     "right": { "label": "Watch from shelter", "effects": { "energy": 1 } }
   },
   {
@@ -176,8 +308,18 @@
     "text": "A slow storm circles the night side, drumming its fingers on the new air.",
     "eras": [2, 5],
     "weight": 7,
-    "left": { "label": "Fly kites into it", "effects": { "energy": 2, "systems": { "atmosphere": 4 }, "instability": 5 } },
-    "right": { "label": "Wait it out", "effects": { "systems": { "hydro": 5, "thermal": -4 } } }
+    "left": {
+      "label": "Fly kites into it",
+      "effects": {
+        "energy": 2,
+        "systems": { "atmosphere": 4 },
+        "instability": 5
+      }
+    },
+    "right": {
+      "label": "Wait it out",
+      "effects": { "systems": { "hydro": 5, "thermal": -4 } }
+    }
   },
   {
     "id": "quiet-morning",
@@ -194,7 +336,17 @@
     "text": "Hollow caverns bloom with slow crystals, chiming faintly in the tremors.",
     "eras": [2, 5],
     "weight": 7,
-    "left": { "label": "Open them to the sky", "effects": { "systems": { "atmosphere": 5 }, "minerals": 20, "instability": 4 } },
-    "right": { "label": "Seal them as a seed vault", "effects": { "systems": { "biosphere": 6 } } }
+    "left": {
+      "label": "Open them to the sky",
+      "effects": {
+        "systems": { "atmosphere": 5 },
+        "minerals": 20,
+        "instability": 4
+      }
+    },
+    "right": {
+      "label": "Seal them as a seed vault",
+      "effects": { "systems": { "biosphere": 6 } }
+    }
   }
 ]

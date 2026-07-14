@@ -8,20 +8,20 @@ changes. The sim never imports this directory — `index.ts` exports a validated
 
 Current files (M1):
 
-| File | Contents |
-|---|---|
-| `balance.json` | All tunables: Energy cap/regen (~5 min/burst target), tap rates, Instability accrual/decay/threshold, setpoint clamps, offline cap |
-| `eras.json` | The 7-era ladder: per-era safe bands, advance threshold + stabilization window, volatility multiplier |
-| `archetypes.json` | Barren only (M1): starting values/setpoints, natural rest points + pull rates, starting minerals |
-| `machines.json` | 3 machines (thermal/atmosphere/hydro): costs, push rates, passive production |
-| `cards.json` | 22 event cards, era-gated, weighted; copy is cozy/hopeful per the tone decision |
-| `recipes.json` | (M3 — not yet created) two-slot synthesis recipes |
+| File              | Contents                                                                                                                           |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `balance.json`    | All tunables: Energy cap/regen (~5 min/burst target), tap rates, Instability accrual/decay/threshold, setpoint clamps, offline cap |
+| `eras.json`       | The 7-era ladder: per-era safe bands, advance threshold + stabilization window, volatility multiplier                              |
+| `archetypes.json` | Barren only (M1): starting values/setpoints, natural rest points + pull rates, starting minerals                                   |
+| `machines.json`   | 3 machines (thermal/atmosphere/hydro): costs, push rates, passive production                                                       |
+| `cards.json`      | 22 event cards, era-gated, weighted; copy is cozy/hopeful per the tone decision                                                    |
+| `recipes.json`    | (M3 — not yet created) two-slot synthesis recipes                                                                                  |
 
 Semantics worth knowing when tuning:
 
 - **Card `eras: [min, max]`** are 1-based positions on the era ladder.
 - **Card system deltas are multiplied by the era's `volatilityMult`**, and so
-  is Instability *accrual* (decay is flat) — later eras swing and punish harder.
+  is Instability _accrual_ (decay is flat) — later eras swing and punish harder.
 - **Bands must stay within [1, 99]**: 0/100 are lethal and only cards may
   reach them (drift is asymptotic; offline is band-clamped).
 - Archetype starting values must sit inside the Era-1 bands (validated).

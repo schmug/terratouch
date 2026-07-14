@@ -22,7 +22,11 @@ function llmEnabled(): boolean {
 
 /** Trim/limit whatever a model returns to plain, capped prose. */
 function sanitize(text: string): string {
-  const words = text.replace(/[#*_`>]/g, '').replace(/\s+/g, ' ').trim().split(' ')
+  const words = text
+    .replace(/[#*_`>]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(' ')
   return words.slice(0, MAX_WORDS).join(' ')
 }
 
@@ -40,7 +44,10 @@ export async function narrate(report: CollapseReport): Promise<Narration> {
       clearTimeout(timer)
       if (res.ok) {
         const data = (await res.json()) as { chronicle?: unknown }
-        if (typeof data.chronicle === 'string' && data.chronicle.trim().length > 0) {
+        if (
+          typeof data.chronicle === 'string' &&
+          data.chronicle.trim().length > 0
+        ) {
           return { chronicle: sanitize(data.chronicle), source: 'llm' }
         }
       }

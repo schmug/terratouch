@@ -23,7 +23,10 @@ export function PlanetScreen({ goToCards }: { goToCards: () => void }) {
   if (!run) return null
   const { balance } = content
   const era = content.eras[run.era]
-  const instabilityPct = Math.min(100, (run.instability / balance.instability.cascadeThreshold) * 100)
+  const instabilityPct = Math.min(
+    100,
+    (run.instability / balance.instability.cascadeThreshold) * 100,
+  )
   const pool = run.uncollected * balance.tap.bonusMult
   const drawable = canDraw(run, content)
   const midCard = run.activeCardId !== null
@@ -50,7 +53,12 @@ export function PlanetScreen({ goToCards }: { goToCards: () => void }) {
   return (
     <div className="screen planet-screen">
       <div className="dial-wrap">
-        <button type="button" className="planet-tap" onClick={onTap} aria-label="Tap the planet to collect minerals">
+        <button
+          type="button"
+          className="planet-tap"
+          onClick={onTap}
+          aria-label="Tap the planet to collect minerals"
+        >
           <PlanetDial run={run} />
         </button>
         {floats.map((f) => (
@@ -61,22 +69,31 @@ export function PlanetScreen({ goToCards }: { goToCards: () => void }) {
       </div>
 
       {pool >= 1 ? (
-        <p className="gather-hint">tap the world to gather {fmtInt(pool)} minerals</p>
+        <p className="gather-hint">
+          tap the world to gather {fmtInt(pool)} minerals
+        </p>
       ) : (
         <p className="gather-hint dim">the machines are gathering…</p>
       )}
 
-      {era?.advanceHabitability !== undefined && run.eraProgressSec > 0 && era.stabilizationSec !== undefined && (
-        <div className="stabilizing" role="status">
-          <div className="stabilizing-bar">
-            <div
-              className="stabilizing-fill"
-              style={{ width: `${Math.min(100, (run.eraProgressSec / era.stabilizationSec) * 100)}%` }}
-            />
+      {era?.advanceHabitability !== undefined &&
+        run.eraProgressSec > 0 &&
+        era.stabilizationSec !== undefined && (
+          <div className="stabilizing" role="status">
+            <div className="stabilizing-bar">
+              <div
+                className="stabilizing-fill"
+                style={{
+                  width: `${Math.min(100, (run.eraProgressSec / era.stabilizationSec) * 100)}%`,
+                }}
+              />
+            </div>
+            <span>
+              stabilizing toward{' '}
+              {content.eras[run.era + 1]?.name ?? 'the next era'}…
+            </span>
           </div>
-          <span>stabilizing toward {content.eras[run.era + 1]?.name ?? 'the next era'}…</span>
-        </div>
-      )}
+        )}
 
       <div className="system-legend">
         {SYSTEM_IDS.map((id) => {
@@ -85,13 +102,20 @@ export function PlanetScreen({ goToCards }: { goToCards: () => void }) {
           const dir = driftDirection(run, content, id)
           const out = s.value < s.band[0] || s.value > s.band[1]
           return (
-            <div key={id} className={`legend-chip${out ? ' out-of-band' : ''}`} title={`${meta.label}: ${Math.round(s.value)} — safe ${s.band[0]}–${s.band[1]}`}>
+            <div
+              key={id}
+              className={`legend-chip${out ? ' out-of-band' : ''}`}
+              title={`${meta.label}: ${Math.round(s.value)} — safe ${s.band[0]}–${s.band[1]}`}
+            >
               <span className="legend-glyph" style={{ color: meta.color }}>
                 {SHAPE_GLYPH[meta.shape]}
               </span>
               <span className="legend-label">{meta.short}</span>
               <span className="legend-value">{Math.round(s.value)}</span>
-              <span className="legend-drift" aria-label={dir > 0 ? 'rising' : dir < 0 ? 'falling' : 'steady'}>
+              <span
+                className="legend-drift"
+                aria-label={dir > 0 ? 'rising' : dir < 0 ? 'falling' : 'steady'}
+              >
                 {dir > 0 ? '↗' : dir < 0 ? '↘' : '·'}
               </span>
             </div>
@@ -102,7 +126,10 @@ export function PlanetScreen({ goToCards }: { goToCards: () => void }) {
       <div className="instability-block">
         <div className="row-between">
           <span className="inst-label">instability</span>
-          <span className="inst-value">{Math.round(run.instability)} / {balance.instability.cascadeThreshold}</span>
+          <span className="inst-value">
+            {Math.round(run.instability)} /{' '}
+            {balance.instability.cascadeThreshold}
+          </span>
         </div>
         <div
           className={`inst-bar${instabilityPct > 75 ? ' danger' : instabilityPct > 50 ? ' warn' : ''}`}
@@ -122,7 +149,11 @@ export function PlanetScreen({ goToCards }: { goToCards: () => void }) {
         onClick={onAdvance}
         disabled={!midCard && !drawable}
       >
-        {midCard ? 'Return to the card' : drawable ? 'Advance — draw a card' : 'The world rests'}
+        {midCard
+          ? 'Return to the card'
+          : drawable
+            ? 'Advance — draw a card'
+            : 'The world rests'}
       </button>
     </div>
   )

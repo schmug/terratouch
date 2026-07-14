@@ -4,7 +4,14 @@
 // deterministic: bot decisions draw from their own mulberry32 chain, and the
 // sim is pure, so a (seed, policy) pair always produces the same run.
 
-import { buildOrUpgrade, machineCost, machineOfType, newRun, setSetpoint, tapCollect } from '../../src/sim/actions'
+import {
+  buildOrUpgrade,
+  machineCost,
+  machineOfType,
+  newRun,
+  setSetpoint,
+  tapCollect,
+} from '../../src/sim/actions'
 import { canDraw, drawCard, resolveCard } from '../../src/sim/cards'
 import { applyOffline } from '../../src/sim/offline'
 import { nextFloat, seedRng } from '../../src/sim/rng'
@@ -59,7 +66,12 @@ function progressScore(run: RunState): number {
   return habitability(run.systems) - run.instability * 0.3
 }
 
-export function runOne(content: Content, seed: number, policy: PolicyName, opts?: Partial<HarnessOptions>): RunResult {
+export function runOne(
+  content: Content,
+  seed: number,
+  policy: PolicyName,
+  opts?: Partial<HarnessOptions>,
+): RunResult {
   const maxTurns = opts?.maxTurns ?? 300
   const secondsPerTurn = opts?.secondsPerTurn ?? 20
   const mistakeRate = opts?.mistakeRate ?? 0.15
@@ -109,7 +121,8 @@ export function runOne(content: Content, seed: number, policy: PolicyName, opts?
     // Out of energy? Step away and let the world refill safely (also
     // exercises the offline path under harness load).
     if (!run.collapse && run.energy < content.balance.energy.drawCost) {
-      const refillSec = content.balance.energy.cap / content.balance.energy.regenPerSec
+      const refillSec =
+        content.balance.energy.cap / content.balance.energy.regenPerSec
       run = applyOffline(run, content, refillSec * 1000).run
     }
 
@@ -144,7 +157,14 @@ export function runOne(content: Content, seed: number, policy: PolicyName, opts?
 export type HarnessReport = {
   policy: PolicyName
   runs: number
-  turns: { median: number; p10: number; p90: number; mean: number; stddev: number; distinct: number }
+  turns: {
+    median: number
+    p10: number
+    p90: number
+    mean: number
+    stddev: number
+    distinct: number
+  }
   outcomes: Record<'hard-fail' | 'cascade' | 'survived', number>
   causeSystems: Record<string, number>
   eraHistogram: Record<number, number>
@@ -159,9 +179,12 @@ export function runMany(content: Content, opts: HarnessOptions): HarnessReport {
   }
 
   const turns = results.map((r) => r.turns).sort((a, b) => a - b)
-  const q = (p: number) => turns[Math.min(turns.length - 1, Math.floor(p * turns.length))]!
+  const q = (p: number) =>
+    turns[Math.min(turns.length - 1, Math.floor(p * turns.length))]!
   const mean = turns.reduce((a, b) => a + b, 0) / turns.length
-  const stddev = Math.sqrt(turns.reduce((a, b) => a + (b - mean) ** 2, 0) / turns.length)
+  const stddev = Math.sqrt(
+    turns.reduce((a, b) => a + (b - mean) ** 2, 0) / turns.length,
+  )
 
   const outcomes = { 'hard-fail': 0, cascade: 0, survived: 0 }
   const causeSystems: Record<string, number> = {}
@@ -169,7 +192,8 @@ export function runMany(content: Content, opts: HarnessOptions): HarnessReport {
   let peakSum = 0
   for (const r of results) {
     outcomes[r.outcome]++
-    if (r.causeSystem) causeSystems[r.causeSystem] = (causeSystems[r.causeSystem] ?? 0) + 1
+    if (r.causeSystem)
+      causeSystems[r.causeSystem] = (causeSystems[r.causeSystem] ?? 0) + 1
     eraHistogram[r.era] = (eraHistogram[r.era] ?? 0) + 1
     peakSum += r.peakHabitability
   }

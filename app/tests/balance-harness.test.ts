@@ -19,7 +19,9 @@ describe(`balance harness (${RUNS} runs per policy)`, () => {
     expect(report.turns.distinct).toBeGreaterThanOrEqual(8)
     expect(report.turns.stddev).toBeGreaterThan(2)
     // Random play must actually be able to lose — permadeath is real.
-    expect(report.outcomes['hard-fail'] + report.outcomes.cascade).toBeGreaterThan(RUNS * 0.5)
+    expect(
+      report.outcomes['hard-fail'] + report.outcomes.cascade,
+    ).toBeGreaterThan(RUNS * 0.5)
   })
 
   it('greedy-safe policy: survives longer than random', () => {

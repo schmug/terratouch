@@ -31,7 +31,12 @@ export function LossModal({ report }: { report: CollapseReport }) {
   }, [report])
 
   return (
-    <div className="overlay" role="dialog" aria-modal="true" aria-label="The world has ended">
+    <div
+      className="overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-label="The world has ended"
+    >
       <div className="sheet loss-sheet">
         <p className="chronicle-kicker">the chronicle records</p>
         <h2 className="loss-title">A World, Concluded</h2>
@@ -57,7 +62,11 @@ export function LossModal({ report }: { report: CollapseReport }) {
           {SYSTEM_IDS.map((id) => {
             const meta = SYSTEM_META[id]
             return (
-              <span key={id} className="final-gauge" style={{ color: meta.color }}>
+              <span
+                key={id}
+                className="final-gauge"
+                style={{ color: meta.color }}
+              >
                 {SHAPE_GLYPH[meta.shape]} {Math.round(report.systemsFinal[id])}
               </span>
             )
@@ -68,10 +77,16 @@ export function LossModal({ report }: { report: CollapseReport }) {
         <p className="chronicle-text">{chronicle ?? '…'}</p>
         <hr className="chronicle-rule" />
 
-        <button type="button" className="btn-primary begin-btn" onClick={beginNewRun}>
+        <button
+          type="button"
+          className="btn-primary begin-btn"
+          onClick={beginNewRun}
+        >
           Begin New World
         </button>
-        <p className="loss-footnote">every ending is a place to plant something</p>
+        <p className="loss-footnote">
+          every ending is a place to plant something
+        </p>
       </div>
     </div>
   )

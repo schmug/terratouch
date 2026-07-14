@@ -25,8 +25,10 @@ export function validateContent(content: Content): void {
   const archetypeIds = new Set(content.archetypes.map((a) => a.id))
 
   const dupes = (ids: string[]) => ids.filter((id, i) => ids.indexOf(id) !== i)
-  for (const d of dupes(content.eras.map((e) => e.id))) problems.push(`duplicate era id "${d}"`)
-  for (const d of dupes(content.cards.map((c) => c.id))) problems.push(`duplicate card id "${d}"`)
+  for (const d of dupes(content.eras.map((e) => e.id)))
+    problems.push(`duplicate era id "${d}"`)
+  for (const d of dupes(content.cards.map((c) => c.id)))
+    problems.push(`duplicate card id "${d}"`)
   for (const d of dupes(content.machines.map((m) => m.id)))
     problems.push(`duplicate machine id "${d}"`)
   for (const d of dupes(content.archetypes.map((a) => a.id)))
@@ -34,7 +36,9 @@ export function validateContent(content: Content): void {
 
   for (const card of content.cards) {
     if (card.eras[1] > eraCount) {
-      problems.push(`card "${card.id}" gates up to era ${card.eras[1]} but only ${eraCount} exist`)
+      problems.push(
+        `card "${card.id}" gates up to era ${card.eras[1]} but only ${eraCount} exist`,
+      )
     }
     for (const ref of card.archetypes ?? []) {
       if (!archetypeIds.has(ref)) {

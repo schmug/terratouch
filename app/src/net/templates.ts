@@ -47,14 +47,19 @@ export function templatedChronicle(report: CollapseReport): string {
   if (cause.kind === 'hard-fail') {
     lines.push(HARD_FAIL_LINES[cause.system][cause.direction])
   } else {
-    const strayed = cause.direction === 'low' ? 'fell behind and kept falling' : 'ran ahead and kept running'
+    const strayed =
+      cause.direction === 'low'
+        ? 'fell behind and kept falling'
+        : 'ran ahead and kept running'
     lines.push(
       `It did not happen all at once. ${capitalize(CASCADE_SYSTEM_PHRASE[cause.system])} ${strayed}, and every small neglect joined hands until the cascade came, like a debt called in.`,
     )
   }
 
   const turnsPhrase =
-    report.turnsSurvived === 1 ? 'a single turn' : `${report.turnsSurvived} turns`
+    report.turnsSurvived === 1
+      ? 'a single turn'
+      : `${report.turnsSurvived} turns`
   lines.push(
     `This was a ${report.archetype} world. You carried it as far as the ${report.eraReached} era, through ${turnsPhrase}.`,
   )

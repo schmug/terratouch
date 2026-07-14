@@ -33,7 +33,8 @@ export function machinePushRate(
   let rate = 0
   for (const m of machines) {
     const def = content.machines.find((d) => d.id === m.typeId)
-    if (def && def.system === system) rate += def.pushRatePerSecPerLevel * m.level
+    if (def && def.system === system)
+      rate += def.pushRatePerSecPerLevel * m.level
   }
   return rate
 }
@@ -66,18 +67,29 @@ export function driftTarget(
   const rate = nat.naturalRatePerSec + push
   if (rate <= 0) return { target: run.systems[system].value, rate: 0 }
   const target =
-    (nat.naturalRest * nat.naturalRatePerSec + run.systems[system].setpoint * push) / rate
+    (nat.naturalRest * nat.naturalRatePerSec +
+      run.systems[system].setpoint * push) /
+    rate
   return { target, rate }
 }
 
 /** Closed-form exponential relaxation of `value` toward `target` over dt. */
-export function relax(value: number, target: number, rate: number, dtSec: number): number {
+export function relax(
+  value: number,
+  target: number,
+  rate: number,
+  dtSec: number,
+): number {
   if (rate <= 0 || dtSec <= 0) return value
   return target + (value - target) * Math.exp(-rate * dtSec)
 }
 
 /** Sign of a gauge's current drift, for UI arrows: -1, 0, or 1. */
-export function driftDirection(run: RunState, content: Content, system: SystemId): -1 | 0 | 1 {
+export function driftDirection(
+  run: RunState,
+  content: Content,
+  system: SystemId,
+): -1 | 0 | 1 {
   const { target, rate } = driftTarget(run, content, system)
   if (rate <= 0) return 0
   const gap = target - run.systems[system].value
@@ -87,7 +99,10 @@ export function driftDirection(run: RunState, content: Content, system: SystemId
 
 /** Total minerals per second flowing into the tap pool. */
 export function productionRate(run: RunState, content: Content): number {
-  return content.balance.tap.baseRatePerSec + machineProductionRate(run.machines, content)
+  return (
+    content.balance.tap.baseRatePerSec +
+    machineProductionRate(run.machines, content)
+  )
 }
 
 /**
@@ -112,7 +127,10 @@ export function tick(run: RunState, content: Content, dtSec: number): RunState {
   const uncollected = Math.min(poolCap, run.uncollected + rate * dtSec)
 
   // Energy regenerates in real time (SPEC §2.5).
-  const energy = Math.min(balance.energy.cap, run.energy + balance.energy.regenPerSec * dtSec)
+  const energy = Math.min(
+    balance.energy.cap,
+    run.energy + balance.energy.regenPerSec * dtSec,
+  )
 
   // Era stabilization: hold Habitability at/above the threshold for the
   // window and the world advances (SPEC §2.3). Never accrues offline —
@@ -123,20 +141,32 @@ export function tick(run: RunState, content: Content, dtSec: number): RunState {
   if (!eraDef) throw new Error(`unknown era ${era}`)
   const hab = habitability(systems)
   let shiftedSystems = systems
-  if (eraDef.advanceHabitability !== undefined && eraDef.stabilizationSec !== undefined) {
+  if (
+    eraDef.advanceHabitability !== undefined &&
+    eraDef.stabilizationSec !== undefined
+  ) {
     if (hab >= eraDef.advanceHabitability) {
       eraProgressSec += dtSec
-      if (eraProgressSec >= eraDef.stabilizationSec && era + 1 < content.eras.length) {
+      if (
+        eraProgressSec >= eraDef.stabilizationSec &&
+        era + 1 < content.eras.length
+      ) {
         era += 1
         eraProgressSec = 0
         shiftedSystems = shiftBandsToEra(systems, content, era)
       }
     } else {
-      eraProgressSec = Math.max(0, eraProgressSec - dtSec * balance.era.progressDecayMult)
+      eraProgressSec = Math.max(
+        0,
+        eraProgressSec - dtSec * balance.era.progressDecayMult,
+      )
     }
   }
 
-  const peak = Math.max(run.history.peakHabitability, habitability(shiftedSystems))
+  const peak = Math.max(
+    run.history.peakHabitability,
+    habitability(shiftedSystems),
+  )
   return {
     ...run,
     systems: shiftedSystems,

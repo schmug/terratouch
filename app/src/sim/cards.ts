@@ -54,7 +54,10 @@ export function canDraw(run: RunState, content: Content): boolean {
  * the run's seeded RNG (recently drawn ids are excluded when the pool is big
  * enough to allow it), and set it as the active card.
  */
-export function drawCard(run: RunState, content: Content): { run: RunState; card: CardDef } {
+export function drawCard(
+  run: RunState,
+  content: Content,
+): { run: RunState; card: CardDef } {
   if (run.collapse) throw new SimError('run-over')
   if (run.activeCardId !== null) throw new SimError('card-active')
   const cost = content.balance.energy.drawCost
@@ -104,7 +107,12 @@ export function resolveCard(
   const volatility = eraDef.volatilityMult
 
   // Apply system deltas, clamped to the physical 0–100 range.
-  const applied: AppliedEffects = { systems: {}, instability: 0, minerals: 0, energy: 0 }
+  const applied: AppliedEffects = {
+    systems: {},
+    instability: 0,
+    minerals: 0,
+    energy: 0,
+  }
   const systems = {} as Record<SystemId, SystemState>
   for (const id of SYSTEM_IDS) {
     const s = run.systems[id]
@@ -131,10 +139,18 @@ export function resolveCard(
   )
   applied.energy = Math.round((energy - run.energy) * 100) / 100
 
-  let instability = Math.max(0, run.instability + (choice.effects.instability ?? 0))
+  let instability = Math.max(
+    0,
+    run.instability + (choice.effects.instability ?? 0),
+  )
 
   // The turn's Instability step (accrual/decay) happens after the deltas land.
-  instability = instabilityStep(instability, systems, content.balance, volatility)
+  instability = instabilityStep(
+    instability,
+    systems,
+    content.balance,
+    volatility,
+  )
   applied.instability = Math.round((instability - run.instability) * 10) / 10
 
   // History: out-of-band turns per system, peak Habitability.
@@ -167,7 +183,10 @@ export function resolveCard(
   if (hardFail) {
     next = { ...next, collapse: buildCollapseReport(next, content, hardFail) }
   } else if (isCascade(instability, content.balance)) {
-    next = { ...next, collapse: buildCollapseReport(next, content, cascadeCause(next)) }
+    next = {
+      ...next,
+      collapse: buildCollapseReport(next, content, cascadeCause(next)),
+    }
   }
 
   return { run: next, applied }

@@ -41,12 +41,25 @@ function scrambledRun(seed: number): RunState {
     }
     run = { ...run, systems: { ...systems } }
   }
-  if (rand() < 0.5) run = buildOrUpgrade({ ...run, resources: { minerals: 50 } }, content, 'test-heater')
-  if (run.machines.length > 0) run = setSetpoint(run, content, 'thermal', 2 + rand() * 96)
+  if (rand() < 0.5)
+    run = buildOrUpgrade(
+      { ...run, resources: { minerals: 50 } },
+      content,
+      'test-heater',
+    )
+  if (run.machines.length > 0)
+    run = setSetpoint(run, content, 'thermal', 2 + rand() * 96)
   return run
 }
 
-const GAPS_MS = [1_000, 60_000, 600_000, 3_600_000, 8 * 3_600_000, 48 * 3_600_000]
+const GAPS_MS = [
+  1_000,
+  60_000,
+  600_000,
+  3_600_000,
+  8 * 3_600_000,
+  48 * 3_600_000,
+]
 
 describe('offline safety invariants (property-style)', () => {
   it('never crosses a band edge; out-of-band gauges never get worse', () => {
@@ -108,7 +121,10 @@ describe('offline safety invariants (property-style)', () => {
     const { run: after, summary } = applyOffline(run, content, 600_000)
     // baseRate 1/s × 600s × mult 1
     expect(summary.mineralsGained).toBeCloseTo(600, 0)
-    expect(after.resources.minerals).toBeCloseTo(run.resources.minerals + 600, 0)
+    expect(after.resources.minerals).toBeCloseTo(
+      run.resources.minerals + 600,
+      0,
+    )
   })
 
   it('clamps elapsed time to the offline cap and reports it', () => {
@@ -132,7 +148,11 @@ describe('offline safety invariants (property-style)', () => {
         archetype: 'x',
         eraReached: 'x',
         turnsSurvived: 1,
-        cause: { kind: 'cascade' as const, system: 'hydro' as const, direction: 'high' as const },
+        cause: {
+          kind: 'cascade' as const,
+          system: 'hydro' as const,
+          direction: 'high' as const,
+        },
         systemsFinal: { thermal: 50, atmosphere: 50, hydro: 50, biosphere: 50 },
         peakHabitability: 10,
         notableStats: [],

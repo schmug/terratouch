@@ -30,7 +30,10 @@ export function nextInt(state: number, n: number): RngResult {
  * Weighted pick: returns the chosen index. Weights must be non-negative and
  * sum to > 0.
  */
-export function pickWeighted(state: number, weights: readonly number[]): RngResult {
+export function pickWeighted(
+  state: number,
+  weights: readonly number[],
+): RngResult {
   let total = 0
   for (const w of weights) total += w
   const r = nextFloat(state)

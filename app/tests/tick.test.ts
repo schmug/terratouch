@@ -1,7 +1,12 @@
 // tick.test.ts — drift-to-setpoint, production, Energy regen, Era
 // stabilization (SPEC §4.3, §2.3). Ticking must never be able to kill.
 import { describe, expect, it } from 'vitest'
-import { buildOrUpgrade, newRun, setSetpoint, tapCollect } from '../src/sim/actions'
+import {
+  buildOrUpgrade,
+  newRun,
+  setSetpoint,
+  tapCollect,
+} from '../src/sim/actions'
 import { habitability } from '../src/sim/systems'
 import { driftDirection, driftTarget, relax, tick } from '../src/sim/tick'
 import { SYSTEM_IDS } from '../src/sim/types'
@@ -71,7 +76,9 @@ describe('production and energy', () => {
     run = tick(run, content, 10)
     const { run: collected, collected: amount } = tapCollect(run, content)
     expect(amount).toBeCloseTo(15) // 10 × 1.5 bonus
-    expect(collected.resources.minerals).toBeCloseTo(run.resources.minerals + 15)
+    expect(collected.resources.minerals).toBeCloseTo(
+      run.resources.minerals + 15,
+    )
     expect(collected.uncollected).toBe(0)
   })
 
@@ -140,7 +147,11 @@ describe('tick guards', () => {
         archetype: 'x',
         eraReached: 'x',
         turnsSurvived: 0,
-        cause: { kind: 'hard-fail' as const, system: 'thermal' as const, direction: 'low' as const },
+        cause: {
+          kind: 'hard-fail' as const,
+          system: 'thermal' as const,
+          direction: 'low' as const,
+        },
         systemsFinal: { thermal: 0, atmosphere: 0, hydro: 0, biosphere: 0 },
         peakHabitability: 0,
         notableStats: [],
@@ -171,19 +182,25 @@ describe('actions', () => {
     run = buildOrUpgrade(run, content, 'test-heater') // 40
     expect(run.resources.minerals).toBe(30)
     expect(run.machines[0]!.level).toBe(3)
-    expect(() => buildOrUpgrade(run, content, 'test-heater')).toThrow('max-level')
+    expect(() => buildOrUpgrade(run, content, 'test-heater')).toThrow(
+      'max-level',
+    )
   })
 
   it('refuses to build without minerals', () => {
     const content = makeTestContent()
     const run = { ...makeRun(content), resources: { minerals: 5 } }
-    expect(() => buildOrUpgrade(run, content, 'test-heater')).toThrow('no-minerals')
+    expect(() => buildOrUpgrade(run, content, 'test-heater')).toThrow(
+      'no-minerals',
+    )
   })
 
   it('setpoints require a machine on the system and clamp to the safe range', () => {
     const content = makeTestContent()
     let run = makeRun(content)
-    expect(() => setSetpoint(run, content, 'thermal', 50)).toThrow('no-machine-for-system')
+    expect(() => setSetpoint(run, content, 'thermal', 50)).toThrow(
+      'no-machine-for-system',
+    )
     run = buildOrUpgrade(run, content, 'test-heater')
     run = setSetpoint(run, content, 'thermal', 150)
     expect(run.systems.thermal.setpoint).toBe(98)

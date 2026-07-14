@@ -38,17 +38,56 @@ function valueAngle(system: SystemId, value: number): number {
   return c - SPAN / 2 + (value / 100) * SPAN
 }
 
-function Marker({ shape, x, y, color }: { shape: MarkerShape; x: number; y: number; color: string }) {
+function Marker({
+  shape,
+  x,
+  y,
+  color,
+}: {
+  shape: MarkerShape
+  x: number
+  y: number
+  color: string
+}) {
   const stroke = '#0a0e1a'
   switch (shape) {
     case 'circle':
-      return <circle cx={x} cy={y} r={7} fill={color} stroke={stroke} strokeWidth={2} />
+      return (
+        <circle
+          cx={x}
+          cy={y}
+          r={7}
+          fill={color}
+          stroke={stroke}
+          strokeWidth={2}
+        />
+      )
     case 'diamond':
       return (
-        <rect x={x - 5.5} y={y - 5.5} width={11} height={11} fill={color} stroke={stroke} strokeWidth={2} transform={`rotate(45 ${x} ${y})`} />
+        <rect
+          x={x - 5.5}
+          y={y - 5.5}
+          width={11}
+          height={11}
+          fill={color}
+          stroke={stroke}
+          strokeWidth={2}
+          transform={`rotate(45 ${x} ${y})`}
+        />
       )
     case 'square':
-      return <rect x={x - 5.5} y={y - 5.5} width={11} height={11} rx={1.5} fill={color} stroke={stroke} strokeWidth={2} />
+      return (
+        <rect
+          x={x - 5.5}
+          y={y - 5.5}
+          width={11}
+          height={11}
+          rx={1.5}
+          fill={color}
+          stroke={stroke}
+          strokeWidth={2}
+        />
+      )
     case 'triangle':
       return (
         <polygon
@@ -83,7 +122,12 @@ export function PlanetDial({ run }: { run: RunState }) {
   const hab = habitability(run.systems)
 
   return (
-    <svg viewBox="0 0 320 320" className="planet-dial" role="img" aria-label={`${era?.name ?? ''} era planet, habitability ${hab}`}>
+    <svg
+      viewBox="0 0 320 320"
+      className="planet-dial"
+      role="img"
+      aria-label={`${era?.name ?? ''} era planet, habitability ${hab}`}
+    >
       <defs>
         <radialGradient id="planet-surface" cx="38%" cy="32%" r="75%">
           <stop offset="0%" stopColor="#5a6f6e" />
@@ -107,9 +151,19 @@ export function PlanetDial({ run }: { run: RunState }) {
         const [mx, my] = polar(R, theta)
         return (
           <g key={id}>
-            <path d={arcPath(R, a0, a1)} stroke="#232c44" strokeWidth={4} fill="none" strokeLinecap="round" />
             <path
-              d={arcPath(R, valueAngle(id, s.band[0]), valueAngle(id, s.band[1]))}
+              d={arcPath(R, a0, a1)}
+              stroke="#232c44"
+              strokeWidth={4}
+              fill="none"
+              strokeLinecap="round"
+            />
+            <path
+              d={arcPath(
+                R,
+                valueAngle(id, s.band[0]),
+                valueAngle(id, s.band[1]),
+              )}
               stroke={meta.color}
               strokeOpacity={0.32}
               strokeWidth={11}
@@ -124,9 +178,29 @@ export function PlanetDial({ run }: { run: RunState }) {
 
       {/* the world itself */}
       <circle cx={CX} cy={CY} r={92} fill="url(#planet-glow)" />
-      <circle cx={CX} cy={CY} r={76} fill="url(#planet-surface)" className="planet-body" />
-      <ellipse cx={CX - 22} cy={CY - 26} rx={26} ry={14} fill="rgba(220,235,230,0.07)" transform={`rotate(-18 ${CX - 22} ${CY - 26})`} />
-      <ellipse cx={CX + 18} cy={CY + 24} rx={20} ry={10} fill="rgba(0,0,0,0.18)" transform={`rotate(-12 ${CX + 18} ${CY + 24})`} />
+      <circle
+        cx={CX}
+        cy={CY}
+        r={76}
+        fill="url(#planet-surface)"
+        className="planet-body"
+      />
+      <ellipse
+        cx={CX - 22}
+        cy={CY - 26}
+        rx={26}
+        ry={14}
+        fill="rgba(220,235,230,0.07)"
+        transform={`rotate(-18 ${CX - 22} ${CY - 26})`}
+      />
+      <ellipse
+        cx={CX + 18}
+        cy={CY + 24}
+        rx={20}
+        ry={10}
+        fill="rgba(0,0,0,0.18)"
+        transform={`rotate(-12 ${CX + 18} ${CY + 24})`}
+      />
 
       <text x={CX} y={CY - 8} textAnchor="middle" className="dial-era">
         {era?.name ?? '—'}

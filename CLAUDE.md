@@ -104,6 +104,7 @@ npm --prefix worker run deploy     # wrangler deploy (needs CF auth)
 ```
 
 Toolchain notes (verified against the npm registry 2026-07-13):
+
 - Key versions: Vite 8 (rolldown-based), vitest 4 (peer-deps our vite — one vite in the tree), React 19.2, TypeScript 7 (native compiler), zod 4, zustand 5, wrangler 4.
 - `vitest.config.ts` is **standalone**, not merged into `vite.config.ts` — sim tests are pure node and need no plugins. Keep it that way.
 - Node: `.nvmrc` says 24 (LTS); CI runs 24. Engines floor across deps is effectively >=22.12.

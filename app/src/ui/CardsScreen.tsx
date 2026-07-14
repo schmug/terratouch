@@ -13,7 +13,8 @@ import { SHAPE_GLYPH, SYSTEM_META } from './meta'
 
 const SWIPE_THRESHOLD = 72
 const reducedMotion =
-  typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  typeof window !== 'undefined' &&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 function ChoiceChips({ choice }: { choice: CardChoice }) {
   const systems = Object.entries(choice.effects.systems ?? {})
@@ -29,12 +30,16 @@ function ChoiceChips({ choice }: { choice: CardChoice }) {
         )
       })}
       {choice.effects.instability !== undefined && (
-        <span className={`effect-chip ${choice.effects.instability > 0 ? 'chip-danger' : 'chip-calm'}`}>
+        <span
+          className={`effect-chip ${choice.effects.instability > 0 ? 'chip-danger' : 'chip-calm'}`}
+        >
           ⌁{choice.effects.instability > 0 ? '▲' : '▼'}
         </span>
       )}
       {choice.effects.minerals !== undefined && (
-        <span className="effect-chip chip-mineral">◇{choice.effects.minerals > 0 ? '▲' : '▼'}</span>
+        <span className="effect-chip chip-mineral">
+          ◇{choice.effects.minerals > 0 ? '▲' : '▼'}
+        </span>
       )}
       {choice.effects.energy !== undefined && choice.effects.energy > 0 && (
         <span className="effect-chip chip-energy">⚡▲</span>
@@ -77,7 +82,9 @@ export function CardsScreen() {
     const drawable = canDraw(run, content)
     const secToNext =
       run.energy < balance.energy.drawCost
-        ? ((balance.energy.drawCost - run.energy) / balance.energy.regenPerSec) * 1000
+        ? ((balance.energy.drawCost - run.energy) /
+            balance.energy.regenPerSec) *
+          1000
         : 0
     return (
       <div className="screen cards-screen">
@@ -87,17 +94,25 @@ export function CardsScreen() {
               {lastOutcome.cardTitle} — <em>{lastOutcome.choiceLabel}</em>
             </p>
             <p className="outcome-chips">
-              {Object.entries(lastOutcome.applied.systems).map(([id, delta]) => {
-                const meta = SYSTEM_META[id as keyof typeof SYSTEM_META]
-                return (
-                  <span key={id} style={{ color: meta.color }}>
-                    {SHAPE_GLYPH[meta.shape]} {delta > 0 ? '+' : ''}
-                    {delta}{' '}
-                  </span>
-                )
-              })}
+              {Object.entries(lastOutcome.applied.systems).map(
+                ([id, delta]) => {
+                  const meta = SYSTEM_META[id as keyof typeof SYSTEM_META]
+                  return (
+                    <span key={id} style={{ color: meta.color }}>
+                      {SHAPE_GLYPH[meta.shape]} {delta > 0 ? '+' : ''}
+                      {delta}{' '}
+                    </span>
+                  )
+                },
+              )}
               {lastOutcome.applied.instability !== 0 && (
-                <span className={lastOutcome.applied.instability > 0 ? 'text-danger' : 'text-calm'}>
+                <span
+                  className={
+                    lastOutcome.applied.instability > 0
+                      ? 'text-danger'
+                      : 'text-calm'
+                  }
+                >
                   ⌁ {lastOutcome.applied.instability > 0 ? '+' : ''}
                   {lastOutcome.applied.instability}{' '}
                 </span>
@@ -113,7 +128,9 @@ export function CardsScreen() {
         )}
         {drawable ? (
           <>
-            <p className="cards-empty-line">The world has something to show you.</p>
+            <p className="cards-empty-line">
+              The world has something to show you.
+            </p>
             <button type="button" className="btn-primary" onClick={draw}>
               Draw a card — 1 ⚡
             </button>
@@ -122,7 +139,8 @@ export function CardsScreen() {
           <>
             <p className="cards-empty-line">The world rests. Let it.</p>
             <p className="cards-empty-sub">
-              energy returns in about {prettyDuration(secToNext)} — machines keep working while you wait
+              energy returns in about {prettyDuration(secToNext)} — machines
+              keep working while you wait
             </p>
           </>
         )}
@@ -140,7 +158,9 @@ export function CardsScreen() {
       <div className="card-arena">
         <div
           className={`event-card${dragging ? ' dragging' : ''}${leaving ? ' leaving' : ''}`}
-          style={{ transform: `translateX(${shownDrag}px) rotate(${rotation}deg)` }}
+          style={{
+            transform: `translateX(${shownDrag}px) rotate(${rotation}deg)`,
+          }}
           onPointerDown={(e) => {
             if (leaving) return
             e.currentTarget.setPointerCapture(e.pointerId)
@@ -166,11 +186,19 @@ export function CardsScreen() {
           }}
         >
           {/* drag-revealed telegraph, Reigns-style: which way you're leaning */}
-          <div className="card-reveal reveal-left" style={{ opacity: leftHint }} aria-hidden>
+          <div
+            className="card-reveal reveal-left"
+            style={{ opacity: leftHint }}
+            aria-hidden
+          >
             <span className="edge-label">{card.left.label}</span>
             <ChoiceChips choice={card.left} />
           </div>
-          <div className="card-reveal reveal-right" style={{ opacity: rightHint }} aria-hidden>
+          <div
+            className="card-reveal reveal-right"
+            style={{ opacity: rightHint }}
+            aria-hidden
+          >
             <span className="edge-label">{card.right.label}</span>
             <ChoiceChips choice={card.right} />
           </div>
@@ -185,11 +213,19 @@ export function CardsScreen() {
       </div>
 
       <div className="choice-buttons">
-        <button type="button" className="btn-choice" onClick={() => commit('left')}>
+        <button
+          type="button"
+          className="btn-choice"
+          onClick={() => commit('left')}
+        >
           <span className="btn-choice-label">◀ {card.left.label}</span>
           <ChoiceChips choice={card.left} />
         </button>
-        <button type="button" className="btn-choice" onClick={() => commit('right')}>
+        <button
+          type="button"
+          className="btn-choice"
+          onClick={() => commit('right')}
+        >
           <span className="btn-choice-label">{card.right.label} ▶</span>
           <ChoiceChips choice={card.right} />
         </button>

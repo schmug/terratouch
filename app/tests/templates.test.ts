@@ -12,7 +12,10 @@ function report(overrides: Partial<CollapseReport> = {}): CollapseReport {
     cause: { kind: 'hard-fail', system: 'thermal', direction: 'low' },
     systemsFinal: { thermal: 0, atmosphere: 30, hydro: 20, biosphere: 5 },
     peakHabitability: 48,
-    notableStats: ['the waters spent 4 turns outside the safe band', 'habitability peaked at 48'],
+    notableStats: [
+      'the waters spent 4 turns outside the safe band',
+      'habitability peaked at 48',
+    ],
     seedsAwarded: 0,
     ...overrides,
   }
@@ -24,7 +27,9 @@ describe('templated chronicle', () => {
     for (const kind of ['hard-fail', 'cascade'] as const) {
       for (const system of SYSTEM_IDS) {
         for (const direction of ['low', 'high'] as const) {
-          const text = templatedChronicle(report({ cause: { kind, system, direction } }))
+          const text = templatedChronicle(
+            report({ cause: { kind, system, direction } }),
+          )
           expect(text.length).toBeGreaterThan(40)
           texts.add(text)
         }
@@ -47,7 +52,9 @@ describe('templated chronicle', () => {
   })
 
   it('handles an empty stats list and a single turn', () => {
-    const text = templatedChronicle(report({ notableStats: [], turnsSurvived: 1 }))
+    const text = templatedChronicle(
+      report({ notableStats: [], turnsSurvived: 1 }),
+    )
     expect(text).toContain('a single turn')
     expect(text).not.toContain('Remember it honestly')
   })
