@@ -1,5 +1,7 @@
 # TerraTouch
 
+[![CI](https://github.com/schmug/terratouch/actions/workflows/ci.yml/badge.svg)](https://github.com/schmug/terratouch/actions/workflows/ci.yml)
+
 A mobile-first, touch-first terraforming clicker/roguelike PWA. You raise a
 dead world toward habitability one swipe at a time — and when it collapses,
 an AI chronicler writes the obituary of your planet.
