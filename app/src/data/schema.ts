@@ -57,6 +57,53 @@ export const balanceSchema = z.strictObject({
   cards: z.strictObject({ recentExclusion: z.number().int().nonnegative() }),
 }) satisfies z.ZodType<Balance>
 
+/** '#rrggbb' only — keeps the palette trivially safe to inline into SVG. */
+const hexColor = z
+  .string()
+  .regex(/^#[0-9a-f]{6}$/i, 'expected a #rrggbb hex color')
+
+const eraLayerSchema = z.strictObject({
+  kind: z.enum([
+    'frost',
+    'seas',
+    'microbial',
+    'flora',
+    'clouds',
+    'aurora',
+    'motes',
+  ]),
+  opacity: z.number().min(0).max(1),
+  color: hexColor.optional(),
+  count: z.number().int().positive().max(12).optional(),
+})
+
+const eraVisualsSchema = z
+  .strictObject({
+    surface: z.tuple([hexColor, hexColor, hexColor]),
+    glow: hexColor,
+    layers: z.array(eraLayerSchema).optional(),
+  })
+  .superRefine((visuals, ctx) => {
+    const seen = new Set<string>()
+    ;(visuals.layers ?? []).forEach((layer, i) => {
+      if (seen.has(layer.kind)) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `duplicate layer "${layer.kind}"`,
+          path: ['layers', i],
+        })
+      }
+      seen.add(layer.kind)
+      if (layer.count !== undefined && layer.kind !== 'motes') {
+        ctx.addIssue({
+          code: 'custom',
+          message: `"count" only applies to motes, not "${layer.kind}"`,
+          path: ['layers', i, 'count'],
+        })
+      }
+    })
+  })
+
 export const eraSchema = z.strictObject({
   id: z.string().min(1),
   name: z.string().min(1),
@@ -64,6 +111,7 @@ export const eraSchema = z.strictObject({
   stabilizationSec: z.number().positive().optional(),
   volatilityMult: z.number().positive(),
   bands,
+  visuals: eraVisualsSchema.optional(),
 }) satisfies z.ZodType<EraDef>
 
 export const erasSchema = z

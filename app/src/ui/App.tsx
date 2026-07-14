@@ -44,6 +44,18 @@ export function App() {
     void useGame.getState().init()
   }, [])
 
+  // Battery: index.css pauses all ambient animation under .tab-hidden.
+  useEffect(() => {
+    const onVisibility = () =>
+      document.documentElement.classList.toggle(
+        'tab-hidden',
+        document.visibilityState === 'hidden',
+      )
+    document.addEventListener('visibilitychange', onVisibility)
+    onVisibility()
+    return () => document.removeEventListener('visibilitychange', onVisibility)
+  }, [])
+
   if (!loaded || !run) {
     return (
       <main className="splash">
