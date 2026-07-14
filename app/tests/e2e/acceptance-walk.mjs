@@ -246,11 +246,16 @@ check(
 await page.click('.away-sheet .btn-primary')
 
 // --------------------------------------------------- 5. collapse + chronicle
-// Rig a near-cascade state (instability 99, biosphere out of band), then
-// take one turn — deterministic collapse via the real resolve path.
+// Rig a near-cascade state (instability 99, biosphere AND atmosphere out of
+// band), then take one turn — collapse via the real resolve path. Two
+// stranded systems make the cascade card-proof: no single era-1/2 choice
+// rescues both or sheds more instability than one out-of-band system
+// re-accrues, so whatever is drawn, this turn crosses the threshold.
+// Biosphere keeps the blame via its out-of-band history.
 const rig = await readSave()
 rig.run.instability = 99
 rig.run.systems.biosphere.value = 0.6
+rig.run.systems.atmosphere.value = 0.6
 rig.run.energy = Math.max(rig.run.energy, 3)
 rig.run.history.turnsOutOfBand.biosphere = 7
 rig.lastSeenMs = Date.now()

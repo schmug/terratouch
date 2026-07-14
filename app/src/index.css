@@ -260,6 +260,45 @@ body {
   color: var(--muted);
 }
 
+/* --------------------------- Mission Control transmissions (issue #16) ----
+   A subordinate one-line strip: fixed height so rotation never shifts the
+   gauges, ellipsized overflow, and a fade that the global reduced-motion
+   rule collapses to an instant swap. */
+
+.transmission {
+  margin: -4px 0 0;
+  width: 100%;
+  height: 18px;
+  line-height: 18px;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 12.5px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.transmission-glyph {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--accent-deep);
+  margin-right: 7px;
+}
+
+.transmission-text {
+  animation: transmission-fade 1.4s ease;
+}
+
+@keyframes transmission-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* ------------------------------------- the living planet (issue #10) ----
    Ambient decoration only: every animation is compositor-friendly
    transform/opacity, and every keyframe ends at a legible rest state so
