@@ -3,6 +3,7 @@
 
 import { useRef, useState } from 'react'
 import { canDraw } from '../sim/cards'
+import { canAscend, seedYield } from '../sim/prestige'
 import { driftDirection } from '../sim/tick'
 import { SYSTEM_IDS } from '../sim/types'
 import { useGame } from '../state/store'
@@ -158,6 +159,48 @@ export function PlanetScreen({ goToCards }: { goToCards: () => void }) {
             ? 'Advance — draw a card'
             : 'The world rests'}
       </button>
+
+      {canAscend(run, content) && <AscendButton />}
     </div>
+  )
+}
+
+/**
+ * Voluntary Ascension (SPEC §2.8), offered only at the final era. Ending a
+ * living world deserves a second thought, so the first tap arms the button
+ * and the second commits; tapping anything else would leave it armed, so it
+ * disarms itself after a beat.
+ */
+function AscendButton() {
+  const run = useGame((s) => s.run)
+  const content = useGame((s) => s.content)
+  const ascendRun = useGame((s) => s.ascendRun)
+  const [armed, setArmed] = useState(false)
+  const disarmTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  if (!run) return null
+  const seeds = seedYield(run, content, 'ascension')
+
+  const onTap = () => {
+    if (armed) {
+      if (disarmTimer.current) clearTimeout(disarmTimer.current)
+      ascendRun()
+      return
+    }
+    setArmed(true)
+    if (disarmTimer.current) clearTimeout(disarmTimer.current)
+    disarmTimer.current = setTimeout(() => setArmed(false), 4000)
+  }
+
+  return (
+    <button
+      type="button"
+      className={`btn-secondary ascend-btn${armed ? ' armed' : ''}`}
+      onClick={onTap}
+    >
+      {armed
+        ? `Leave it living — claim ✦ ${seeds}?`
+        : `Ascend — the world can stand alone (✦ ${seeds})`}
+    </button>
   )
 }

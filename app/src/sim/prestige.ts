@@ -77,10 +77,20 @@ export function buyUpgrade(
   if (targetLevel > def.maxLevel) throw new SimError('max-level')
   const cost = upgradeCost(def, targetLevel)
   if (meta.genesisSeeds < cost) throw new SimError('no-seeds')
+
+  // Archetype unlocks land on the canonical v1 list the rest of the app
+  // reads (meta.unlockedArchetypes); the upgrade level just records the buy.
+  const unlocked =
+    def.effect.kind === 'unlock-archetype' &&
+    !meta.unlockedArchetypes.includes(def.effect.archetypeId)
+      ? [...meta.unlockedArchetypes, def.effect.archetypeId]
+      : meta.unlockedArchetypes
+
   return {
     ...meta,
     genesisSeeds: meta.genesisSeeds - cost,
     upgrades: { ...meta.upgrades, [upgradeId]: targetLevel },
+    unlockedArchetypes: unlocked,
   }
 }
 
@@ -125,6 +135,9 @@ export function applyMetaUpgrades(
         break
       case 'offline-cap-hours':
         offlineHours += e.perLevel * owned
+        break
+      case 'unlock-archetype':
+        // Unlocks live on MetaState, not on the derived bundle.
         break
     }
   }

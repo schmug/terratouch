@@ -220,6 +220,8 @@ export type MetaUpgradeEffect =
   | { kind: 'energy-cap'; perLevel: number }
   /** Offline catch-up window +perLevel·level hours (still band-safe). */
   | { kind: 'offline-cap-hours'; perLevel: number }
+  /** Buying adds the archetype to meta.unlockedArchetypes (maxLevel 1). */
+  | { kind: 'unlock-archetype'; archetypeId: string }
 
 export type MetaUpgradeDef = {
   id: string

@@ -12,10 +12,10 @@ Current files (M1):
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `balance.json`       | All tunables: Energy cap/regen (~5 min/burst target), tap rates, Instability accrual/decay/threshold, setpoint clamps, offline cap, Seed-yield params (`prestige`) |
 | `eras.json`          | The 7-era ladder: per-era safe bands, advance threshold + stabilization window, volatility multiplier                                                              |
-| `archetypes.json`    | Barren only (M1): starting values/setpoints, natural rest points + pull rates, starting minerals                                                                   |
+| `archetypes.json`    | Barren (starter) + Seed-gated Frozen and Volcanic (M2): starting values/setpoints, natural rest points + pull rates, starting minerals                             |
 | `machines.json`      | 4 machines (one per system): costs, push rates, passive production; the Spore Garden (biosphere) is era-gated via `unlockEra`                                      |
-| `upgrades.json`      | 5 Seed meta-upgrades (SPEC §2.8): machine speed, gentler Instability, starting minerals, energy cap, offline window                                                |
-| `cards.json`         | 22 event cards, era-gated, weighted; copy is cozy/hopeful per the tone decision                                                                                    |
+| `upgrades.json`      | Seed meta-upgrades (SPEC §2.8): machine speed, gentler Instability, starting minerals, energy cap, offline window, archetype unlocks (Charts of Ice/Fire)          |
+| `cards.json`         | 28 event cards, era- and archetype-gated, weighted; copy is cozy/hopeful per the tone decision                                                                     |
 | `transmissions.json` | 44 Mission Control one-liners (issue #16), trigger- and era-tagged; see the tagging scheme below                                                                   |
 | `recipes.json`       | (M3 — not yet created) two-slot synthesis recipes                                                                                                                  |
 

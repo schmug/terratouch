@@ -1,7 +1,8 @@
 // LossModal.tsx — the end-of-run screen (SPEC §3): stat recap with the Seed
 // yield, the Chronicle (templated in M1; the LLM flag stays off), the Seed
-// shop (SPEC §2.8 — spend between worlds), and Begin New World. The
-// chronicle can never block — narrate() falls back locally (SPEC §5.4).
+// shop, the next-world archetype picker (SPEC §2.8 — spend between worlds),
+// and Begin New World. An Ascension renders the same sheet in its triumphant
+// key. The chronicle can never block — narrate() falls back locally (§5.4).
 
 import { useEffect, useState } from 'react'
 import { narrate } from '../net/narrate'
@@ -11,11 +12,52 @@ import { useGame } from '../state/store'
 import { SHAPE_GLYPH, SYSTEM_META } from './meta'
 
 function causeLine(report: CollapseReport): string {
+  if (report.cause.kind === 'ascension') {
+    return 'You chose the leaving — the world turns on without you'
+  }
   const meta = SYSTEM_META[report.cause.system]
   if (report.cause.kind === 'hard-fail') {
     return `${meta.label} reached its ${report.cause.direction === 'low' ? 'cold, empty' : 'far, violent'} edge`
   }
   return `Instability cascaded — ${meta.label.toLowerCase()} strayed too long`
+}
+
+function ArchetypePicker({
+  value,
+  onChange,
+}: {
+  value: string
+  onChange: (id: string) => void
+}) {
+  const meta = useGame((s) => s.meta)
+  const content = useGame((s) => s.content)
+  const selected = content.archetypes.find((a) => a.id === value)
+
+  return (
+    <div className="archetype-picker">
+      <p className="seed-shop-title">the next world</p>
+      <div className="archetype-row" role="radiogroup" aria-label="archetype">
+        {content.archetypes.map((a) => {
+          const unlocked = meta.unlockedArchetypes.includes(a.id)
+          return (
+            <button
+              key={a.id}
+              type="button"
+              role="radio"
+              aria-checked={value === a.id}
+              className={`archetype-chip${value === a.id ? ' selected' : ''}`}
+              disabled={!unlocked}
+              onClick={() => onChange(a.id)}
+            >
+              {a.name}
+              {!unlocked && <span className="chip-locked"> · locked</span>}
+            </button>
+          )
+        })}
+      </div>
+      {selected && <p className="archetype-blurb">{selected.blurb}</p>}
+    </div>
+  )
 }
 
 function SeedShop() {
@@ -70,7 +112,12 @@ function SeedShop() {
 
 export function LossModal({ report }: { report: CollapseReport }) {
   const beginNewRun = useGame((s) => s.beginNewRun)
+  const endedArchetypeId = useGame((s) => s.run?.archetypeId)
   const [chronicle, setChronicle] = useState<string | null>(null)
+  const [nextArchetype, setNextArchetype] = useState(
+    endedArchetypeId ?? 'barren',
+  )
+  const ascended = report.cause.kind === 'ascension'
 
   useEffect(() => {
     let alive = true
@@ -87,11 +134,13 @@ export function LossModal({ report }: { report: CollapseReport }) {
       className="overlay"
       role="dialog"
       aria-modal="true"
-      aria-label="The world has ended"
+      aria-label={ascended ? 'The world has ascended' : 'The world has ended'}
     >
       <div className="sheet loss-sheet">
         <p className="chronicle-kicker">the chronicle records</p>
-        <h2 className="loss-title">A World, Concluded</h2>
+        <h2 className="loss-title">
+          {ascended ? 'A World, Ascended' : 'A World, Concluded'}
+        </h2>
 
         <div className="loss-stats">
           <div className="loss-stat">
@@ -108,7 +157,9 @@ export function LossModal({ report }: { report: CollapseReport }) {
           </div>
         </div>
 
-        <p className="loss-cause">{causeLine(report)}</p>
+        <p className={ascended ? 'ascend-cause' : 'loss-cause'}>
+          {causeLine(report)}
+        </p>
 
         <div className="final-gauges" aria-label="final system values">
           {SYSTEM_IDS.map((id) => {
@@ -136,15 +187,19 @@ export function LossModal({ report }: { report: CollapseReport }) {
 
         <SeedShop />
 
+        <ArchetypePicker value={nextArchetype} onChange={setNextArchetype} />
+
         <button
           type="button"
           className="btn-primary begin-btn"
-          onClick={beginNewRun}
+          onClick={() => beginNewRun(nextArchetype)}
         >
           Begin New World
         </button>
         <p className="loss-footnote">
-          every ending is a place to plant something
+          {ascended
+            ? 'what you planted will remember you'
+            : 'every ending is a place to plant something'}
         </p>
       </div>
     </div>

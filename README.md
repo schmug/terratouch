@@ -51,7 +51,7 @@ npm --prefix app run dev        # dev server
 npm --prefix app test           # vitest (sim suite + 1000-run balance harness)
 npm --prefix app run harness    # balance harness with the full report
 npm --prefix app run build      # typecheck + build → app/dist
-npm --prefix app run walk       # 27-check e2e acceptance walk (needs Chrome
+npm --prefix app run walk       # 35-check e2e acceptance walk (needs Chrome
                                 #   + a server; WALK_BASE overrides the URL)
 
 npm --prefix worker install

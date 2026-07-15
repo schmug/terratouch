@@ -31,10 +31,14 @@ describe('shipped content', () => {
   it('parses and validates', () => {
     const content = loadContent()
     expect(content.eras).toHaveLength(7)
-    expect(content.archetypes.map((a) => a.id)).toEqual(['barren']) // Frozen/Volcanic land with the M2 archetype PR
+    expect(content.archetypes.map((a) => a.id)).toEqual([
+      'barren',
+      'frozen',
+      'volcanic',
+    ])
     expect(content.machines).toHaveLength(4)
-    expect(content.cards.length).toBeGreaterThanOrEqual(20)
-    expect(content.upgrades.length).toBeGreaterThanOrEqual(5)
+    expect(content.cards.length).toBeGreaterThanOrEqual(26)
+    expect(content.upgrades.length).toBeGreaterThanOrEqual(7)
   })
 
   it('every system has a steering machine (issue #3: Spore Garden)', () => {
@@ -59,6 +63,7 @@ describe('shipped content', () => {
         'starting-minerals',
         'energy-cap',
         'offline-cap-hours',
+        'unlock-archetype',
       ]),
     )
   })

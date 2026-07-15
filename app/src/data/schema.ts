@@ -204,6 +204,10 @@ const metaUpgradeEffectSchema = z.discriminatedUnion('kind', [
     kind: z.literal('offline-cap-hours'),
     perLevel: z.number().positive(),
   }),
+  z.strictObject({
+    kind: z.literal('unlock-archetype'),
+    archetypeId: z.string().min(1),
+  }),
 ])
 
 export const metaUpgradeSchema = z.strictObject({

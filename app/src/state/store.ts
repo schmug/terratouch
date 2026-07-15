@@ -5,7 +5,13 @@
 
 import { create } from 'zustand'
 import { content as baseContent } from '../data'
-import { buildOrUpgrade, newRun, setSetpoint, tapCollect } from '../sim/actions'
+import {
+  ascend,
+  buildOrUpgrade,
+  newRun,
+  setSetpoint,
+  tapCollect,
+} from '../sim/actions'
 import { canDraw, cardById, drawCard, resolveCard } from '../sim/cards'
 import { applyOffline } from '../sim/offline'
 import { applyMetaUpgrades, buyUpgrade } from '../sim/prestige'
@@ -78,8 +84,25 @@ type GameStore = {
   build(typeId: string): void
   setpoint(system: SystemId, value: number): void
   buy(upgradeId: string): void
-  beginNewRun(): void
+  /** Voluntary Ascension at the final era (SPEC §2.8): max Seed yield. */
+  ascendRun(): void
+  /** Start the next world; archetype must be unlocked (falls back to Barren). */
+  beginNewRun(archetypeId?: string): void
   dismissAwaySummary(): void
+}
+
+/** Bank a finished run's Seed yield + records into persistent meta. */
+function foldRunEnd(meta: MetaState, run: RunState): MetaState {
+  if (!run.collapse) return meta
+  return {
+    ...meta,
+    genesisSeeds: meta.genesisSeeds + run.collapse.seedsAwarded,
+    stats: {
+      ...meta.stats,
+      bestEra: Math.max(meta.stats.bestEra, run.era + 1),
+      longestRun: Math.max(meta.stats.longestRun, run.turns),
+    },
+  }
 }
 
 /** Swallow SimError (illegal action — UI races), rethrow real bugs. */
@@ -179,23 +202,10 @@ export const useGame = create<GameStore>((set, get) => ({
     const result = guard(() => resolveCard(run, content, side))
     if (!result) return
     const choice = side === 'left' ? card.left : card.right
-    let nextMeta = meta
-    if (result.run.collapse) {
-      // Run ended: bank the Seed yield (SPEC §2.8) and fold the post-mortem
-      // into persistent stats (SPEC §4.4).
-      nextMeta = {
-        ...meta,
-        genesisSeeds: meta.genesisSeeds + result.run.collapse.seedsAwarded,
-        stats: {
-          ...meta.stats,
-          bestEra: Math.max(meta.stats.bestEra, result.run.era + 1),
-          longestRun: Math.max(meta.stats.longestRun, result.run.turns),
-        },
-      }
-    }
     set({
       run: result.run,
-      meta: nextMeta,
+      // A collapsing turn banks the Seed yield + records (SPEC §2.8, §4.4).
+      meta: foldRunEnd(meta, result.run),
       lastOutcome: {
         cardTitle: card.title,
         choiceLabel: choice.label,
@@ -238,10 +248,23 @@ export const useGame = create<GameStore>((set, get) => ({
     saveNow() // spent Seeds are worth persisting promptly
   },
 
-  beginNewRun() {
+  ascendRun() {
+    const { run, meta, content } = get()
+    if (!run) return
+    const ended = guard(() => ascend(run, content))
+    if (!ended) return
+    set({ run: ended, meta: foldRunEnd(meta, ended), lastOutcome: null })
+    saveNow() // an ended world is worth persisting promptly
+  },
+
+  beginNewRun(archetypeId) {
     const { meta, content } = get()
+    const pick =
+      archetypeId && meta.unlockedArchetypes.includes(archetypeId)
+        ? archetypeId
+        : STARTING_ARCHETYPE
     set({
-      run: newRun(content, randomSeed(), STARTING_ARCHETYPE),
+      run: newRun(content, randomSeed(), pick),
       meta: { ...meta, stats: { ...meta.stats, runs: meta.stats.runs + 1 } },
       awaySummary: null,
       lastOutcome: null,

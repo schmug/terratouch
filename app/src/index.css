@@ -1196,6 +1196,70 @@ body {
   min-height: 44px;
 }
 
+.ascend-cause {
+  margin: 0;
+  font-size: 13px;
+  color: var(--accent);
+}
+
+/* Voluntary Ascension (final era only): arm on first tap, commit on second. */
+.ascend-btn {
+  margin-top: 2px;
+  border-color: rgba(233, 184, 114, 0.5);
+  color: var(--accent);
+}
+
+.ascend-btn.armed {
+  background: rgba(233, 184, 114, 0.16);
+}
+
+/* Next-world archetype picker on the end-of-run sheet. */
+.archetype-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.archetype-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.archetype-chip {
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--panel-edge);
+  background: rgba(233, 227, 213, 0.05);
+  color: inherit;
+  font-size: 13px;
+}
+
+.archetype-chip.selected {
+  border-color: var(--accent);
+  background: rgba(233, 184, 114, 0.14);
+}
+
+.archetype-chip:disabled {
+  opacity: 0.45;
+}
+
+.chip-locked {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.archetype-blurb {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
 /* Era-gated machines sleep until their era (unlockEra). */
 .machine-locked {
   opacity: 0.55;
