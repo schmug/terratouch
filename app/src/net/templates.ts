@@ -44,6 +44,26 @@ export function templatedChronicle(report: CollapseReport): string {
   const { cause } = report
   const lines: string[] = []
 
+  if (cause.kind === 'ascension') {
+    // The one ending that isn't grief: an Ascension chronicle is a leave-taking,
+    // not an obituary — hopeful, but still wistful (the world goes on without you).
+    const turnsPhrase =
+      report.turnsSurvived === 1
+        ? 'a single turn'
+        : `${report.turnsSurvived} turns`
+    lines.push(
+      `You did not lose this one. This was a ${report.archetype} world, and you stayed ${turnsPhrase}, long enough to see the ${report.eraReached} era open its eyes.`,
+    )
+    const notable = report.notableStats.slice(0, 2)
+    if (notable.length > 0) {
+      lines.push(`Let the record show: ${notable.join('; ')}.`)
+    }
+    lines.push(
+      `Then you set it down, still turning, still green in places, and walked on. It does not need you anymore. That was always the point.`,
+    )
+    return lines.join(' ')
+  }
+
   if (cause.kind === 'hard-fail') {
     lines.push(HARD_FAIL_LINES[cause.system][cause.direction])
   } else {

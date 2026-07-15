@@ -19,6 +19,12 @@ export function makeTestContent(overrides: Partial<Content> = {}): Content {
       era: { progressDecayMult: 1 },
       offline: { maxHours: 8, productionMult: 1 },
       cards: { recentExclusion: 2 },
+      prestige: {
+        eraWeight: 2,
+        habDivisor: 25,
+        collapseMult: 0.5,
+        ascensionBonus: 5,
+      },
     },
     eras: [
       {

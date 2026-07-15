@@ -166,7 +166,8 @@ describe('collapse report', () => {
       direction: 'high',
     })
     expect(report.peakHabitability).toBe(61)
-    expect(report.seedsAwarded).toBe(0)
+    // era 0, peak 61: base = 0·2 + ⌊61/25⌋ = 2 → collapse pays ⌊2·0.5⌋ = 1
+    expect(report.seedsAwarded).toBe(1)
     expect(report.notableStats.join(' ')).toContain(
       'thermal balance spent 9 turns',
     )

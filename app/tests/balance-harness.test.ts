@@ -45,6 +45,18 @@ describe(`balance harness (${RUNS} runs per policy)`, () => {
     expect(report.turns.distinct).toBeGreaterThanOrEqual(8)
   })
 
+  it('seeds/run rises with policy skill (SPEC M2 acceptance)', () => {
+    const random = reports.find((r) => r.policy === 'random')!
+    const safe = reports.find((r) => r.policy === 'greedy-safe')!
+    const progress = reports.find((r) => r.policy === 'greedy-progress')!
+    expect(safe.meanSeeds).toBeGreaterThan(random.meanSeeds)
+    expect(progress.meanSeeds).toBeGreaterThan(safe.meanSeeds)
+    // The max-yield path is real: skilled play actually reaches Ascension.
+    expect(safe.outcomes.ascended + progress.outcomes.ascended).toBeGreaterThan(
+      0,
+    )
+  })
+
   it('both collapse kinds occur across policies', () => {
     const hard = reports.reduce((a, r) => a + r.outcomes['hard-fail'], 0)
     const cascade = reports.reduce((a, r) => a + r.outcomes.cascade, 0)

@@ -169,9 +169,11 @@ export const useGame = create<GameStore>((set, get) => ({
     const choice = side === 'left' ? card.left : card.right
     let nextMeta = meta
     if (result.run.collapse) {
-      // Run ended: fold the post-mortem into persistent stats (SPEC §4.4).
+      // Run ended: bank the Seed yield (SPEC §2.8) and fold the post-mortem
+      // into persistent stats (SPEC §4.4).
       nextMeta = {
         ...meta,
+        genesisSeeds: meta.genesisSeeds + result.run.collapse.seedsAwarded,
         stats: {
           ...meta.stats,
           bestEra: Math.max(meta.stats.bestEra, result.run.era + 1),

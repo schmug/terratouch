@@ -9,5 +9,11 @@
   "setpoint": { "min": 2, "max": 98 },
   "era": { "progressDecayMult": 1 },
   "offline": { "maxHours": 8, "productionMult": 0.5 },
-  "cards": { "recentExclusion": 3 }
+  "cards": { "recentExclusion": 3 },
+  "prestige": {
+    "eraWeight": 2,
+    "habDivisor": 25,
+    "collapseMult": 0.5,
+    "ascensionBonus": 4
+  }
 }
