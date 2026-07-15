@@ -3,7 +3,8 @@
 // edge and Instability NEVER accrues offline. This rule is non-negotiable.
 //
 // Concretely, per SPEC §1.3:
-//  - machines produce resources at full rate (straight to the balance);
+//  - machines produce resources, paid out at balance.offline.productionMult
+//    (straight to the balance);
 //  - Energy refills;
 //  - gauges drift toward their targets but each is clamped to the interval
 //    [min(value, band.lo), max(value, band.hi)] — inside the band it can

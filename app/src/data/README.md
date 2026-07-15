@@ -27,11 +27,20 @@ Semantics worth knowing when tuning:
   reach them (drift is asymptotic; offline is band-clamped).
 - Archetype starting values must sit inside the Era-1 bands (validated).
 
-Balance-harness snapshot (2026-07-13, 1000 runs/policy, 15% mistake rate):
-random dies 61% (median 131 turns); greedy-safe survives 85% to the 300-turn
-cap, 13.5% reach Habitable; greedy-progress hits Fauna in ~45 turns then
-cascades. **Known hotspot: biosphere is the dominant late-era killer** (no
-machine steers it; its band floor climbs) — revisit when M2 adds content.
+Balance-harness snapshot (2026-07-15, 1000 runs/policy, 15% mistake rate,
+after the issue #4 economy retune): random dies 63% (median 116 turns);
+greedy-safe survives 84% to the 300-turn cap, 14% reach Habitable;
+greedy-progress hits Fauna in ~48 turns then cascades. **Known hotspot:
+biosphere is the dominant late-era killer** (no machine steers it; its band
+floor climbs) — revisit when M2 adds content.
+
+Mineral economy (issue #4): offline pays at 50% (`offline.productionMult`),
+and machine costs are steep (`costMult` 2.2) so maxing all three machines
+(~5,470 minerals total) is a multi-session project rather than one away-cycle
+(~3,240 minerals from a 2 h gap early on). The Core Furnace's `baseCost`
+equals Barren's `startingMinerals` so the first build stays an instant
+onboarding beat. New mineral sinks are deliberately deferred to M2
+meta-upgrades (#5) and M3 synthesis (#6).
 
 Tone reminder (SPEC §0): card copy is cozy and hopeful; loss narration is
 elegiac. Write card text accordingly.

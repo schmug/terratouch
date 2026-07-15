@@ -4,8 +4,8 @@
     "name": "Core Furnace",
     "blurb": "Coaxes old warmth up from the planet's heart. Purrs when it's working.",
     "system": "thermal",
-    "baseCost": 25,
-    "costMult": 1.7,
+    "baseCost": 30,
+    "costMult": 2.2,
     "pushRatePerSecPerLevel": 0.006,
     "productionPerSecPerLevel": 0.5,
     "maxLevel": 5
@@ -15,8 +15,8 @@
     "name": "Gas Sifter",
     "blurb": "Sieves buried ices into a young sky, one soft exhale at a time.",
     "system": "atmosphere",
-    "baseCost": 35,
-    "costMult": 1.7,
+    "baseCost": 50,
+    "costMult": 2.2,
     "pushRatePerSecPerLevel": 0.006,
     "productionPerSecPerLevel": 0.4,
     "maxLevel": 5
@@ -26,8 +26,8 @@
     "name": "Vapor Well",
     "blurb": "Breathes gently on frozen ground until it remembers how to be rain.",
     "system": "hydro",
-    "baseCost": 35,
-    "costMult": 1.7,
+    "baseCost": 50,
+    "costMult": 2.2,
     "pushRatePerSecPerLevel": 0.006,
     "productionPerSecPerLevel": 0.4,
     "maxLevel": 5
