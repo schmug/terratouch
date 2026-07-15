@@ -31,5 +31,17 @@
     "pushRatePerSecPerLevel": 0.006,
     "productionPerSecPerLevel": 0.4,
     "maxLevel": 5
+  },
+  {
+    "id": "spore-garden",
+    "name": "Spore Garden",
+    "blurb": "A warm, damp room where small green thoughts learn to stay. Life is slow, and will not be hurried.",
+    "system": "biosphere",
+    "baseCost": 200,
+    "costMult": 2.2,
+    "pushRatePerSecPerLevel": 0.001,
+    "productionPerSecPerLevel": 0.3,
+    "maxLevel": 5,
+    "unlockEra": 4
   }
 ]

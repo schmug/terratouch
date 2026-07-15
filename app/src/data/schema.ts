@@ -9,6 +9,7 @@ import type {
   CardDef,
   EraDef,
   MachineDef,
+  MetaUpgradeDef,
 } from '../sim/types'
 
 const systemId = z.enum(['thermal', 'atmosphere', 'hydro', 'biosphere'])
@@ -172,9 +173,50 @@ export const machineSchema = z.strictObject({
   pushRatePerSecPerLevel: z.number().positive(),
   productionPerSecPerLevel: z.number().nonnegative(),
   maxLevel: z.number().int().positive(),
+  unlockEra: z.number().int().min(1).optional(),
 }) satisfies z.ZodType<MachineDef>
 
 export const machinesSchema = z.array(machineSchema)
+
+/**
+ * Meta-upgrade effects (SPEC §2.8). Multiplier `perLevel`s compound per
+ * level; the instability one must stay below 1 so accrual can shrink but
+ * never stop — danger stays real at any upgrade level.
+ */
+const metaUpgradeEffectSchema = z.discriminatedUnion('kind', [
+  z.strictObject({
+    kind: z.literal('machine-push-mult'),
+    perLevel: z.number().positive(),
+  }),
+  z.strictObject({
+    kind: z.literal('instability-accrual-mult'),
+    perLevel: z.number().positive().lt(1),
+  }),
+  z.strictObject({
+    kind: z.literal('starting-minerals'),
+    perLevel: z.number().positive(),
+  }),
+  z.strictObject({
+    kind: z.literal('energy-cap'),
+    perLevel: z.number().positive(),
+  }),
+  z.strictObject({
+    kind: z.literal('offline-cap-hours'),
+    perLevel: z.number().positive(),
+  }),
+])
+
+export const metaUpgradeSchema = z.strictObject({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  blurb: z.string().min(1),
+  baseCost: z.number().positive(),
+  costMult: z.number().min(1),
+  maxLevel: z.number().int().positive(),
+  effect: metaUpgradeEffectSchema,
+}) satisfies z.ZodType<MetaUpgradeDef>
+
+export const upgradesSchema = z.array(metaUpgradeSchema)
 
 const cardEffectsSchema = z.strictObject({
   systems: z

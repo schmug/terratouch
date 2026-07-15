@@ -114,6 +114,11 @@ export function machineOfType(run: RunState, typeId: string) {
   return run.machines.find((m) => m.typeId === typeId)
 }
 
+/** Era gate (unlockEra is 1-based, like card gates); eras only climb. */
+export function machineUnlocked(run: RunState, def: MachineDef): boolean {
+  return def.unlockEra === undefined || run.era + 1 >= def.unlockEra
+}
+
 /**
  * Build a machine (level 1) or upgrade the existing one by a level, paying
  * minerals. M1 keeps one instance per machine type.
@@ -125,6 +130,7 @@ export function buildOrUpgrade(
 ): RunState {
   if (run.collapse) throw new SimError('run-over')
   const def = machineDef(content, typeId)
+  if (!machineUnlocked(run, def)) throw new SimError('machine-locked')
   const existing = machineOfType(run, typeId)
   const targetLevel = (existing?.level ?? 0) + 1
   if (targetLevel > def.maxLevel) throw new SimError('max-level')

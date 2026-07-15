@@ -3,7 +3,6 @@
 // (SPEC §3).
 
 import { useEffect, useState } from 'react'
-import { content } from '../data'
 import { useGame } from '../state/store'
 import { AwayModal } from './AwayModal'
 import { BuildScreen } from './BuildScreen'
@@ -38,6 +37,7 @@ export function App() {
   const loaded = useGame((s) => s.loaded)
   const run = useGame((s) => s.run)
   const awaySummary = useGame((s) => s.awaySummary)
+  const content = useGame((s) => s.content)
   const [tab, setTab] = useState<Tab>('planet')
 
   useEffect(() => {

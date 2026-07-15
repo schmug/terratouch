@@ -4,15 +4,17 @@
 // initiated — never inside sim/ functions.
 
 import { create } from 'zustand'
-import { content } from '../data'
+import { content as baseContent } from '../data'
 import { buildOrUpgrade, newRun, setSetpoint, tapCollect } from '../sim/actions'
 import { canDraw, cardById, drawCard, resolveCard } from '../sim/cards'
 import { applyOffline } from '../sim/offline'
+import { applyMetaUpgrades, buyUpgrade } from '../sim/prestige'
 import { tick } from '../sim/tick'
 import {
   SimError,
   type AppliedEffects,
   type AwaySummary,
+  type Content,
   type MetaState,
   type RunState,
   type Save,
@@ -56,6 +58,12 @@ type GameStore = {
   loaded: boolean
   run: RunState | null
   meta: MetaState
+  /**
+   * The EFFECTIVE content bundle: base content with the owned meta-upgrade
+   * levels applied (SPEC §2.8). Everything — sim calls and UI reads — goes
+   * through this; it is re-derived whenever upgrades change.
+   */
+  content: Content
   awaySummary: AwaySummary | null
   /** The most recent resolved card, for UI feedback. */
   lastOutcome: CardOutcome | null
@@ -69,6 +77,7 @@ type GameStore = {
   resolve(side: 'left' | 'right'): void
   build(typeId: string): void
   setpoint(system: SystemId, value: number): void
+  buy(upgradeId: string): void
   beginNewRun(): void
   dismissAwaySummary(): void
 }
@@ -87,6 +96,7 @@ export const useGame = create<GameStore>((set, get) => ({
   loaded: false,
   run: null,
   meta: freshMeta(),
+  content: baseContent,
   awaySummary: null,
   lastOutcome: null,
 
@@ -95,6 +105,7 @@ export const useGame = create<GameStore>((set, get) => ({
     const save = await loadSave()
     let run = save?.run ?? null
     let meta = save?.meta ?? freshMeta()
+    const content = applyMetaUpgrades(baseContent, meta.upgrades)
     let awaySummary: AwaySummary | null = null
 
     if (run === null) {
@@ -110,7 +121,7 @@ export const useGame = create<GameStore>((set, get) => ({
       }
     }
 
-    set({ loaded: true, run, meta, awaySummary })
+    set({ loaded: true, run, meta, content, awaySummary })
     startLoop()
     // Persist immediately: offline gains were just credited against the old
     // lastSeenMs, and a debounced save would leave a window where reloading
@@ -119,6 +130,7 @@ export const useGame = create<GameStore>((set, get) => ({
   },
 
   tickBy(steps) {
+    const { content } = get()
     let { run } = get()
     if (!run || run.collapse) return
     for (let i = 0; i < steps && !run.collapse; i++) {
@@ -129,7 +141,7 @@ export const useGame = create<GameStore>((set, get) => ({
   },
 
   offlineBy(elapsedMs) {
-    const { run } = get()
+    const { run, content } = get()
     if (!run || run.collapse) return
     const { run: caught, summary } = applyOffline(run, content, elapsedMs)
     set({
@@ -141,7 +153,7 @@ export const useGame = create<GameStore>((set, get) => ({
   },
 
   tap() {
-    const { run } = get()
+    const { run, content } = get()
     if (!run) return
     const result = guard(() => tapCollect(run, content))
     if (result) {
@@ -151,7 +163,7 @@ export const useGame = create<GameStore>((set, get) => ({
   },
 
   draw() {
-    const { run } = get()
+    const { run, content } = get()
     if (!run || !canDraw(run, content)) return
     const result = guard(() => drawCard(run, content))
     if (result) {
@@ -161,7 +173,7 @@ export const useGame = create<GameStore>((set, get) => ({
   },
 
   resolve(side) {
-    const { run, meta } = get()
+    const { run, meta, content } = get()
     if (!run || !run.activeCardId) return
     const card = cardById(content, run.activeCardId)
     const result = guard(() => resolveCard(run, content, side))
@@ -194,7 +206,7 @@ export const useGame = create<GameStore>((set, get) => ({
   },
 
   build(typeId) {
-    const { run } = get()
+    const { run, content } = get()
     if (!run) return
     const next = guard(() => buildOrUpgrade(run, content, typeId))
     if (next) {
@@ -204,7 +216,7 @@ export const useGame = create<GameStore>((set, get) => ({
   },
 
   setpoint(system, value) {
-    const { run } = get()
+    const { run, content } = get()
     if (!run) return
     const next = guard(() => setSetpoint(run, content, system, value))
     if (next) {
@@ -213,8 +225,21 @@ export const useGame = create<GameStore>((set, get) => ({
     }
   },
 
-  beginNewRun() {
+  buy(upgradeId) {
     const { meta } = get()
+    const nextMeta = guard(() => buyUpgrade(meta, baseContent, upgradeId))
+    if (!nextMeta) return
+    // Re-derive the effective bundle; a live run benefits immediately (the
+    // only mid-run changes are strictly kind ones).
+    set({
+      meta: nextMeta,
+      content: applyMetaUpgrades(baseContent, nextMeta.upgrades),
+    })
+    saveNow() // spent Seeds are worth persisting promptly
+  },
+
+  beginNewRun() {
+    const { meta, content } = get()
     set({
       run: newRun(content, randomSeed(), STARTING_ARCHETYPE),
       meta: { ...meta, stats: { ...meta.stats, runs: meta.stats.runs + 1 } },

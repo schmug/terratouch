@@ -13,7 +13,8 @@ Current files (M1):
 | `balance.json`       | All tunables: Energy cap/regen (~5 min/burst target), tap rates, Instability accrual/decay/threshold, setpoint clamps, offline cap, Seed-yield params (`prestige`) |
 | `eras.json`          | The 7-era ladder: per-era safe bands, advance threshold + stabilization window, volatility multiplier                                                              |
 | `archetypes.json`    | Barren only (M1): starting values/setpoints, natural rest points + pull rates, starting minerals                                                                   |
-| `machines.json`      | 3 machines (thermal/atmosphere/hydro): costs, push rates, passive production                                                                                       |
+| `machines.json`      | 4 machines (one per system): costs, push rates, passive production; the Spore Garden (biosphere) is era-gated via `unlockEra`                                      |
+| `upgrades.json`      | 5 Seed meta-upgrades (SPEC §2.8): machine speed, gentler Instability, starting minerals, energy cap, offline window                                                |
 | `cards.json`         | 22 event cards, era-gated, weighted; copy is cozy/hopeful per the tone decision                                                                                    |
 | `transmissions.json` | 44 Mission Control one-liners (issue #16), trigger- and era-tagged; see the tagging scheme below                                                                   |
 | `recipes.json`       | (M3 — not yet created) two-slot synthesis recipes                                                                                                                  |
@@ -28,13 +29,18 @@ Semantics worth knowing when tuning:
 - Archetype starting values must sit inside the Era-1 bands (validated).
 
 Balance-harness snapshot (2026-07-15, 1000 runs/policy, 15% mistake rate,
-after the issue #4 economy retune): random dies 63% (median 116 turns);
-greedy-safe survives 83% to the 300-turn cap and Ascends 14% at Habitable;
-greedy-progress hits Fauna in ~48 turns then cascades. Seeds/run rises with
-policy skill (M2 acceptance, asserted in CI): random 1.41 → greedy-safe 2.71
-→ greedy-progress 6.28. **Known hotspot: biosphere is the dominant late-era
-killer** (no machine steers it; its band floor climbs) — revisit when M2 adds
-content.
+after the Spore Garden landed): random dies 72% (median 44 turns, spread
+p10=8 / p90=300); greedy-safe dies 2% and Ascends 98% in ~57 turns;
+greedy-progress busts 6% on hard-fails and Ascends 93%. Seeds/run rises with
+policy skill (M2 acceptance, asserted in CI): random 1.57 vs greedy ~17.7–18.5
+(≥3× is the CI bar). **The old biosphere hotspot (issue #3) is resolved**:
+cascade blame pooled across policies is thermal 41% / biosphere 30% / hydro
+20% / atmosphere 9% — no system over the 60% bar (also asserted in CI).
+Biosphere remains the intended weakest system: the Spore Garden pushes at a
+sixth of the other machines' rate, so late floors take high levels + a high
+setpoint, and it stays the only cascade cause greedy play ever sees. Note the
+oracle-bot caveat: bots see both resolved futures before choosing; human
+Ascension rates will be far lower.
 
 Seed yield (`balance.prestige`, SPEC §2.8): `base = era·eraWeight +
 ⌊peakHab/habDivisor⌋`; collapse pays `⌊base·collapseMult⌋` (partial),
@@ -44,12 +50,14 @@ a mid-game death 2–6, a full Ascension ~18–20 — Ascending must always beat
 collapsing on the same board (schema enforces `collapseMult < 1`).
 
 Mineral economy (issue #4): offline pays at 50% (`offline.productionMult`),
-and machine costs are steep (`costMult` 2.2) so maxing all three machines
-(~5,470 minerals total) is a multi-session project rather than one away-cycle
-(~3,240 minerals from a 2 h gap early on). The Core Furnace's `baseCost`
-equals Barren's `startingMinerals` so the first build stays an instant
-onboarding beat. New mineral sinks are deliberately deferred to M2
-meta-upgrades (#5) and M3 synthesis (#6).
+and machine costs are steep (`costMult` 2.2) so maxing the original three
+machines (~5,470 minerals total) is a multi-session project rather than one
+away-cycle (~3,240 minerals from a 2 h gap early on). The Core Furnace's
+`baseCost` equals Barren's `startingMinerals` so the first build stays an
+instant onboarding beat. The Spore Garden (base 200, unlocks at Microbial)
+is the M2 mineral sink — maxing it is another ~5,000. Genesis Seeds are a
+separate economy: the shop's five upgrades cost ~600 Seeds to complete
+(≈30+ Ascensions), the long meta arc.
 
 Tone reminder (SPEC §0): card copy is cozy and hopeful; loss narration is
 elegiac. Write card text accordingly.

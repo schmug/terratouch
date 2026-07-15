@@ -5,10 +5,10 @@
 // PlanetVisuals (era palette + ambient layers, issue #10); the gauges stay
 // on top — they are information, ambiance is not.
 
-import { content } from '../data'
 import { driftDirection } from '../sim/tick'
 import { habitability } from '../sim/systems'
 import { SYSTEM_IDS, type RunState, type SystemId } from '../sim/types'
+import { useGame } from '../state/store'
 import { SYSTEM_META, type MarkerShape } from './meta'
 import { PlanetVisuals, Starfield } from './PlanetVisuals'
 
@@ -104,6 +104,7 @@ function Marker({
 }
 
 function DriftArrow({ system, run }: { system: SystemId; run: RunState }) {
+  const content = useGame((s) => s.content)
   const dir = driftDirection(run, content, system)
   if (dir === 0) return null
   const theta = valueAngle(system, run.systems[system].value)
@@ -121,6 +122,7 @@ function DriftArrow({ system, run }: { system: SystemId; run: RunState }) {
 }
 
 export function PlanetDial({ run }: { run: RunState }) {
+  const content = useGame((s) => s.content)
   const era = content.eras[run.era]
   const hab = habitability(run.systems)
 

@@ -24,12 +24,17 @@ describe(`balance harness (${RUNS} runs per policy)`, () => {
     ).toBeGreaterThan(RUNS * 0.5)
   })
 
-  it('greedy-safe policy: survives longer than random', () => {
+  it('greedy-safe policy: dies far less often than random', () => {
     const report = runMany(content, { runs: RUNS, policy: 'greedy-safe' })
     reports.push(report)
     console.log(formatReport(report, content))
     const random = reports.find((r) => r.policy === 'random')!
-    expect(report.turns.median).toBeGreaterThan(random.turns.median)
+    // Since Ascension ends winning runs early, longevity is measured by how
+    // rarely a run DIES, not by turn medians (a cashed-out run is short on
+    // purpose). Safe play must die at under a quarter of random's rate.
+    const deaths = (r: HarnessReport) =>
+      r.outcomes['hard-fail'] + r.outcomes.cascade
+    expect(deaths(report)).toBeLessThan(deaths(random) * 0.25)
     expect(report.turns.distinct).toBeGreaterThanOrEqual(8)
   })
 
@@ -49,12 +54,35 @@ describe(`balance harness (${RUNS} runs per policy)`, () => {
     const random = reports.find((r) => r.policy === 'random')!
     const safe = reports.find((r) => r.policy === 'greedy-safe')!
     const progress = reports.find((r) => r.policy === 'greedy-progress')!
-    expect(safe.meanSeeds).toBeGreaterThan(random.meanSeeds)
-    expect(progress.meanSeeds).toBeGreaterThan(safe.meanSeeds)
-    // The max-yield path is real: skilled play actually reaches Ascension.
-    expect(safe.outcomes.ascended + progress.outcomes.ascended).toBeGreaterThan(
-      0,
-    )
+    // Rising with skill: each skilled policy banks a MULTIPLE of what random
+    // flailing earns. (The two greedy styles are different play styles, not
+    // a skill ladder relative to each other — safe cashes out reliably,
+    // progress rushes and sometimes busts — so no ordering between them.)
+    expect(safe.meanSeeds).toBeGreaterThan(random.meanSeeds * 3)
+    expect(progress.meanSeeds).toBeGreaterThan(random.meanSeeds * 3)
+    // The max-yield path is real: both skilled styles actually Ascend.
+    expect(safe.outcomes.ascended).toBeGreaterThan(0)
+    expect(progress.outcomes.ascended).toBeGreaterThan(0)
+  })
+
+  it('no single system owns the cascade blame (issue #3 success bar)', () => {
+    // Pre-Spore-Garden, biosphere owned ~95% of greedy-progress cascades.
+    // Pool cascades across all policies and require an actual spread.
+    const blame: Record<string, number> = {}
+    let total = 0
+    for (const r of reports) {
+      for (const [sys, n] of Object.entries(r.cascadeSystems)) {
+        blame[sys] = (blame[sys] ?? 0) + n
+        total += n
+      }
+    }
+    expect(total).toBeGreaterThan(0)
+    for (const [sys, n] of Object.entries(blame)) {
+      expect(
+        n / total,
+        `${sys} owns ${Math.round((n / total) * 100)}% of cascade blame`,
+      ).toBeLessThan(0.6)
+    }
   })
 
   it('both collapse kinds occur across policies', () => {
