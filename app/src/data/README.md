@@ -8,15 +8,15 @@ changes. The sim never imports this directory — `index.ts` exports a validated
 
 Current files (M1):
 
-| File                 | Contents                                                                                                                           |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `balance.json`       | All tunables: Energy cap/regen (~5 min/burst target), tap rates, Instability accrual/decay/threshold, setpoint clamps, offline cap |
-| `eras.json`          | The 7-era ladder: per-era safe bands, advance threshold + stabilization window, volatility multiplier                              |
-| `archetypes.json`    | Barren only (M1): starting values/setpoints, natural rest points + pull rates, starting minerals                                   |
-| `machines.json`      | 3 machines (thermal/atmosphere/hydro): costs, push rates, passive production                                                       |
-| `cards.json`         | 22 event cards, era-gated, weighted; copy is cozy/hopeful per the tone decision                                                    |
-| `transmissions.json` | 44 Mission Control one-liners (issue #16), trigger- and era-tagged; see the tagging scheme below                                   |
-| `recipes.json`       | (M3 — not yet created) two-slot synthesis recipes                                                                                  |
+| File                 | Contents                                                                                                                                                           |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `balance.json`       | All tunables: Energy cap/regen (~5 min/burst target), tap rates, Instability accrual/decay/threshold, setpoint clamps, offline cap, Seed-yield params (`prestige`) |
+| `eras.json`          | The 7-era ladder: per-era safe bands, advance threshold + stabilization window, volatility multiplier                                                              |
+| `archetypes.json`    | Barren only (M1): starting values/setpoints, natural rest points + pull rates, starting minerals                                                                   |
+| `machines.json`      | 3 machines (thermal/atmosphere/hydro): costs, push rates, passive production                                                                                       |
+| `cards.json`         | 22 event cards, era-gated, weighted; copy is cozy/hopeful per the tone decision                                                                                    |
+| `transmissions.json` | 44 Mission Control one-liners (issue #16), trigger- and era-tagged; see the tagging scheme below                                                                   |
+| `recipes.json`       | (M3 — not yet created) two-slot synthesis recipes                                                                                                                  |
 
 Semantics worth knowing when tuning:
 
@@ -29,10 +29,19 @@ Semantics worth knowing when tuning:
 
 Balance-harness snapshot (2026-07-15, 1000 runs/policy, 15% mistake rate,
 after the issue #4 economy retune): random dies 63% (median 116 turns);
-greedy-safe survives 84% to the 300-turn cap, 14% reach Habitable;
-greedy-progress hits Fauna in ~48 turns then cascades. **Known hotspot:
-biosphere is the dominant late-era killer** (no machine steers it; its band
-floor climbs) — revisit when M2 adds content.
+greedy-safe survives 83% to the 300-turn cap and Ascends 14% at Habitable;
+greedy-progress hits Fauna in ~48 turns then cascades. Seeds/run rises with
+policy skill (M2 acceptance, asserted in CI): random 1.41 → greedy-safe 2.71
+→ greedy-progress 6.28. **Known hotspot: biosphere is the dominant late-era
+killer** (no machine steers it; its band floor climbs) — revisit when M2 adds
+content.
+
+Seed yield (`balance.prestige`, SPEC §2.8): `base = era·eraWeight +
+⌊peakHab/habDivisor⌋`; collapse pays `⌊base·collapseMult⌋` (partial),
+voluntary Ascension at Habitable pays `base + ascensionBonus` (max). The
+Codex/discoveries term joins in M3. Tuning intent: first runs bank 0–1 Seeds,
+a mid-game death 2–6, a full Ascension ~18–20 — Ascending must always beat
+collapsing on the same board (schema enforces `collapseMult < 1`).
 
 Mineral economy (issue #4): offline pays at 50% (`offline.productionMult`),
 and machine costs are steep (`costMult` 2.2) so maxing all three machines

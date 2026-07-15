@@ -5,6 +5,7 @@
 // sim is pure, so a (seed, policy) pair always produces the same run.
 
 import {
+  ascend,
   buildOrUpgrade,
   machineCost,
   machineOfType,
@@ -14,6 +15,7 @@ import {
 } from '../../src/sim/actions'
 import { canDraw, drawCard, resolveCard } from '../../src/sim/cards'
 import { applyOffline } from '../../src/sim/offline'
+import { canAscend } from '../../src/sim/prestige'
 import { nextFloat, seedRng } from '../../src/sim/rng'
 import { habitability } from '../../src/sim/systems'
 import { tick } from '../../src/sim/tick'
@@ -21,12 +23,16 @@ import { SYSTEM_IDS, type Content, type RunState } from '../../src/sim/types'
 
 export type PolicyName = 'random' | 'greedy-safe' | 'greedy-progress'
 
+export type Outcome = 'hard-fail' | 'cascade' | 'ascended' | 'survived'
+
 export type RunResult = {
   seed: number
   turns: number
   era: number // 0-based era index reached
   peakHabitability: number
-  outcome: 'hard-fail' | 'cascade' | 'survived'
+  outcome: Outcome
+  /** Genesis Seeds banked by the run's ending (0 if it never ended). */
+  seeds: number
   causeSystem?: string
 }
 
@@ -89,6 +95,13 @@ export function runOne(
     run = tick(run, content, secondsPerTurn)
     run = tapCollect(run, content).run
 
+    // Skilled play knows to cash out: greedy bots Ascend the moment the
+    // final era arrives (max Seed yield, SPEC §2.8). Random play doesn't.
+    if (policy !== 'random' && canAscend(run, content)) {
+      run = ascend(run, content)
+      break
+    }
+
     // Machine management.
     if (policy === 'random') {
       if (rand() < 0.3) {
@@ -144,13 +157,23 @@ export function runOne(
     }
   }
 
+  const outcome: Outcome = !run.collapse
+    ? 'survived'
+    : run.collapse.cause.kind === 'ascension'
+      ? 'ascended'
+      : run.collapse.cause.kind
   return {
     seed,
     turns: run.turns,
     era: run.era,
     peakHabitability: run.history.peakHabitability,
-    outcome: run.collapse ? run.collapse.cause.kind : 'survived',
-    causeSystem: run.collapse?.cause.system,
+    outcome,
+    seeds: run.collapse?.seedsAwarded ?? 0,
+    // A cause system only makes sense for a death, not a leave-taking.
+    causeSystem:
+      outcome === 'hard-fail' || outcome === 'cascade'
+        ? run.collapse?.cause.system
+        : undefined,
   }
 }
 
@@ -165,10 +188,12 @@ export type HarnessReport = {
     stddev: number
     distinct: number
   }
-  outcomes: Record<'hard-fail' | 'cascade' | 'survived', number>
+  outcomes: Record<Outcome, number>
   causeSystems: Record<string, number>
   eraHistogram: Record<number, number>
   meanPeakHabitability: number
+  /** Genesis Seeds per run — the SPEC M2 acceptance metric. */
+  meanSeeds: number
 }
 
 export function runMany(content: Content, opts: HarnessOptions): HarnessReport {
@@ -186,16 +211,18 @@ export function runMany(content: Content, opts: HarnessOptions): HarnessReport {
     turns.reduce((a, b) => a + (b - mean) ** 2, 0) / turns.length,
   )
 
-  const outcomes = { 'hard-fail': 0, cascade: 0, survived: 0 }
+  const outcomes = { 'hard-fail': 0, cascade: 0, ascended: 0, survived: 0 }
   const causeSystems: Record<string, number> = {}
   const eraHistogram: Record<number, number> = {}
   let peakSum = 0
+  let seedSum = 0
   for (const r of results) {
     outcomes[r.outcome]++
     if (r.causeSystem)
       causeSystems[r.causeSystem] = (causeSystems[r.causeSystem] ?? 0) + 1
     eraHistogram[r.era] = (eraHistogram[r.era] ?? 0) + 1
     peakSum += r.peakHabitability
+    seedSum += r.seeds
   }
 
   return {
@@ -213,6 +240,7 @@ export function runMany(content: Content, opts: HarnessOptions): HarnessReport {
     causeSystems,
     eraHistogram,
     meanPeakHabitability: Math.round((peakSum / results.length) * 10) / 10,
+    meanSeeds: Math.round((seedSum / results.length) * 100) / 100,
   }
 }
 
@@ -229,9 +257,10 @@ export function formatReport(report: HarnessReport, content: Content): string {
   return [
     `policy=${report.policy} runs=${report.runs}`,
     `  turns survived: median=${report.turns.median} p10=${report.turns.p10} p90=${report.turns.p90} mean=${report.turns.mean} stddev=${report.turns.stddev} distinct=${report.turns.distinct}`,
-    `  outcomes: hard-fail=${pct(report.outcomes['hard-fail'])} cascade=${pct(report.outcomes.cascade)} survived-cap=${pct(report.outcomes.survived)}`,
+    `  outcomes: hard-fail=${pct(report.outcomes['hard-fail'])} cascade=${pct(report.outcomes.cascade)} ascended=${pct(report.outcomes.ascended)} survived-cap=${pct(report.outcomes.survived)}`,
     `  collapse systems: ${causes || '(none)'}`,
     `  era reached: ${eras}`,
     `  mean peak habitability: ${report.meanPeakHabitability}`,
+    `  seeds/run: ${report.meanSeeds}`,
   ].join('\n')
 }

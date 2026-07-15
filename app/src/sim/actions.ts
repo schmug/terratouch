@@ -3,7 +3,9 @@
 // system setpoints. Pure functions over plain state, like all of sim/.
 // (Not in SPEC §4.2's file list — split out so tick.ts stays time-only.)
 
+import { canAscend } from './prestige'
 import { seedRng } from './rng'
+import { buildCollapseReport } from './systems'
 import {
   SimError,
   SYSTEM_IDS,
@@ -56,6 +58,22 @@ export function newRun(
     history: { peakHabitability: 0, turnsOutOfBand, machinesBuilt: 0 },
     collapse: null,
   }
+}
+
+/**
+ * Voluntary Ascension (SPEC §2.8): end a run at the final era for the max
+ * Genesis Seed yield. The run's board is otherwise untouched — the report is
+ * the record of the world as you left it. The cause's system/direction are
+ * fixed ('biosphere' rising) purely so the report shape stays uniform.
+ */
+export function ascend(run: RunState, content: Content): RunState {
+  if (!canAscend(run, content)) throw new SimError('cannot-ascend')
+  const report = buildCollapseReport(run, content, {
+    kind: 'ascension',
+    system: 'biosphere',
+    direction: 'high',
+  })
+  return { ...run, collapse: report }
 }
 
 /** Collect the tap pool with the active-play bonus (SPEC §2.6). */

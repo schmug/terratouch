@@ -55,6 +55,13 @@ export const balanceSchema = z.strictObject({
     productionMult: z.number().nonnegative(),
   }),
   cards: z.strictObject({ recentExclusion: z.number().int().nonnegative() }),
+  prestige: z.strictObject({
+    eraWeight: z.number().nonnegative(),
+    habDivisor: z.number().positive(),
+    /** Strictly below 1: collapse must never pay as well as Ascension. */
+    collapseMult: z.number().nonnegative().lt(1),
+    ascensionBonus: z.number().int().nonnegative(),
+  }),
 }) satisfies z.ZodType<Balance>
 
 /** '#rrggbb' only — keeps the palette trivially safe to inline into SVG. */

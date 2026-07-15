@@ -58,4 +58,18 @@ describe('templated chronicle', () => {
     expect(text).toContain('a single turn')
     expect(text).not.toContain('Remember it honestly')
   })
+
+  it('an ascension reads as a leave-taking, not an obituary', () => {
+    const text = templatedChronicle(
+      report({
+        cause: { kind: 'ascension', system: 'biosphere', direction: 'high' },
+        eraReached: 'Habitable',
+        seedsAwarded: 18,
+      }),
+    )
+    expect(text.split(/\s+/).length).toBeLessThanOrEqual(120)
+    expect(text).toContain('You did not lose this one')
+    expect(text).toContain('Habitable')
+    expect(text).toContain('Barren')
+  })
 })

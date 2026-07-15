@@ -40,7 +40,8 @@ export type RunHistory = {
 }
 
 export type CollapseCause = {
-  kind: 'hard-fail' | 'cascade'
+  /** 'ascension' is the voluntary run end at Habitable (SPEC §2.8, M2). */
+  kind: 'hard-fail' | 'cascade' | 'ascension'
   system: SystemId
   direction: 'low' | 'high'
 }
@@ -116,6 +117,15 @@ export type Balance = {
   era: { progressDecayMult: number }
   offline: { maxHours: number; productionMult: number }
   cards: { recentExclusion: number }
+  /** Genesis Seed yield (SPEC §2.8): base = era·eraWeight + ⌊peakHab/habDivisor⌋. */
+  prestige: {
+    eraWeight: number
+    habDivisor: number
+    /** Partial yield on collapse: ⌊base·collapseMult⌋. */
+    collapseMult: number
+    /** Flat extra Seeds on voluntary Ascension (max yield): base + bonus. */
+    ascensionBonus: number
+  }
 }
 
 /** Decorative overlay kinds painted on the planet (issue #10). */

@@ -2,6 +2,7 @@
 // bands, Habitability, Instability accrual/decay, and collapse detection
 // (SPEC §2.2, §2.4). Pure functions over plain state.
 
+import { seedYield } from './prestige'
 import {
   SYSTEM_IDS,
   type Balance,
@@ -155,7 +156,11 @@ export function buildCollapseReport(
     systemsFinal,
     peakHabitability: run.history.peakHabitability,
     notableStats: notable.slice(0, 4),
-    seedsAwarded: 0, // prestige economy is Milestone 2
+    seedsAwarded: seedYield(
+      run,
+      content,
+      cause.kind === 'ascension' ? 'ascension' : 'collapse',
+    ),
   }
 }
 
