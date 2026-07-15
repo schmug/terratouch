@@ -13,9 +13,9 @@
 // coming alive, not seven different planets.
 
 import { useEffect, useRef, useState } from 'react'
-import { content } from '../data'
 import { habitability, inBand } from '../sim/systems'
 import type { RunState } from '../sim/types'
+import { useGame } from '../state/store'
 import {
   DEFAULT_VISUALS,
   cloudCover,
@@ -102,6 +102,7 @@ export function Starfield() {
 }
 
 export function PlanetVisuals({ run }: { run: RunState }) {
+  const content = useGame((s) => s.content)
   const visuals = content.eras[run.era]?.visuals ?? DEFAULT_VISUALS
   const hab = habitability(run.systems)
   const mood = strain(

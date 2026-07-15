@@ -2,7 +2,6 @@
 // Habitability, Instability meter, Energy, and the Advance button.
 
 import { useRef, useState } from 'react'
-import { content } from '../data'
 import { canDraw } from '../sim/cards'
 import { driftDirection } from '../sim/tick'
 import { SYSTEM_IDS } from '../sim/types'
@@ -16,6 +15,7 @@ type Float = { id: number; amount: number }
 
 export function PlanetScreen({ goToCards }: { goToCards: () => void }) {
   const run = useGame((s) => s.run)
+  const content = useGame((s) => s.content)
   const tap = useGame((s) => s.tap)
   const draw = useGame((s) => s.draw)
   const [floats, setFloats] = useState<Float[]>([])

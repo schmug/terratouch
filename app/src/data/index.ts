@@ -11,6 +11,7 @@ import cardsJson from './cards.json'
 import erasJson from './eras.json'
 import machinesJson from './machines.json'
 import transmissionsJson from './transmissions.json'
+import upgradesJson from './upgrades.json'
 import {
   archetypesSchema,
   balanceSchema,
@@ -19,6 +20,7 @@ import {
   machinesSchema,
   transmissionsSchema,
   transmissionTriggerSchema,
+  upgradesSchema,
   type TransmissionDef,
 } from './schema'
 
@@ -39,6 +41,16 @@ export function validateContent(content: Content): void {
     problems.push(`duplicate machine id "${d}"`)
   for (const d of dupes(content.archetypes.map((a) => a.id)))
     problems.push(`duplicate archetype id "${d}"`)
+  for (const d of dupes(content.upgrades.map((u) => u.id)))
+    problems.push(`duplicate upgrade id "${d}"`)
+
+  for (const machine of content.machines) {
+    if (machine.unlockEra !== undefined && machine.unlockEra > eraCount) {
+      problems.push(
+        `machine "${machine.id}" unlocks at era ${machine.unlockEra} but only ${eraCount} exist`,
+      )
+    }
+  }
 
   for (const card of content.cards) {
     if (card.eras[1] > eraCount) {
@@ -98,6 +110,7 @@ export function parseContent(raw: {
   archetypes: unknown
   machines: unknown
   cards: unknown
+  upgrades: unknown
 }): Content {
   const content: Content = {
     balance: balanceSchema.parse(raw.balance),
@@ -105,6 +118,7 @@ export function parseContent(raw: {
     archetypes: archetypesSchema.parse(raw.archetypes),
     machines: machinesSchema.parse(raw.machines),
     cards: cardsSchema.parse(raw.cards),
+    upgrades: upgradesSchema.parse(raw.upgrades),
   }
   validateContent(content)
   return content
@@ -117,6 +131,7 @@ export function loadContent(): Content {
     archetypes: archetypesJson,
     machines: machinesJson,
     cards: cardsJson,
+    upgrades: upgradesJson,
   })
 }
 

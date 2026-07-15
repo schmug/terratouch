@@ -1,14 +1,15 @@
 // BuildScreen.tsx — machines list (SPEC §3): place, upgrade, set setpoints.
-// Minimal, chunky rows; every control ≥44px.
+// Minimal, chunky rows; every control ≥44px. Era-gated machines (unlockEra)
+// show as sleeping rows until their era arrives.
 
-import { content } from '../data'
-import { machineCost, machineOfType } from '../sim/actions'
+import { machineCost, machineOfType, machineUnlocked } from '../sim/actions'
 import { useGame } from '../state/store'
 import { fmtInt } from './format'
 import { SHAPE_GLYPH, SYSTEM_META } from './meta'
 
 export function BuildScreen() {
   const run = useGame((s) => s.run)
+  const content = useGame((s) => s.content)
   const build = useGame((s) => s.build)
   const setpoint = useGame((s) => s.setpoint)
 
@@ -24,6 +25,28 @@ export function BuildScreen() {
 
       {content.machines.map((def) => {
         const meta = SYSTEM_META[def.system]
+        const unlocked = machineUnlocked(run, def)
+
+        if (!unlocked) {
+          const eraName =
+            content.eras[(def.unlockEra ?? 1) - 1]?.name ?? 'a later'
+          return (
+            <div key={def.id} className="machine-row machine-locked">
+              <div className="machine-head">
+                <div>
+                  <h3 className="machine-name">{def.name}</h3>
+                  <p className="machine-blurb">
+                    Sleeps until the {eraName} era.
+                  </p>
+                </div>
+                <span className="machine-system" style={{ color: meta.color }}>
+                  {SHAPE_GLYPH[meta.shape]} {meta.short}
+                </span>
+              </div>
+            </div>
+          )
+        }
+
         const instance = machineOfType(run, def.id)
         const level = instance?.level ?? 0
         const maxed = level >= def.maxLevel
@@ -92,11 +115,6 @@ export function BuildScreen() {
           </div>
         )
       })}
-
-      <p className="build-note">
-        The biosphere has no machine yet — living things answer only to the
-        cards.
-      </p>
     </div>
   )
 }

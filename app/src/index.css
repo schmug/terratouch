@@ -1130,6 +1130,84 @@ body {
   color: var(--muted);
 }
 
+/* Genesis Seeds: the run's yield in the recap + the between-worlds shop. */
+
+.seeds-earned {
+  margin: 0;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+.seed-shop {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.seed-shop-title {
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+}
+
+.shop-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(233, 227, 213, 0.05);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.shop-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.shop-name {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.shop-blurb {
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.shop-buy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.shop-btn {
+  min-width: 72px;
+  min-height: 44px;
+}
+
+/* Era-gated machines sleep until their era (unlockEra). */
+.machine-locked {
+  opacity: 0.55;
+}
+
+.machine-locked .machine-name::after {
+  content: ' ·  asleep';
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
 .away-title {
   margin: 0;
   font-family: var(--font-serif);

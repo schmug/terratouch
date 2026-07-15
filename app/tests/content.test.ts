@@ -13,6 +13,7 @@ import cardsJson from '../src/data/cards.json'
 import erasJson from '../src/data/eras.json'
 import machinesJson from '../src/data/machines.json'
 import transmissionsJson from '../src/data/transmissions.json'
+import upgradesJson from '../src/data/upgrades.json'
 
 const raw = () => ({
   balance: structuredClone(balanceJson) as unknown,
@@ -20,6 +21,7 @@ const raw = () => ({
   archetypes: structuredClone(archetypesJson) as unknown,
   machines: structuredClone(machinesJson) as unknown,
   cards: structuredClone(cardsJson) as unknown,
+  upgrades: structuredClone(upgradesJson) as unknown,
 })
 
 const rawTransmissions = () =>
@@ -29,16 +31,36 @@ describe('shipped content', () => {
   it('parses and validates', () => {
     const content = loadContent()
     expect(content.eras).toHaveLength(7)
-    expect(content.archetypes.map((a) => a.id)).toEqual(['barren']) // M1: Barren only
-    expect(content.machines).toHaveLength(3)
+    expect(content.archetypes.map((a) => a.id)).toEqual(['barren']) // Frozen/Volcanic land with the M2 archetype PR
+    expect(content.machines).toHaveLength(4)
     expect(content.cards.length).toBeGreaterThanOrEqual(20)
+    expect(content.upgrades.length).toBeGreaterThanOrEqual(5)
   })
 
-  it('M1 scope: a machine steers thermal, atmosphere, and hydro', () => {
+  it('every system has a steering machine (issue #3: Spore Garden)', () => {
     const systems = loadContent()
       .machines.map((m) => m.system)
       .sort()
-    expect(systems).toEqual(['atmosphere', 'hydro', 'thermal'])
+    expect(systems).toEqual(['atmosphere', 'biosphere', 'hydro', 'thermal'])
+  })
+
+  it('the Spore Garden wakes around Liquid/Microbial (issue #3 decision)', () => {
+    const garden = loadContent().machines.find((m) => m.id === 'spore-garden')!
+    expect(garden.unlockEra).toBeGreaterThanOrEqual(3)
+    expect(garden.unlockEra).toBeLessThanOrEqual(4)
+  })
+
+  it('meta-upgrades cover every SPEC §2.8 effect family', () => {
+    const kinds = new Set(loadContent().upgrades.map((u) => u.effect.kind))
+    expect(kinds).toEqual(
+      new Set([
+        'machine-push-mult',
+        'instability-accrual-mult',
+        'starting-minerals',
+        'energy-cap',
+        'offline-cap-hours',
+      ]),
+    )
   })
 
   it('every era has a card pool and rising bands stay off the lethal edges', () => {
@@ -139,6 +161,30 @@ describe('malformed content fails loudly', () => {
       cards: [...content.cards, content.cards[0]!],
     }
     expect(() => validateContent(dupe)).toThrow(/duplicate card id/)
+  })
+
+  it('rejects a duplicate upgrade id', () => {
+    const content = loadContent()
+    const dupe = {
+      ...content,
+      upgrades: [...content.upgrades, content.upgrades[0]!],
+    }
+    expect(() => validateContent(dupe)).toThrow(/duplicate upgrade id/)
+  })
+
+  it('rejects a machine unlocking past the era ladder', () => {
+    const bad = raw()
+    ;(bad.machines as { unlockEra?: number }[])[0]!.unlockEra = 99
+    expect(() => parseContent(bad)).toThrow(/only 7 exist/)
+  })
+
+  it('rejects an instability upgrade that could stop accrual entirely', () => {
+    const bad = raw()
+    const steady = (
+      bad.upgrades as { id: string; effect: { perLevel: number } }[]
+    ).find((u) => u.id === 'steady-hands')!
+    steady.effect.perLevel = 1
+    expect(() => parseContent(bad)).toThrow()
   })
 
   it('rejects a non-final era with no advance threshold', () => {

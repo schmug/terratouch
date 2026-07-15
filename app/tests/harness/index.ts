@@ -9,6 +9,7 @@ import {
   buildOrUpgrade,
   machineCost,
   machineOfType,
+  machineUnlocked,
   newRun,
   setSetpoint,
   tapCollect,
@@ -116,6 +117,7 @@ export function runOne(
       const reserve = policy === 'greedy-safe' ? 20 : 0
       for (const typeId of buyPriority) {
         const def = content.machines.find((m) => m.id === typeId)!
+        if (!machineUnlocked(run, def)) continue
         const level = machineOfType(run, typeId)?.level ?? 0
         if (level >= def.maxLevel) continue
         const cost = machineCost(def, level + 1)
@@ -190,6 +192,8 @@ export type HarnessReport = {
   }
   outcomes: Record<Outcome, number>
   causeSystems: Record<string, number>
+  /** Blame among cascade deaths only (issue #3's spread bar). */
+  cascadeSystems: Record<string, number>
   eraHistogram: Record<number, number>
   meanPeakHabitability: number
   /** Genesis Seeds per run — the SPEC M2 acceptance metric. */
@@ -213,13 +217,18 @@ export function runMany(content: Content, opts: HarnessOptions): HarnessReport {
 
   const outcomes = { 'hard-fail': 0, cascade: 0, ascended: 0, survived: 0 }
   const causeSystems: Record<string, number> = {}
+  const cascadeSystems: Record<string, number> = {}
   const eraHistogram: Record<number, number> = {}
   let peakSum = 0
   let seedSum = 0
   for (const r of results) {
     outcomes[r.outcome]++
-    if (r.causeSystem)
+    if (r.causeSystem) {
       causeSystems[r.causeSystem] = (causeSystems[r.causeSystem] ?? 0) + 1
+      if (r.outcome === 'cascade') {
+        cascadeSystems[r.causeSystem] = (cascadeSystems[r.causeSystem] ?? 0) + 1
+      }
+    }
     eraHistogram[r.era] = (eraHistogram[r.era] ?? 0) + 1
     peakSum += r.peakHabitability
     seedSum += r.seeds
@@ -238,6 +247,7 @@ export function runMany(content: Content, opts: HarnessOptions): HarnessReport {
     },
     outcomes,
     causeSystems,
+    cascadeSystems,
     eraHistogram,
     meanPeakHabitability: Math.round((peakSum / results.length) * 10) / 10,
     meanSeeds: Math.round((seedSum / results.length) * 100) / 100,

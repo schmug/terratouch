@@ -4,7 +4,6 @@
 // hidden). Buttons under the card mirror the choices for accessibility.
 
 import { useRef, useState } from 'react'
-import { content } from '../data'
 import { canDraw, cardById } from '../sim/cards'
 import type { CardChoice } from '../sim/types'
 import { useGame } from '../state/store'
@@ -50,6 +49,7 @@ function ChoiceChips({ choice }: { choice: CardChoice }) {
 
 export function CardsScreen() {
   const run = useGame((s) => s.run)
+  const content = useGame((s) => s.content)
   const draw = useGame((s) => s.draw)
   const resolve = useGame((s) => s.resolve)
   const lastOutcome = useGame((s) => s.lastOutcome)

@@ -1,0 +1,47 @@
+[
+  {
+    "id": "buried-caches",
+    "name": "Buried Caches",
+    "blurb": "You leave supplies behind for the next world, the way travelers leave firewood for strangers.",
+    "baseCost": 3,
+    "costMult": 2,
+    "maxLevel": 5,
+    "effect": { "kind": "starting-minerals", "perLevel": 25 }
+  },
+  {
+    "id": "tuned-flywheels",
+    "name": "Tuned Flywheels",
+    "blurb": "Your machines remember their rhythm from world to world, and settle into it a little quicker.",
+    "baseCost": 4,
+    "costMult": 2,
+    "maxLevel": 5,
+    "effect": { "kind": "machine-push-mult", "perLevel": 0.1 }
+  },
+  {
+    "id": "steady-hands",
+    "name": "Steady Hands",
+    "blurb": "You have done this before. The close calls stay close calls a little longer.",
+    "baseCost": 5,
+    "costMult": 2,
+    "maxLevel": 5,
+    "effect": { "kind": "instability-accrual-mult", "perLevel": 0.08 }
+  },
+  {
+    "id": "deep-cells",
+    "name": "Deep Cells",
+    "blurb": "A bigger reserve of attention. Each level holds one more decision before you need to rest.",
+    "baseCost": 6,
+    "costMult": 2,
+    "maxLevel": 4,
+    "effect": { "kind": "energy-cap", "perLevel": 1 }
+  },
+  {
+    "id": "patient-orbit",
+    "name": "Patient Orbit",
+    "blurb": "The world learns to keep itself a few hours longer while you are elsewhere, living.",
+    "baseCost": 4,
+    "costMult": 2,
+    "maxLevel": 4,
+    "effect": { "kind": "offline-cap-hours", "perLevel": 4 }
+  }
+]

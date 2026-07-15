@@ -199,6 +199,37 @@ export type MachineDef = {
   /** Passive minerals per second per level. */
   productionPerSecPerLevel: number
   maxLevel: number
+  /** 1-based era the machine becomes buildable in; omitted = always. */
+  unlockEra?: number
+}
+
+// ---------------------------------------------------------------------------
+// Meta-upgrades (SPEC §2.8, M2): Seeds → permanent effects. Pure data; the
+// levels the player owns live in MetaState.upgrades, and prestige.ts derives
+// an effective Content bundle from them.
+// ---------------------------------------------------------------------------
+
+export type MetaUpgradeEffect =
+  /** Machines push harder: every pushRatePerSecPerLevel ×(1+perLevel)^level. */
+  | { kind: 'machine-push-mult'; perLevel: number }
+  /** Gentler active-turn accrual: accrualPerSystemPerTurn ×(1−perLevel)^level. */
+  | { kind: 'instability-accrual-mult'; perLevel: number }
+  /** Every archetype starts with +perLevel·level minerals. */
+  | { kind: 'starting-minerals'; perLevel: number }
+  /** Energy cap +perLevel·level (runs also START at the raised cap). */
+  | { kind: 'energy-cap'; perLevel: number }
+  /** Offline catch-up window +perLevel·level hours (still band-safe). */
+  | { kind: 'offline-cap-hours'; perLevel: number }
+
+export type MetaUpgradeDef = {
+  id: string
+  name: string
+  blurb: string
+  /** Seed cost of level n: round(baseCost · costMult^(n−1)). */
+  baseCost: number
+  costMult: number
+  maxLevel: number
+  effect: MetaUpgradeEffect
 }
 
 export type CardEffects = {
@@ -232,6 +263,7 @@ export type Content = {
   archetypes: ArchetypeDef[]
   machines: MachineDef[]
   cards: CardDef[]
+  upgrades: MetaUpgradeDef[]
 }
 
 // ---------------------------------------------------------------------------
