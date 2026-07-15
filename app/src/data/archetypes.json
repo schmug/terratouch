@@ -30,5 +30,69 @@
         "naturalRatePerSec": 0.002
       }
     }
+  },
+  {
+    "id": "frozen",
+    "name": "Frozen",
+    "blurb": "An ice world, dreaming under glass. All the water you could want — it just needs convincing to move.",
+    "startingMinerals": 35,
+    "systems": {
+      "thermal": {
+        "start": 5,
+        "setpoint": 27,
+        "naturalRest": 2,
+        "naturalRatePerSec": 0.008
+      },
+      "atmosphere": {
+        "start": 6,
+        "setpoint": 24,
+        "naturalRest": 4,
+        "naturalRatePerSec": 0.003
+      },
+      "hydro": {
+        "start": 30,
+        "setpoint": 30,
+        "naturalRest": 24,
+        "naturalRatePerSec": 0.004
+      },
+      "biosphere": {
+        "start": 2,
+        "setpoint": 15,
+        "naturalRest": 2,
+        "naturalRatePerSec": 0.002
+      }
+    }
+  },
+  {
+    "id": "volcanic",
+    "name": "Volcanic",
+    "blurb": "A molten heart that never learned to rest. Rich beyond counting, if you can keep the heat from having its way.",
+    "startingMinerals": 60,
+    "systems": {
+      "thermal": {
+        "start": 48,
+        "setpoint": 30,
+        "naturalRest": 95,
+        "naturalRatePerSec": 0.008
+      },
+      "atmosphere": {
+        "start": 28,
+        "setpoint": 24,
+        "naturalRest": 35,
+        "naturalRatePerSec": 0.004
+      },
+      "hydro": {
+        "start": 4,
+        "setpoint": 24,
+        "naturalRest": 2,
+        "naturalRatePerSec": 0.003
+      },
+      "biosphere": {
+        "start": 2,
+        "setpoint": 15,
+        "naturalRest": 1,
+        "naturalRatePerSec": 0.002
+      }
+    }
   }
 ]

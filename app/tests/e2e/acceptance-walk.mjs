@@ -1,8 +1,9 @@
-// M1 acceptance walk (SPEC §7) — drives the built PWA end-to-end with
+// M1+M2 acceptance walk (SPEC §7) — drives the built PWA end-to-end with
 // system Chrome via playwright-core (no browser download; needs Chrome
-// installed). 27 checks: install/SW, play burst (swipe + buttons), build +
+// installed). 35 checks: install/SW, play burst (swipe + buttons), build +
 // setpoints, offline-gap safety invariants, both collapse kinds, templated
-// chronicle, loss persistence, new world, no-network reload, reduced motion.
+// chronicle, loss persistence, new world, the full prestige loop (Ascend →
+// Seeds → shop → archetype unlock), no-network reload, reduced motion.
 //
 // Usage:
 //   npm run build && npm run preview &     # or any deployed URL
@@ -168,6 +169,14 @@ check(
   (save1?.run?.energy ?? 99) <= 10 - resolved + 2,
   `energy=${save1?.run?.energy?.toFixed(2)}`,
 )
+
+// A very unlucky burst can end the world (Barren's biosphere starts at 2, so
+// an early bio-negative card can hard-fail on the spot). Rare, but the walk
+// must not wedge on luck: begin a fresh world and carry on.
+if (await page.isVisible('.loss-sheet')) {
+  await page.click('.begin-btn')
+  await page.waitForSelector('.loss-sheet', { state: 'detached' })
+}
 
 // --------------------------------------------- 3. build a machine + setpoint
 await page.click('.tab-btn:nth-child(3)')
@@ -354,6 +363,95 @@ if (hardFailed) {
     'no hard fail in 12 turns from 97 thermal (may be ok — cards drifted cool)',
   )
 }
+
+// --------------------------------------------------- 6b. Ascension (M2 #5)
+// Rig a healthy world at the final era, then walk the whole prestige loop:
+// arm + commit the Ascend button, read the triumphant sheet, spend Seeds in
+// the shop, unlock Frozen with the Charts, and begin the next world as it.
+const rig3 = await readSave()
+rig3.run.collapse = null
+rig3.run.activeCardId = null
+rig3.run.era = 6
+rig3.run.eraProgressSec = 0
+rig3.run.instability = 0
+rig3.run.energy = 10
+rig3.run.history.peakHabitability = 90
+rig3.run.systems.thermal = { value: 68, band: [50, 86], setpoint: 68 }
+rig3.run.systems.atmosphere = { value: 65, band: [46, 84], setpoint: 65 }
+rig3.run.systems.hydro = { value: 63, band: [42, 84], setpoint: 63 }
+rig3.run.systems.biosphere = { value: 62, band: [40, 84], setpoint: 62 }
+rig3.lastSeenMs = Date.now()
+await writeSave(rig3)
+await page.reload({ waitUntil: 'load' })
+await page.waitForSelector('.app-header')
+await page.click('.tab-btn:nth-child(1)')
+const seedsBefore = (await readSave()).meta.genesisSeeds
+check('Ascend offered at the final era', await page.isVisible('.ascend-btn'))
+await page.click('.ascend-btn')
+const armed = await page.isVisible('.ascend-btn.armed')
+const stillAlive = (await readSave()).run.collapse === null
+check('Ascension arms first, commits second', armed && stillAlive)
+await page.click('.ascend-btn')
+await page.waitForSelector('.loss-sheet', { timeout: 5000 })
+await page.waitForFunction(() => {
+  const el = document.querySelector('.chronicle-text')
+  return el && el.textContent && el.textContent.length > 40
+})
+await page.screenshot({ path: `${SHOTS}14-ascended.png` })
+const ascendSheet = await page.textContent('.loss-sheet')
+check(
+  'Ascension reaches the sheet in its triumphant key',
+  Boolean(ascendSheet?.includes('A World, Ascended')),
+)
+check(
+  'Ascension chronicle is a leave-taking',
+  Boolean(ascendSheet?.includes('You did not lose this one')),
+)
+const ascendedSave = await readSave()
+const awarded = ascendedSave.run.collapse?.seedsAwarded ?? 0
+check(
+  'Seeds earned shown in the recap and banked to meta',
+  awarded > 0 &&
+    ascendedSave.meta.genesisSeeds === seedsBefore + awarded &&
+    Boolean(ascendSheet?.includes(`+${awarded} genesis seed`)),
+  `+${awarded} → ${ascendedSave.meta.genesisSeeds}`,
+)
+
+// Spend in the shop: Buried Caches (3), then Charts of Ice (8) → Frozen.
+await page
+  .locator('.shop-row', { hasText: 'Buried Caches' })
+  .locator('.shop-btn')
+  .click()
+await page.waitForTimeout(300)
+const afterCaches = await readSave()
+check(
+  'Seed shop purchase persists',
+  afterCaches.meta.upgrades['buried-caches'] === 1 &&
+    afterCaches.meta.genesisSeeds < ascendedSave.meta.genesisSeeds,
+  `seeds ${ascendedSave.meta.genesisSeeds} → ${afterCaches.meta.genesisSeeds}`,
+)
+const frozenChip = page.locator('.archetype-chip', { hasText: 'Frozen' })
+const lockedBefore = await frozenChip.isDisabled()
+await page
+  .locator('.shop-row', { hasText: 'Charts of Ice' })
+  .locator('.shop-btn')
+  .click()
+await page.waitForTimeout(300)
+check(
+  'Charts of Ice unlock enables the Frozen chip',
+  lockedBefore && !(await frozenChip.isDisabled()),
+)
+await frozenChip.click()
+await page.screenshot({ path: `${SHOTS}15-next-world-picker.png` })
+await page.click('.begin-btn')
+await page.waitForTimeout(400)
+const frozenRun = await readSave()
+check(
+  'the next world begins as the chosen archetype',
+  frozenRun.run.archetypeId === 'frozen' &&
+    frozenRun.run.collapse === null &&
+    frozenRun.meta.unlockedArchetypes.includes('frozen'),
+)
 
 // --------------------------------------------------- 7. fully offline reload
 await context.setOffline(true)

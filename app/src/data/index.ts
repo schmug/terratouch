@@ -52,6 +52,20 @@ export function validateContent(content: Content): void {
     }
   }
 
+  for (const upgrade of content.upgrades) {
+    if (upgrade.effect.kind !== 'unlock-archetype') continue
+    if (!archetypeIds.has(upgrade.effect.archetypeId)) {
+      problems.push(
+        `upgrade "${upgrade.id}" unlocks unknown archetype "${upgrade.effect.archetypeId}"`,
+      )
+    }
+    if (upgrade.maxLevel !== 1) {
+      problems.push(
+        `upgrade "${upgrade.id}" unlocks an archetype but has maxLevel ${upgrade.maxLevel} (must be 1)`,
+      )
+    }
+  }
+
   for (const card of content.cards) {
     if (card.eras[1] > eraCount) {
       problems.push(

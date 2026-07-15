@@ -43,5 +43,23 @@
     "costMult": 2,
     "maxLevel": 4,
     "effect": { "kind": "offline-cap-hours", "perLevel": 4 }
+  },
+  {
+    "id": "unlock-frozen",
+    "name": "Charts of Ice",
+    "blurb": "Maps to a world asleep under glaciers. Unlocks the Frozen archetype for new runs.",
+    "baseCost": 8,
+    "costMult": 1,
+    "maxLevel": 1,
+    "effect": { "kind": "unlock-archetype", "archetypeId": "frozen" }
+  },
+  {
+    "id": "unlock-volcanic",
+    "name": "Charts of Fire",
+    "blurb": "Maps to a world that never cooled. Unlocks the Volcanic archetype for new runs.",
+    "baseCost": 12,
+    "costMult": 1,
+    "maxLevel": 1,
+    "effect": { "kind": "unlock-archetype", "archetypeId": "volcanic" }
   }
 ]
