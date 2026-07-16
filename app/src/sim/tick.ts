@@ -7,7 +7,8 @@
 // (weighted by total machine push). Exponential approach never overshoots,
 // so ticking can NEVER hard-fail a gauge — danger comes only from cards.
 
-import { habitability, shiftBandsToEra } from './systems'
+import { stepPhenomena } from './phenomena'
+import { habitability, productionRate, shiftBandsToEra } from './systems'
 import {
   SYSTEM_IDS,
   type ArchetypeDef,
@@ -17,6 +18,8 @@ import {
   type SystemId,
   type SystemState,
 } from './types'
+
+export { machineProductionRate, productionRate } from './systems'
 
 function archetypeOf(run: RunState, content: Content): ArchetypeDef {
   const a = content.archetypes.find((x) => x.id === run.archetypeId)
@@ -35,19 +38,6 @@ export function machinePushRate(
     const def = content.machines.find((d) => d.id === m.typeId)
     if (def && def.system === system)
       rate += def.pushRatePerSecPerLevel * m.level
-  }
-  return rate
-}
-
-/** Total passive minerals per second from machines (before the planet's base rate). */
-export function machineProductionRate(
-  machines: readonly MachineInstance[],
-  content: Content,
-): number {
-  let rate = 0
-  for (const m of machines) {
-    const def = content.machines.find((d) => d.id === m.typeId)
-    if (def) rate += def.productionPerSecPerLevel * m.level
   }
   return rate
 }
@@ -95,14 +85,6 @@ export function driftDirection(
   const gap = target - run.systems[system].value
   if (Math.abs(gap) < 0.5) return 0
   return gap > 0 ? 1 : -1
-}
-
-/** Total minerals per second flowing into the tap pool. */
-export function productionRate(run: RunState, content: Content): number {
-  return (
-    content.balance.tap.baseRatePerSec +
-    machineProductionRate(run.machines, content)
-  )
 }
 
 /**
@@ -171,13 +153,17 @@ export function tick(run: RunState, content: Content, dtSec: number): RunState {
     run.history.peakHabitability,
     habitability(shiftedSystems),
   )
-  return {
-    ...run,
-    systems: shiftedSystems,
-    uncollected,
-    energy,
-    era,
-    eraProgressSec,
-    history: { ...run.history, peakHabitability: peak },
-  }
+  return stepPhenomena(
+    {
+      ...run,
+      systems: shiftedSystems,
+      uncollected,
+      energy,
+      era,
+      eraProgressSec,
+      activeSec: run.activeSec + dtSec,
+      history: { ...run.history, peakHabitability: peak },
+    },
+    content,
+  )
 }

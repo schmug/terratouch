@@ -176,4 +176,19 @@ describe('offline safety invariants (property-style)', () => {
     applyOffline(run, content, 3_600_000)
     expect(JSON.stringify(run)).toBe(before)
   })
+
+  it('offline freezes the phenomena state machine entirely', () => {
+    const run = {
+      ...makeRun(content, 3),
+      activeSec: 50,
+      phenomenon: { defId: 'x', expiresAtActiveSec: 55 },
+      tailwind: { system: 'thermal' as const, untilActiveSec: 70, pushMult: 2 },
+      nextPhenomenonAtSec: 0,
+    }
+    const after = applyOffline(run, content, 8 * 3600_000).run
+    expect(after.activeSec).toBe(50)
+    expect(after.phenomenon).toEqual(run.phenomenon)
+    expect(after.tailwind).toEqual(run.tailwind)
+    expect(after.phenoRngState).toBe(run.phenoRngState)
+  })
 })
