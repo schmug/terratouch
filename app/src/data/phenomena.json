@@ -1,0 +1,71 @@
+[
+  {
+    "id": "meteor-fall",
+    "name": "Meteor fall",
+    "blurb": "A soft streak of sky-iron — catch it while it glitters.",
+    "weight": 30,
+    "payout": { "kind": "minerals", "productionSec": 45 }
+  },
+  {
+    "id": "geyser-vent",
+    "name": "Geyser vent",
+    "blurb": "The crust exhales. Let the pressure go with it.",
+    "weight": 25,
+    "payout": { "kind": "vent", "amount": 4 }
+  },
+  {
+    "id": "aurora-surge",
+    "name": "Aurora surge",
+    "blurb": "Charged winds comb the high air into ribbons.",
+    "weight": 10,
+    "payout": {
+      "kind": "tailwind",
+      "system": "atmosphere",
+      "durationSec": 30,
+      "pushMult": 2
+    }
+  },
+  {
+    "id": "thermal-bloom",
+    "name": "Thermal bloom",
+    "blurb": "A warm current rises, eager to be steered.",
+    "weight": 10,
+    "payout": {
+      "kind": "tailwind",
+      "system": "thermal",
+      "durationSec": 30,
+      "pushMult": 2
+    }
+  },
+  {
+    "id": "spring-swell",
+    "name": "Spring swell",
+    "blurb": "Groundwater remembers the way up.",
+    "weight": 10,
+    "payout": {
+      "kind": "tailwind",
+      "system": "hydro",
+      "durationSec": 30,
+      "pushMult": 2
+    }
+  },
+  {
+    "id": "verdant-flush",
+    "name": "Verdant flush",
+    "blurb": "Something small decides today is the day.",
+    "weight": 10,
+    "payout": {
+      "kind": "tailwind",
+      "system": "biosphere",
+      "durationSec": 30,
+      "pushMult": 2
+    }
+  },
+  {
+    "id": "spark-of-attention",
+    "name": "Spark of attention",
+    "blurb": "The world notices you noticing. Take a breath back.",
+    "weight": 15,
+    "payout": { "kind": "energy", "amount": 1 }
+  }
+]

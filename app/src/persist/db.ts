@@ -3,7 +3,8 @@
 // with a migration switch. Never localStorage for the authoritative save.
 
 import { openDB, type IDBPDatabase } from 'idb'
-import type { Save } from '../sim/types'
+import { seedPhenoRng } from '../sim/rng'
+import type { RunState, Save } from '../sim/types'
 
 const DB_NAME = 'terratouch'
 const DB_VERSION = 1
@@ -21,6 +22,13 @@ function db(): Promise<IDBPDatabase> {
   return dbPromise
 }
 
+type ActivePlayField =
+  | 'activeSec'
+  | 'phenoRngState'
+  | 'phenomenon'
+  | 'tailwind'
+  | 'nextPhenomenonAtSec'
+
 /**
  * Migration switch (SPEC §4.4). Pure — exported for tests. Returns null for
  * anything unrecognized (treated as no save, so the game starts fresh rather
@@ -34,6 +42,26 @@ export function migrateSave(raw: unknown): Save | null {
   const candidate = raw as { schemaVersion?: unknown }
   switch (candidate.schemaVersion) {
     case 1: {
+      // v1 → v2: add the active-play fields (Session Arc slice A) with inert
+      // defaults, then fall through to v2 validation via recursion.
+      const v1 = raw as Omit<Save, 'schemaVersion' | 'run'> & {
+        schemaVersion: 1
+        run: (Omit<RunState, ActivePlayField> & Partial<RunState>) | null
+      }
+      const run: RunState | null =
+        v1.run === null || v1.run === undefined
+          ? null
+          : {
+              ...v1.run,
+              activeSec: 0,
+              phenoRngState: seedPhenoRng(v1.run.seed),
+              phenomenon: null,
+              tailwind: null,
+              nextPhenomenonAtSec: 0,
+            }
+      return migrateSave({ ...v1, schemaVersion: 2, run })
+    }
+    case 2: {
       const save = raw as Save
       if (typeof save.lastSeenMs !== 'number' || save.meta === undefined)
         return null

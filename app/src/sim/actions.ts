@@ -4,7 +4,7 @@
 // (Not in SPEC §4.2's file list — split out so tick.ts stays time-only.)
 
 import { canAscend } from './prestige'
-import { seedRng } from './rng'
+import { seedPhenoRng, seedRng } from './rng'
 import { buildCollapseReport } from './systems'
 import {
   SimError,
@@ -55,6 +55,11 @@ export function newRun(
     turns: 0,
     activeCardId: null,
     recentCardIds: [],
+    activeSec: 0,
+    phenoRngState: seedPhenoRng(seed),
+    phenomenon: null,
+    tailwind: null,
+    nextPhenomenonAtSec: 0,
     history: { peakHabitability: 0, turnsOutOfBand, machinesBuilt: 0 },
     collapse: null,
   }

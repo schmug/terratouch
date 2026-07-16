@@ -8,8 +8,10 @@ import { newRun } from '../src/sim/actions'
 export function makeTestContent(overrides: Partial<Content> = {}): Content {
   const content: Content = {
     balance: {
-      energy: { cap: 10, regenPerSec: 0.02, drawCost: 1 },
+      energy: { cap: 10, regenPerSec: 0.02, drawCost: 1, reserve: 3 },
       tap: { baseRatePerSec: 1, bonusMult: 1.5, poolCapSec: 100 },
+      phenomena: { meanSpacingSec: 60, windowSec: 12 },
+      pulse: { periodSec: 4, onBeatMult: 1.6 },
       instability: {
         accrualPerSystemPerTurn: 10,
         decayPerTurn: 5,
@@ -206,6 +208,9 @@ export function makeTestContent(overrides: Partial<Content> = {}): Content {
         right: { label: 'B', effects: {} },
       },
     ],
+    // Empty pool = the phenomena engine stays dormant in every existing
+    // fixture test; phenomena tests opt in via overrides.
+    phenomena: [],
     ...overrides,
   }
   return content

@@ -12,6 +12,7 @@ import balanceJson from '../src/data/balance.json'
 import cardsJson from '../src/data/cards.json'
 import erasJson from '../src/data/eras.json'
 import machinesJson from '../src/data/machines.json'
+import phenomenaJson from '../src/data/phenomena.json'
 import transmissionsJson from '../src/data/transmissions.json'
 import upgradesJson from '../src/data/upgrades.json'
 
@@ -21,6 +22,7 @@ const raw = () => ({
   archetypes: structuredClone(archetypesJson) as unknown,
   machines: structuredClone(machinesJson) as unknown,
   cards: structuredClone(cardsJson) as unknown,
+  phenomena: structuredClone(phenomenaJson) as unknown,
   upgrades: structuredClone(upgradesJson) as unknown,
 })
 
@@ -93,6 +95,13 @@ describe('shipped content', () => {
     expect(audible('idle', eraCount)).toBe(true)
     expect(audible('era-up', 2)).toBe(true)
     expect(audible('era-up', eraCount)).toBe(true)
+  })
+
+  it('ships a non-empty, valid phenomena pool', () => {
+    const content = loadContent()
+    expect(content.phenomena.length).toBeGreaterThanOrEqual(4)
+    const kinds = new Set(content.phenomena.map((p) => p.payout.kind))
+    expect(kinds).toEqual(new Set(['minerals', 'vent', 'tailwind', 'energy']))
   })
 
   it('every era paints the planet, and life arrives on ladder (issue #10)', () => {

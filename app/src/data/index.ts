@@ -10,6 +10,7 @@ import balanceJson from './balance.json'
 import cardsJson from './cards.json'
 import erasJson from './eras.json'
 import machinesJson from './machines.json'
+import phenomenaJson from './phenomena.json'
 import transmissionsJson from './transmissions.json'
 import upgradesJson from './upgrades.json'
 import {
@@ -18,6 +19,7 @@ import {
   cardsSchema,
   erasSchema,
   machinesSchema,
+  phenomenaSchema,
   transmissionsSchema,
   transmissionTriggerSchema,
   upgradesSchema,
@@ -79,6 +81,23 @@ export function validateContent(content: Content): void {
     }
   }
 
+  for (const d of dupes(content.phenomena.map((p) => p.id)))
+    problems.push(`duplicate phenomenon id "${d}"`)
+  for (const p of content.phenomena) {
+    if (p.eras !== undefined && p.eras[1] > eraCount) {
+      problems.push(
+        `phenomenon "${p.id}" gates up to era ${p.eras[1]} but only ${eraCount} exist`,
+      )
+    }
+    for (const ref of p.archetypes ?? []) {
+      if (!archetypeIds.has(ref)) {
+        problems.push(
+          `phenomenon "${p.id}" references unknown archetype "${ref}"`,
+        )
+      }
+    }
+  }
+
   // Every archetype must start playable: values inside the Era-1 bands
   // (otherwise a run could begin already accruing Instability), and rest
   // points/setpoints must be reachable without touching a lethal edge.
@@ -124,6 +143,7 @@ export function parseContent(raw: {
   archetypes: unknown
   machines: unknown
   cards: unknown
+  phenomena: unknown
   upgrades: unknown
 }): Content {
   const content: Content = {
@@ -132,6 +152,7 @@ export function parseContent(raw: {
     archetypes: archetypesSchema.parse(raw.archetypes),
     machines: machinesSchema.parse(raw.machines),
     cards: cardsSchema.parse(raw.cards),
+    phenomena: phenomenaSchema.parse(raw.phenomena),
     upgrades: upgradesSchema.parse(raw.upgrades),
   }
   validateContent(content)
@@ -145,6 +166,7 @@ export function loadContent(): Content {
     archetypes: archetypesJson,
     machines: machinesJson,
     cards: cardsJson,
+    phenomena: phenomenaJson,
     upgrades: upgradesJson,
   })
 }

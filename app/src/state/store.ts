@@ -292,7 +292,7 @@ let listenersInstalled = false
 
 function currentSave(): Save {
   const { run, meta } = useGame.getState()
-  return { schemaVersion: 1, run, meta, lastSeenMs: Date.now() }
+  return { schemaVersion: 2, run, meta, lastSeenMs: Date.now() }
 }
 
 function saveNow(): void {
