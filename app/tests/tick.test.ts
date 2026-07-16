@@ -119,6 +119,40 @@ describe('era stabilization', () => {
     expect(run.era).toBe(0)
   })
 
+  it('stamps turnsToFinalEra when the advance lands on the final era', () => {
+    const content = makeTestContent()
+    let run = { ...makeRun(content), turns: 7 }
+    expect(run.history.turnsToFinalEra).toBeNull()
+    run = tick(run, content, 31)
+    expect(run.era).toBe(1) // the fixture's final era
+    expect(run.history.turnsToFinalEra).toBe(7)
+  })
+
+  it('an advance short of the final era stamps nothing', () => {
+    // Three-era ladder: the middle hop must not look like arrival.
+    const base = makeTestContent()
+    const content = makeTestContent({
+      eras: [
+        base.eras[0]!,
+        {
+          ...base.eras[1]!,
+          id: 'mid',
+          name: 'Mid',
+          advanceHabitability: 10,
+          stabilizationSec: 5,
+        },
+        { ...base.eras[1]!, id: 'last', name: 'Last' },
+      ],
+    })
+    let run = { ...makeRun(content), turns: 3 }
+    run = tick(run, content, 31) // hop 0 → 1: not the final era
+    expect(run.era).toBe(1)
+    expect(run.history.turnsToFinalEra).toBeNull()
+    run = tick(run, content, 6) // hop 1 → 2: arrival at the final era
+    expect(run.era).toBe(2)
+    expect(run.history.turnsToFinalEra).toBe(3)
+  })
+
   it('the final era never advances', () => {
     const content = makeTestContent()
     let run = { ...makeRun(content), era: 1 }

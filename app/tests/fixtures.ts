@@ -26,6 +26,9 @@ export function makeTestContent(overrides: Partial<Content> = {}): Content {
         habDivisor: 25,
         collapseMult: 0.5,
         ascensionBonus: 5,
+        // cap 0 = efficiency bonus off, so fixture tests keep pinning the
+        // classic formula; prestige.test.ts opts in via overrides.
+        efficiency: { refTurns: 20, perTurns: 5, cap: 0 },
       },
     },
     eras: [

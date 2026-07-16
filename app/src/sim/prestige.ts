@@ -8,7 +8,15 @@
 // Yield formula (params in balance.json → balance.prestige):
 //   base      = era · eraWeight + ⌊peakHabitability / habDivisor⌋
 //   collapse  = ⌊base · collapseMult⌋            (the world died — partial)
-//   ascension = base + ascensionBonus            (you chose to leave — max)
+//   ascension = base + ascensionBonus + efficiency   (you chose to leave — max)
+//   efficiency = clamp(⌊(refTurns − turnsToFinalEra) / perTurns⌋, 0, cap)
+//
+// The efficiency bonus (issue #28) restores top-end skill expression: at the
+// final era base+ascensionBonus saturates, so a swift climb pays extra. It
+// keys to when the run ARRIVED at the final era (stamped by tick), not the
+// Ascension turn, so lingering afterwards never erodes it. Bonus-only:
+// collapse yields and slower-than-refTurns runs are exactly the classic
+// formula.
 //
 // SPEC §2.8 also names discoveries as an input; the Codex is Milestone 3, so
 // that term joins the formula when synthesis lands. Biosphere contributes via
@@ -34,7 +42,17 @@ export function seedYield(
   const base =
     run.era * p.eraWeight +
     Math.floor(run.history.peakHabitability / p.habDivisor)
-  if (mode === 'ascension') return base + p.ascensionBonus
+  if (mode === 'ascension') {
+    const e = p.efficiency
+    // Null arrival (pre-v3 saves already at the final era) falls back to the
+    // current turn count, which can only under-pay — never below classic.
+    const arrival = run.history.turnsToFinalEra ?? run.turns
+    const bonus = Math.min(
+      e.cap,
+      Math.max(0, Math.floor((e.refTurns - arrival) / e.perTurns)),
+    )
+    return base + p.ascensionBonus + bonus
+  }
   return Math.max(0, Math.floor(base * p.collapseMult))
 }
 

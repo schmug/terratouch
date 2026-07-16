@@ -16,6 +16,7 @@
     "eraWeight": 2,
     "habDivisor": 25,
     "collapseMult": 0.5,
-    "ascensionBonus": 4
+    "ascensionBonus": 4,
+    "efficiency": { "refTurns": 90, "perTurns": 10, "cap": 5 }
   }
 }

@@ -37,6 +37,12 @@ export type RunHistory = {
   /** Active turns each system has spent outside its safe band (for the Chronicle). */
   turnsOutOfBand: Record<SystemId, number>
   machinesBuilt: number
+  /**
+   * Turn count when the run first reached the final era (stamped by tick's
+   * era advance; null until then). Ascension's efficiency bonus reads this —
+   * keyed to ARRIVAL, so lingering afterwards never erodes it (issue #28).
+   */
+  turnsToFinalEra: number | null
 }
 
 export type CollapseCause = {
@@ -115,7 +121,7 @@ export type MetaState = {
 }
 
 export type Save = {
-  schemaVersion: 2
+  schemaVersion: 3
   run: RunState | null
   meta: MetaState
   lastSeenMs: number
@@ -161,6 +167,17 @@ export type Balance = {
     collapseMult: number
     /** Flat extra Seeds on voluntary Ascension (max yield): base + bonus. */
     ascensionBonus: number
+    /**
+     * Ascension efficiency bonus (issue #28): a swift climb pays extra —
+     * clamp(⌊(refTurns − turnsToFinalEra) / perTurns⌋, 0, cap) Seeds, keyed
+     * to when the run ARRIVED at the final era so lingering stays free.
+     * Ascension-only; collapse and slower-than-refTurns runs are untouched.
+     */
+    efficiency: {
+      refTurns: number
+      perTurns: number
+      cap: number
+    }
   }
 }
 

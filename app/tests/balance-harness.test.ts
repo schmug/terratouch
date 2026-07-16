@@ -50,20 +50,21 @@ describe(`balance harness (${RUNS} runs per policy)`, () => {
     expect(report.turns.distinct).toBeGreaterThanOrEqual(8)
   })
 
-  it('attentive policy: attention pays in Seeds per turn (bonus-only invariant)', () => {
+  it('attentive policy: attention pays in Seeds per turn AND per run', () => {
     const report = runMany(content, { runs: RUNS, policy: 'attentive' })
     reports.push(report)
     console.log(formatReport(report, content))
     const safe = reports.find((r) => r.policy === 'greedy-safe')!
-    // Metric note: seed yield saturates at Ascension (~98% of skilled runs
-    // bank the same ~19), so attention cannot show up as Seeds per RUN — it
-    // pays as a faster prestige cycle instead. Catching phenomena + on-beat
-    // taps must out-earn the same strategy played inattentively in Seeds
-    // per TURN (the saturation finding itself is recorded in the PR for
-    // owner follow-up).
+    // Attention pays twice: a faster prestige cycle (Seeds per TURN — the
+    // slice-A bar) and, since the Ascension efficiency bonus (issue #28),
+    // more Seeds per RUN — faster era climbs arrive at the final era
+    // sooner, which is exactly what the bonus pays. Before the bonus the
+    // per-run comparison dead-tied at the saturated ~19-Seed ceiling
+    // (attentive 18.57 vs safe 18.58); both comparisons are UNROUNDED.
     expect(report.meanSeeds / report.turns.mean).toBeGreaterThan(
       safe.meanSeeds / safe.turns.mean,
     )
+    expect(report.meanSeeds).toBeGreaterThan(safe.meanSeeds)
     expect(report.turns.distinct).toBeGreaterThanOrEqual(8)
   })
 

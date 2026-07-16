@@ -205,7 +205,11 @@ export type HarnessReport = {
   cascadeSystems: Record<string, number>
   eraHistogram: Record<number, number>
   meanPeakHabitability: number
-  /** Genesis Seeds per run — the SPEC M2 acceptance metric. */
+  /**
+   * Genesis Seeds per run — the SPEC M2 acceptance metric. UNROUNDED: CI
+   * compares policies on margins well under 2 dp (issue #28); formatReport
+   * rounds for display.
+   */
   meanSeeds: number
 }
 
@@ -259,7 +263,7 @@ export function runMany(content: Content, opts: HarnessOptions): HarnessReport {
     cascadeSystems,
     eraHistogram,
     meanPeakHabitability: Math.round((peakSum / results.length) * 10) / 10,
-    meanSeeds: Math.round((seedSum / results.length) * 100) / 100,
+    meanSeeds: seedSum / results.length,
   }
 }
 
@@ -280,6 +284,6 @@ export function formatReport(report: HarnessReport, content: Content): string {
     `  collapse systems: ${causes || '(none)'}`,
     `  era reached: ${eras}`,
     `  mean peak habitability: ${report.meanPeakHabitability}`,
-    `  seeds/run: ${report.meanSeeds}`,
+    `  seeds/run: ${report.meanSeeds.toFixed(2)}`,
   ].join('\n')
 }
