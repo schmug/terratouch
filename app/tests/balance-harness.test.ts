@@ -50,6 +50,23 @@ describe(`balance harness (${RUNS} runs per policy)`, () => {
     expect(report.turns.distinct).toBeGreaterThanOrEqual(8)
   })
 
+  it('attentive policy: attention pays in Seeds per turn (bonus-only invariant)', () => {
+    const report = runMany(content, { runs: RUNS, policy: 'attentive' })
+    reports.push(report)
+    console.log(formatReport(report, content))
+    const safe = reports.find((r) => r.policy === 'greedy-safe')!
+    // Metric note: seed yield saturates at Ascension (~98% of skilled runs
+    // bank the same ~19), so attention cannot show up as Seeds per RUN — it
+    // pays as a faster prestige cycle instead. Catching phenomena + on-beat
+    // taps must out-earn the same strategy played inattentively in Seeds
+    // per TURN (the saturation finding itself is recorded in the PR for
+    // owner follow-up).
+    expect(report.meanSeeds / report.turns.mean).toBeGreaterThan(
+      safe.meanSeeds / safe.turns.mean,
+    )
+    expect(report.turns.distinct).toBeGreaterThanOrEqual(8)
+  })
+
   it('seeds/run rises with policy skill (SPEC M2 acceptance)', () => {
     const random = reports.find((r) => r.policy === 'random')!
     const safe = reports.find((r) => r.policy === 'greedy-safe')!
@@ -96,5 +113,8 @@ describe(`balance harness (${RUNS} runs per policy)`, () => {
     const a = runOne(content, 12345, 'greedy-safe')
     const b = runOne(content, 12345, 'greedy-safe')
     expect(a).toEqual(b)
+    const c = runOne(content, 12345, 'attentive')
+    const d = runOne(content, 12345, 'attentive')
+    expect(c).toEqual(d)
   })
 })

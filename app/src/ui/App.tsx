@@ -13,18 +13,36 @@ import { PlanetScreen } from './PlanetScreen'
 import { SynthesisScreen } from './SynthesisScreen'
 import { TabBar, type Tab } from './TabBar'
 
-function EnergyPips({ energy, cap }: { energy: number; cap: number }) {
+function EnergyPips({
+  energy,
+  cap,
+  reserve,
+}: {
+  energy: number
+  cap: number
+  reserve: number
+}) {
   const whole = Math.floor(energy)
   const frac = energy - whole
+  // Bonus energy (phenomena, rewards) may overfill the cap into the reserve
+  // (Session Arc slice A): render the overfill as extra, dashed pips.
+  const extra = Math.min(reserve, Math.max(0, Math.ceil(energy - cap)))
   return (
-    <span className="energy-pips" aria-label={`Energy ${whole} of ${cap}`}>
+    <span
+      className="energy-pips"
+      aria-label={`Energy ${whole} of ${cap}${whole > cap ? ' (reserve)' : ''}`}
+    >
       <span className="energy-glyph" aria-hidden>
         ⚡
       </span>
-      {Array.from({ length: cap }, (_, i) => {
+      {Array.from({ length: cap + extra }, (_, i) => {
         const fill = i < whole ? 1 : i === whole ? frac : 0
         return (
-          <span key={i} className="pip" aria-hidden>
+          <span
+            key={i}
+            className={`pip${i >= cap ? ' reserve' : ''}`}
+            aria-hidden
+          >
             <span className="pip-fill" style={{ width: `${fill * 100}%` }} />
           </span>
         )
@@ -76,7 +94,11 @@ export function App() {
           <span aria-hidden>◇</span> {fmtInt(run.resources.minerals)}
         </span>
         <span className="header-title">TerraTouch</span>
-        <EnergyPips energy={run.energy} cap={content.balance.energy.cap} />
+        <EnergyPips
+          energy={run.energy}
+          cap={content.balance.energy.cap}
+          reserve={content.balance.energy.reserve}
+        />
       </header>
 
       <main className="app-main">

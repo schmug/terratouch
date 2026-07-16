@@ -10,6 +10,7 @@ import type {
   EraDef,
   MachineDef,
   MetaUpgradeDef,
+  PhenomenonDef,
 } from '../sim/types'
 
 const systemId = z.enum(['thermal', 'atmosphere', 'hydro', 'biosphere'])
@@ -36,11 +37,20 @@ export const balanceSchema = z.strictObject({
     cap: z.number().positive(),
     regenPerSec: z.number().positive(),
     drawCost: z.number().positive(),
+    reserve: z.number().nonnegative(),
   }),
   tap: z.strictObject({
     baseRatePerSec: z.number().nonnegative(),
     bonusMult: z.number().min(1),
     poolCapSec: z.number().positive(),
+  }),
+  phenomena: z.strictObject({
+    meanSpacingSec: z.number().positive(),
+    windowSec: z.number().positive(),
+  }),
+  pulse: z.strictObject({
+    periodSec: z.number().int().positive(),
+    onBeatMult: z.number().min(1),
   }),
   instability: z.strictObject({
     accrualPerSystemPerTurn: z.number().positive(),
@@ -255,6 +265,36 @@ export const cardSchema = z.strictObject({
 }) satisfies z.ZodType<CardDef>
 
 export const cardsSchema = z.array(cardSchema)
+
+const phenomenonPayoutSchema = z.discriminatedUnion('kind', [
+  z.strictObject({
+    kind: z.literal('minerals'),
+    productionSec: z.number().positive(),
+  }),
+  z.strictObject({ kind: z.literal('vent'), amount: z.number().positive() }),
+  z.strictObject({
+    kind: z.literal('tailwind'),
+    system: systemId,
+    durationSec: z.number().positive(),
+    pushMult: z.number().min(1),
+  }),
+  z.strictObject({ kind: z.literal('energy'), amount: z.number().positive() }),
+])
+
+export const phenomenonSchema = z.strictObject({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  blurb: z.string().min(1),
+  weight: z.number().positive(),
+  payout: phenomenonPayoutSchema,
+  eras: z
+    .tuple([z.number().int().min(1), z.number().int().min(1)])
+    .refine(([min, max]) => min <= max, { message: 'eras min must be <= max' })
+    .optional(),
+  archetypes: z.array(z.string().min(1)).optional(),
+}) satisfies z.ZodType<PhenomenonDef>
+
+export const phenomenaSchema = z.array(phenomenonSchema)
 
 // --------------------------------------------------------------------------
 // Mission Control transmissions (issue #16) — ambient one-liners the Planet

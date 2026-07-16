@@ -16,13 +16,15 @@ import {
 } from '../../src/sim/actions'
 import { canDraw, drawCard, resolveCard } from '../../src/sim/cards'
 import { applyOffline } from '../../src/sim/offline'
+import { catchPhenomenon } from '../../src/sim/phenomena'
 import { canAscend } from '../../src/sim/prestige'
 import { nextFloat, seedRng } from '../../src/sim/rng'
 import { habitability } from '../../src/sim/systems'
 import { tick } from '../../src/sim/tick'
 import { SYSTEM_IDS, type Content, type RunState } from '../../src/sim/types'
 
-export type PolicyName = 'random' | 'greedy-safe' | 'greedy-progress'
+export type PolicyName =
+  'random' | 'greedy-safe' | 'greedy-progress' | 'attentive'
 
 export type Outcome = 'hard-fail' | 'cascade' | 'ascended' | 'survived'
 
@@ -80,7 +82,11 @@ export function runOne(
   opts?: Partial<HarnessOptions>,
 ): RunResult {
   const maxTurns = opts?.maxTurns ?? 300
-  const secondsPerTurn = opts?.secondsPerTurn ?? 20
+  // 19 (not 20): 19 mod pulse-period 4 cycles every residue, so ordinary
+  // bots hit the tap beat at chance level (25%) instead of always. The
+  // attentive bot ticks 20 — a multiple of the period — to ALWAYS be on-beat.
+  const secondsPerTurn =
+    opts?.secondsPerTurn ?? (policy === 'attentive' ? 20 : 19)
   const mistakeRate = opts?.mistakeRate ?? 0.15
   let run: RunState = newRun(content, seed, content.archetypes[0]!.id)
   let botState = seedRng(seed ^ 0x9e3779b9)
@@ -94,6 +100,8 @@ export function runOne(
 
   while (!run.collapse && run.turns < maxTurns) {
     run = tick(run, content, secondsPerTurn)
+    // The attentive player notices what the planet offers; nobody else does.
+    if (policy === 'attentive') run = catchPhenomenon(run, content).run
     run = tapCollect(run, content).run
 
     // Skilled play knows to cash out: greedy bots Ascend the moment the
@@ -114,7 +122,8 @@ export function runOne(
         }
       }
     } else {
-      const reserve = policy === 'greedy-safe' ? 20 : 0
+      const reserve =
+        policy === 'greedy-safe' || policy === 'attentive' ? 20 : 0
       for (const typeId of buyPriority) {
         const def = content.machines.find((m) => m.id === typeId)!
         if (!machineUnlocked(run, def)) continue
@@ -151,7 +160,7 @@ export function runOne(
       run = rand() < 0.5 ? left.run : right.run
     } else {
       const preferLeft =
-        policy === 'greedy-safe'
+        policy === 'greedy-safe' || policy === 'attentive'
           ? safetyScore(left.run) <= safetyScore(right.run)
           : progressScore(left.run) >= progressScore(right.run)
       const mistake = rand() < mistakeRate

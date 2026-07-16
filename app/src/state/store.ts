@@ -14,6 +14,7 @@ import {
 } from '../sim/actions'
 import { canDraw, cardById, drawCard, resolveCard } from '../sim/cards'
 import { applyOffline } from '../sim/offline'
+import { catchPhenomenon } from '../sim/phenomena'
 import { applyMetaUpgrades, buyUpgrade } from '../sim/prestige'
 import { tick } from '../sim/tick'
 import {
@@ -78,7 +79,9 @@ type GameStore = {
   /** Advance by whole logical ticks (1s each) — called only by the loop. */
   tickBy(steps: number): void
   offlineBy(elapsedMs: number): void
-  tap(): void
+  tap(): { collected: number; onBeat: boolean } | undefined
+  /** Catch the live phenomenon (Session Arc slice A). No-op if none. */
+  catchPheno(): void
   draw(): void
   resolve(side: 'left' | 'right'): void
   build(typeId: string): void
@@ -177,9 +180,19 @@ export const useGame = create<GameStore>((set, get) => ({
 
   tap() {
     const { run, content } = get()
-    if (!run) return
+    if (!run) return undefined
     const result = guard(() => tapCollect(run, content))
-    if (result) {
+    if (!result) return undefined
+    set({ run: result.run })
+    scheduleSave()
+    return { collected: result.collected, onBeat: result.onBeat }
+  },
+
+  catchPheno() {
+    const { run, content } = get()
+    if (!run) return
+    const result = guard(() => catchPhenomenon(run, content))
+    if (result && result.caught) {
       set({ run: result.run })
       scheduleSave()
     }
@@ -292,7 +305,7 @@ let listenersInstalled = false
 
 function currentSave(): Save {
   const { run, meta } = useGame.getState()
-  return { schemaVersion: 1, run, meta, lastSeenMs: Date.now() }
+  return { schemaVersion: 2, run, meta, lastSeenMs: Date.now() }
 }
 
 function saveNow(): void {
@@ -359,3 +372,13 @@ function stopLoop(): void {
     intervalId = null
   }
 }
+
+// Debug/e2e handle: the acceptance walk fast-forwards active time through
+// this (tests/e2e/acceptance-walk.mjs). Harmless in production — the game
+// is free, offline-first, and single-player; there is nothing to cheat.
+declare global {
+  interface Window {
+    __terratouch?: typeof useGame
+  }
+}
+if (typeof window !== 'undefined') window.__terratouch = useGame

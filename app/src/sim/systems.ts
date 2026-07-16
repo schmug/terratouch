@@ -9,10 +9,32 @@ import {
   type CollapseCause,
   type CollapseReport,
   type Content,
+  type MachineInstance,
   type RunState,
   type SystemId,
   type SystemState,
 } from './types'
+
+/** Total passive minerals per second from machines (before the planet's base rate). */
+export function machineProductionRate(
+  machines: readonly MachineInstance[],
+  content: Content,
+): number {
+  let rate = 0
+  for (const m of machines) {
+    const def = content.machines.find((d) => d.id === m.typeId)
+    if (def) rate += def.productionPerSecPerLevel * m.level
+  }
+  return rate
+}
+
+/** Total minerals per second flowing into the tap pool. */
+export function productionRate(run: RunState, content: Content): number {
+  return (
+    content.balance.tap.baseRatePerSec +
+    machineProductionRate(run.machines, content)
+  )
+}
 
 /** True when value sits inside the safe band (inclusive edges are safe). */
 export function inBand(s: SystemState): boolean {
@@ -162,6 +184,20 @@ export function buildCollapseReport(
       cause.kind === 'ascension' ? 'ascension' : 'collapse',
     ),
   }
+}
+
+/**
+ * Add bonus Energy (phenomena, contract rewards, +energy cards). Bonus gains
+ * may OVERFILL the cap by balance.energy.reserve; regen never does, and
+ * nothing passive ever reduces an existing overfill.
+ */
+export function gainEnergy(
+  current: number,
+  amount: number,
+  balance: Balance,
+): number {
+  if (amount <= 0) return current
+  return Math.min(balance.energy.cap + balance.energy.reserve, current + amount)
 }
 
 /**

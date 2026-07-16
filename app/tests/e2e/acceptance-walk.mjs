@@ -1,9 +1,10 @@
 // M1+M2 acceptance walk (SPEC §7) — drives the built PWA end-to-end with
 // system Chrome via playwright-core (no browser download; needs Chrome
-// installed). 35 checks: install/SW, play burst (swipe + buttons), build +
-// setpoints, offline-gap safety invariants, both collapse kinds, templated
-// chronicle, loss persistence, new world, the full prestige loop (Ascend →
-// Seeds → shop → archetype unlock), no-network reload, reduced motion.
+// installed). 40 checks: install/SW, play burst (swipe + buttons), active
+// play (pulse ring + a caught phenomenon), build + setpoints, offline-gap
+// safety invariants, both collapse kinds, templated chronicle, loss
+// persistence, new world, the full prestige loop (Ascend → Seeds → shop →
+// archetype unlock), no-network reload, reduced motion.
 //
 // Usage:
 //   npm run build && npm run preview &     # or any deployed URL
@@ -111,6 +112,51 @@ const energyBefore = await page.evaluate(
   () => document.querySelectorAll('.pip-fill').length,
 )
 check('energy pips rendered', energyBefore > 0, `${energyBefore} pips`)
+
+// --- Active play slice A: pulse ring + a caught phenomenon (Session Arc PR A)
+check('pulse ring renders on the dial', await page.isVisible('.pulse-ring'))
+
+const phenoSpawned = await page.evaluate(async () => {
+  const store = window.__terratouch
+  if (!store) return false
+  // Fast-forward active time in 5s logical steps until a phenomenon is live
+  // (max spacing is 1.5 × 60s; 40 × 5s = 200s of active time is plenty).
+  for (let i = 0; i < 40 && !store.getState().run?.phenomenon; i++) {
+    store.getState().tickBy(5)
+    await new Promise((r) => setTimeout(r, 25)) // let React paint
+  }
+  return Boolean(store.getState().run?.phenomenon)
+})
+check('a phenomenon spawns within 200s of active time', phenoSpawned)
+check('phenomenon chip is visible', await page.isVisible('.pheno-chip'))
+
+const beforeCatch = await page.evaluate(() => {
+  const r = window.__terratouch.getState().run
+  return {
+    minerals: r.resources.minerals,
+    energy: r.energy,
+    instability: r.instability,
+  }
+})
+await page.click('.pheno-chip')
+const afterCatch = await page.evaluate(() => {
+  const r = window.__terratouch.getState().run
+  return {
+    minerals: r.resources.minerals,
+    energy: r.energy,
+    instability: r.instability,
+    cleared: r.phenomenon === null,
+    tailwind: r.tailwind !== null,
+  }
+})
+check('catching clears the phenomenon', afterCatch.cleared)
+check(
+  'catching pays out (minerals, energy, vent, or tailwind)',
+  afterCatch.minerals > beforeCatch.minerals ||
+    afterCatch.energy > beforeCatch.energy ||
+    afterCatch.instability < beforeCatch.instability ||
+    afterCatch.tailwind,
+)
 
 // tap-to-collect (give the pool a moment to accrue)
 await page.waitForTimeout(4000)

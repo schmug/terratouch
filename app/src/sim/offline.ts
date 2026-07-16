@@ -74,11 +74,14 @@ export function applyOffline(
     productionRate(run, content) * sec * balance.offline.productionMult
   const minerals = run.resources.minerals + mineralsGained
 
-  // Energy refills on real time, up to the cap.
-  const energy = Math.min(
-    balance.energy.cap,
-    run.energy + balance.energy.regenPerSec * sec,
-  )
+  // Refill to the cap only; an overfill (bonus reserve) is preserved.
+  const energy =
+    run.energy >= balance.energy.cap
+      ? run.energy
+      : Math.min(
+          balance.energy.cap,
+          run.energy + balance.energy.regenPerSec * sec,
+        )
   const energyGained = energy - run.energy
 
   return {

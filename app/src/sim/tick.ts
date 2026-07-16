@@ -7,7 +7,8 @@
 // (weighted by total machine push). Exponential approach never overshoots,
 // so ticking can NEVER hard-fail a gauge — danger comes only from cards.
 
-import { habitability, shiftBandsToEra } from './systems'
+import { stepPhenomena, tailwindBoost } from './phenomena'
+import { habitability, productionRate, shiftBandsToEra } from './systems'
 import {
   SYSTEM_IDS,
   type ArchetypeDef,
@@ -17,6 +18,8 @@ import {
   type SystemId,
   type SystemState,
 } from './types'
+
+export { machineProductionRate, productionRate } from './systems'
 
 function archetypeOf(run: RunState, content: Content): ArchetypeDef {
   const a = content.archetypes.find((x) => x.id === run.archetypeId)
@@ -39,19 +42,6 @@ export function machinePushRate(
   return rate
 }
 
-/** Total passive minerals per second from machines (before the planet's base rate). */
-export function machineProductionRate(
-  machines: readonly MachineInstance[],
-  content: Content,
-): number {
-  let rate = 0
-  for (const m of machines) {
-    const def = content.machines.find((d) => d.id === m.typeId)
-    if (def) rate += def.productionPerSecPerLevel * m.level
-  }
-  return rate
-}
-
 /**
  * The value a gauge is drifting toward and how fast: blend of natural rest
  * and setpoint, weighted by pull rates. `rate` is the exponential constant.
@@ -60,10 +50,11 @@ export function driftTarget(
   run: RunState,
   content: Content,
   system: SystemId,
+  pushMult = 1,
 ): { target: number; rate: number } {
   const arch = archetypeOf(run, content)
   const nat = arch.systems[system]
-  const push = machinePushRate(run.machines, content, system)
+  const push = machinePushRate(run.machines, content, system) * pushMult
   const rate = nat.naturalRatePerSec + push
   if (rate <= 0) return { target: run.systems[system].value, rate: 0 }
   const target =
@@ -90,19 +81,16 @@ export function driftDirection(
   content: Content,
   system: SystemId,
 ): -1 | 0 | 1 {
-  const { target, rate } = driftTarget(run, content, system)
+  const { target, rate } = driftTarget(
+    run,
+    content,
+    system,
+    tailwindBoost(run, system),
+  )
   if (rate <= 0) return 0
   const gap = target - run.systems[system].value
   if (Math.abs(gap) < 0.5) return 0
   return gap > 0 ? 1 : -1
-}
-
-/** Total minerals per second flowing into the tap pool. */
-export function productionRate(run: RunState, content: Content): number {
-  return (
-    content.balance.tap.baseRatePerSec +
-    machineProductionRate(run.machines, content)
-  )
 }
 
 /**
@@ -117,7 +105,12 @@ export function tick(run: RunState, content: Content, dtSec: number): RunState {
   const systems = {} as Record<SystemId, SystemState>
   for (const id of SYSTEM_IDS) {
     const s = run.systems[id]
-    const { target, rate } = driftTarget(run, content, id)
+    const { target, rate } = driftTarget(
+      run,
+      content,
+      id,
+      tailwindBoost(run, id),
+    )
     systems[id] = { ...s, value: relax(s.value, target, rate, dtSec) }
   }
 
@@ -126,11 +119,15 @@ export function tick(run: RunState, content: Content, dtSec: number): RunState {
   const poolCap = rate * balance.tap.poolCapSec
   const uncollected = Math.min(poolCap, run.uncollected + rate * dtSec)
 
-  // Energy regenerates in real time (SPEC §2.5).
-  const energy = Math.min(
-    balance.energy.cap,
-    run.energy + balance.energy.regenPerSec * dtSec,
-  )
+  // Energy regenerates in real time (SPEC §2.5) — but only up to the cap,
+  // and never down: an overfill from bonus Energy (reserve) is preserved.
+  const energy =
+    run.energy >= balance.energy.cap
+      ? run.energy
+      : Math.min(
+          balance.energy.cap,
+          run.energy + balance.energy.regenPerSec * dtSec,
+        )
 
   // Era stabilization: hold Habitability at/above the threshold for the
   // window and the world advances (SPEC §2.3). Never accrues offline —
@@ -167,13 +164,17 @@ export function tick(run: RunState, content: Content, dtSec: number): RunState {
     run.history.peakHabitability,
     habitability(shiftedSystems),
   )
-  return {
-    ...run,
-    systems: shiftedSystems,
-    uncollected,
-    energy,
-    era,
-    eraProgressSec,
-    history: { ...run.history, peakHabitability: peak },
-  }
+  return stepPhenomena(
+    {
+      ...run,
+      systems: shiftedSystems,
+      uncollected,
+      energy,
+      era,
+      eraProgressSec,
+      activeSec: run.activeSec + dtSec,
+      history: { ...run.history, peakHabitability: peak },
+    },
+    content,
+  )
 }

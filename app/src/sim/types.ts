@@ -80,6 +80,27 @@ export type RunState = {
   activeCardId: string | null
   /** Recently drawn card ids, excluded from the next draws for variety. */
   recentCardIds: string[]
+  /**
+   * Cumulative seconds of ACTIVE play — advanced only by tick(), never by
+   * offline.ts. The clock for phenomena, tailwinds, and the tap pulse; its
+   * freezing while away is what makes leaving always free.
+   */
+  activeSec: number
+  /**
+   * Second mulberry32 stream (phenomena spawns/types). Never used for card
+   * draws, so card sequences are identical whether or not anyone engages.
+   */
+  phenoRngState: number
+  /** The currently tappable phenomenon, if one is live. */
+  phenomenon: { defId: string; expiresAtActiveSec: number } | null
+  /** A live tailwind boost from a caught phenomenon. */
+  tailwind: {
+    system: SystemId
+    untilActiveSec: number
+    pushMult: number
+  } | null
+  /** Next spawn time on the activeSec clock; 0 = unscheduled (lazy). */
+  nextPhenomenonAtSec: number
   history: RunHistory
   /** Set exactly once, when the run ends. No actions are legal afterwards. */
   collapse: CollapseReport | null
@@ -94,7 +115,7 @@ export type MetaState = {
 }
 
 export type Save = {
-  schemaVersion: 1
+  schemaVersion: 2
   run: RunState | null
   meta: MetaState
   lastSeenMs: number
@@ -106,8 +127,23 @@ export type Save = {
 // ---------------------------------------------------------------------------
 
 export type Balance = {
-  energy: { cap: number; regenPerSec: number; drawCost: number }
+  energy: {
+    cap: number
+    regenPerSec: number
+    drawCost: number
+    reserve: number
+  }
   tap: { baseRatePerSec: number; bonusMult: number; poolCapSec: number }
+  /** Phenomena cadence (slice A): mean active-seconds between spawns + window. */
+  phenomena: {
+    meanSpacingSec: number
+    windowSec: number
+  }
+  /** Tap-pool pulse: on-beat collects (1 tick per period) use onBeatMult. */
+  pulse: {
+    periodSec: number
+    onBeatMult: number
+  }
   instability: {
     accrualPerSystemPerTurn: number
     decayPerTurn: number
@@ -204,6 +240,38 @@ export type MachineDef = {
 }
 
 // ---------------------------------------------------------------------------
+// Phenomena (Session Arc slice A): transient tappable events that exist only
+// in ACTIVE time. Bonus-only by design — a miss expires silently.
+// ---------------------------------------------------------------------------
+
+export type PhenomenonPayout =
+  /** Lump-sum minerals worth `productionSec` seconds of current production. */
+  | { kind: 'minerals'; productionSec: number }
+  /** Vents Instability (floored at 0). Only matters during active play. */
+  | { kind: 'vent'; amount: number }
+  /** One system's machine push ×pushMult toward setpoint for durationSec. */
+  | {
+      kind: 'tailwind'
+      system: SystemId
+      durationSec: number
+      pushMult: number
+    }
+  /** Bonus Energy via gainEnergy (may overfill up to cap + reserve). */
+  | { kind: 'energy'; amount: number }
+
+export type PhenomenonDef = {
+  id: string
+  name: string
+  blurb: string
+  weight: number
+  payout: PhenomenonPayout
+  /** Inclusive 1-based Era range (like card gates); omitted = all eras. */
+  eras?: readonly [min: number, max: number]
+  /** Archetype ids this appears for; omitted = all archetypes. */
+  archetypes?: string[]
+}
+
+// ---------------------------------------------------------------------------
 // Meta-upgrades (SPEC §2.8, M2): Seeds → permanent effects. Pure data; the
 // levels the player owns live in MetaState.upgrades, and prestige.ts derives
 // an effective Content bundle from them.
@@ -265,6 +333,7 @@ export type Content = {
   archetypes: ArchetypeDef[]
   machines: MachineDef[]
   cards: CardDef[]
+  phenomena: PhenomenonDef[]
   upgrades: MetaUpgradeDef[]
 }
 

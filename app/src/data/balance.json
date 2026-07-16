@@ -1,6 +1,8 @@
 {
-  "energy": { "cap": 10, "regenPerSec": 0.0133, "drawCost": 1 },
+  "energy": { "cap": 10, "regenPerSec": 0.0133, "drawCost": 1, "reserve": 3 },
   "tap": { "baseRatePerSec": 0.4, "bonusMult": 1.25, "poolCapSec": 120 },
+  "phenomena": { "meanSpacingSec": 60, "windowSec": 12 },
+  "pulse": { "periodSec": 4, "onBeatMult": 1.6 },
   "instability": {
     "accrualPerSystemPerTurn": 6,
     "decayPerTurn": 4,

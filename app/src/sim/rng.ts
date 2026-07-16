@@ -10,6 +10,15 @@ export function seedRng(seed: number): number {
   return seed >>> 0
 }
 
+/**
+ * Initial state for the run's SECOND stream (phenomena). XOR keeps it
+ * distinct from the main stream and from the harness bot stream
+ * (seed ^ 0x9e3779b9) on the same seed.
+ */
+export function seedPhenoRng(seed: number): number {
+  return seedRng(seed ^ 0x7068656e) // 'phen'
+}
+
 /** One mulberry32 step. Returns the next state and a float in [0, 1). */
 export function nextFloat(state: number): RngResult {
   const a = (state + 0x6d2b79f5) | 0
