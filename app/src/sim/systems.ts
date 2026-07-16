@@ -165,6 +165,20 @@ export function buildCollapseReport(
 }
 
 /**
+ * Add bonus Energy (phenomena, contract rewards, +energy cards). Bonus gains
+ * may OVERFILL the cap by balance.energy.reserve; regen never does, and
+ * nothing passive ever reduces an existing overfill.
+ */
+export function gainEnergy(
+  current: number,
+  amount: number,
+  balance: Balance,
+): number {
+  if (amount <= 0) return current
+  return Math.min(balance.energy.cap + balance.energy.reserve, current + amount)
+}
+
+/**
  * Apply an Era transition: bands shift to the new Era's targets (SPEC §2.3).
  * Values and setpoints are untouched — holding the climbing band IS the game.
  */

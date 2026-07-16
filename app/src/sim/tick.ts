@@ -126,11 +126,15 @@ export function tick(run: RunState, content: Content, dtSec: number): RunState {
   const poolCap = rate * balance.tap.poolCapSec
   const uncollected = Math.min(poolCap, run.uncollected + rate * dtSec)
 
-  // Energy regenerates in real time (SPEC §2.5).
-  const energy = Math.min(
-    balance.energy.cap,
-    run.energy + balance.energy.regenPerSec * dtSec,
-  )
+  // Energy regenerates in real time (SPEC §2.5) — but only up to the cap,
+  // and never down: an overfill from bonus Energy (reserve) is preserved.
+  const energy =
+    run.energy >= balance.energy.cap
+      ? run.energy
+      : Math.min(
+          balance.energy.cap,
+          run.energy + balance.energy.regenPerSec * dtSec,
+        )
 
   // Era stabilization: hold Habitability at/above the threshold for the
   // window and the world advances (SPEC §2.3). Never accrues offline —

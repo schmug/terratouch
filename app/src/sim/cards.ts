@@ -8,6 +8,7 @@ import {
   buildCollapseReport,
   cascadeCause,
   detectHardFail,
+  gainEnergy,
   habitability,
   instabilityStep,
   isCascade,
@@ -133,10 +134,12 @@ export function resolveCard(
   applied.minerals = minerals - run.resources.minerals
 
   const energyDelta = choice.effects.energy ?? 0
-  const energy = Math.min(
-    content.balance.energy.cap,
-    Math.max(0, run.energy + energyDelta),
-  )
+  // Positive card energy is bonus energy (may overfill into the reserve);
+  // costs/negative deltas floor at 0 as before.
+  const energy =
+    energyDelta >= 0
+      ? gainEnergy(run.energy, energyDelta, content.balance)
+      : Math.max(0, run.energy + energyDelta)
   applied.energy = Math.round((energy - run.energy) * 100) / 100
 
   let instability = Math.max(
