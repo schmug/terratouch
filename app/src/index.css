@@ -1404,3 +1404,161 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ------------------------------------------------------- active-play: pulse */
+
+.pulse-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  opacity: 0;
+  pointer-events: none;
+  animation: pulse-beat linear infinite;
+}
+
+@keyframes pulse-beat {
+  /* Bright during the first quarter of the period — the on-beat tick. */
+  0% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  25% {
+    opacity: 0.12;
+    transform: scale(1.03);
+  }
+  100% {
+    opacity: 0.12;
+    transform: scale(1);
+  }
+}
+
+/* --------------------------------------------------- active-play: phenomena */
+
+.pheno-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  animation: pheno-arrive 240ms ease-out;
+}
+
+.pheno-name {
+  font-weight: 600;
+}
+
+.pheno-blurb {
+  font-size: 0.85em;
+  opacity: 0.8;
+}
+
+.pheno-timer {
+  height: 3px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+  overflow: hidden;
+}
+
+.pheno-timer-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 1s linear;
+}
+
+@keyframes pheno-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.pheno-fx {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.pheno-fx--minerals {
+  animation: fx-streak 2.4s ease-in-out infinite;
+}
+
+.pheno-fx--vent {
+  animation: fx-plume 2.4s ease-in-out infinite;
+}
+
+.pheno-fx--tailwind {
+  animation: fx-shimmer 3s linear infinite;
+}
+
+.pheno-fx--energy {
+  animation: fx-glint 1.6s ease-in-out infinite;
+}
+
+@keyframes fx-streak {
+  0%,
+  100% {
+    box-shadow: inset 12px -12px 24px -18px #ffd9a0;
+  }
+  50% {
+    box-shadow: inset 18px -18px 32px -16px #ffd9a0;
+  }
+}
+
+@keyframes fx-plume {
+  0%,
+  100% {
+    box-shadow: inset 0 14px 26px -18px #bfe8ff;
+  }
+  50% {
+    box-shadow: inset 0 20px 34px -16px #bfe8ff;
+  }
+}
+
+@keyframes fx-shimmer {
+  0%,
+  100% {
+    box-shadow: inset 0 -14px 30px -18px #a8ffd0;
+  }
+  50% {
+    box-shadow: inset 0 -20px 38px -14px #a8ffd0;
+  }
+}
+
+@keyframes fx-glint {
+  0%,
+  100% {
+    box-shadow: 0 0 14px -4px #fff3b0;
+  }
+  50% {
+    box-shadow: 0 0 22px -2px #fff3b0;
+  }
+}
+
+.float-num.on-beat {
+  color: var(--calm);
+  font-weight: 700;
+}
+
+.pip.reserve {
+  outline: 1px dashed var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-ring,
+  .pheno-fx {
+    animation: none;
+  }
+
+  .pulse-ring {
+    opacity: 0.2;
+  }
+}

@@ -12,13 +12,14 @@ import { SHAPE_GLYPH, SYSTEM_META } from './meta'
 import { PlanetDial } from './PlanetDial'
 import { TransmissionStrip } from './TransmissionStrip'
 
-type Float = { id: number; amount: number }
+type Float = { id: number; amount: number; onBeat: boolean }
 
 export function PlanetScreen({ goToCards }: { goToCards: () => void }) {
   const run = useGame((s) => s.run)
   const content = useGame((s) => s.content)
   const tap = useGame((s) => s.tap)
   const draw = useGame((s) => s.draw)
+  const catchPheno = useGame((s) => s.catchPheno)
   const [floats, setFloats] = useState<Float[]>([])
   const floatId = useRef(0)
 
@@ -32,13 +33,19 @@ export function PlanetScreen({ goToCards }: { goToCards: () => void }) {
   const pool = run.uncollected * balance.tap.bonusMult
   const drawable = canDraw(run, content)
   const midCard = run.activeCardId !== null
+  // The live phenomenon's def, if any (Session Arc slice A).
+  const pheno = run.phenomenon
+    ? content.phenomena.find((p) => p.id === run.phenomenon!.defId)
+    : undefined
 
   const onTap = () => {
-    const amount = Math.round(pool * 10) / 10
-    tap()
-    if (amount >= 1) {
+    const result = tap()
+    if (result && result.collected >= 1) {
       const id = ++floatId.current
-      setFloats((f) => [...f, { id, amount }])
+      setFloats((f) => [
+        ...f,
+        { id, amount: result.collected, onBeat: result.onBeat },
+      ])
       setTimeout(() => setFloats((f) => f.filter((x) => x.id !== id)), 950)
     }
   }
@@ -55,6 +62,14 @@ export function PlanetScreen({ goToCards }: { goToCards: () => void }) {
   return (
     <div className="screen planet-screen">
       <div className="dial-wrap">
+        <span
+          className="pulse-ring"
+          aria-hidden
+          style={{
+            animationDuration: `${balance.pulse.periodSec}s`,
+            animationDelay: `-${run.activeSec % balance.pulse.periodSec}s`,
+          }}
+        />
         <button
           type="button"
           className="planet-tap"
@@ -63,9 +78,20 @@ export function PlanetScreen({ goToCards }: { goToCards: () => void }) {
         >
           <PlanetDial run={run} />
         </button>
+        {pheno && (
+          <span
+            className={`pheno-fx pheno-fx--${pheno.payout.kind}`}
+            aria-hidden
+          />
+        )}
         {floats.map((f) => (
-          <span key={f.id} className="float-num" aria-hidden>
+          <span
+            key={f.id}
+            className={`float-num${f.onBeat ? ' on-beat' : ''}`}
+            aria-hidden
+          >
             +{fmtInt(f.amount)}
+            {f.onBeat ? ' ✧' : ''}
           </span>
         ))}
       </div>
@@ -76,6 +102,31 @@ export function PlanetScreen({ goToCards }: { goToCards: () => void }) {
         </p>
       ) : (
         <p className="gather-hint dim">the machines are gathering…</p>
+      )}
+
+      {pheno && run.phenomenon && (
+        <button
+          type="button"
+          className="pheno-chip"
+          onClick={catchPheno}
+          aria-label={`${pheno.name} — tap to catch`}
+        >
+          <span className="pheno-name">{pheno.name}</span>
+          <span className="pheno-blurb">{pheno.blurb}</span>
+          <span className="pheno-timer" aria-hidden>
+            <span
+              className="pheno-timer-fill"
+              style={{
+                width: `${Math.max(
+                  0,
+                  ((run.phenomenon.expiresAtActiveSec - run.activeSec) /
+                    balance.phenomena.windowSec) *
+                    100,
+                )}%`,
+              }}
+            />
+          </span>
+        </button>
       )}
 
       <TransmissionStrip run={run} />
