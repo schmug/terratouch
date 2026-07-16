@@ -16,6 +16,7 @@ Current files (M1):
 | `machines.json`      | 4 machines (one per system): costs, push rates, passive production; the Spore Garden (biosphere) is era-gated via `unlockEra`                                      |
 | `upgrades.json`      | Seed meta-upgrades (SPEC §2.8): machine speed, gentler Instability, starting minerals, energy cap, offline window, archetype unlocks (Charts of Ice/Fire)          |
 | `cards.json`         | 28 event cards, era- and archetype-gated, weighted; copy is cozy/hopeful per the tone decision                                                                     |
+| `phenomena.json`     | Tappable active-play phenomena (Session Arc slice A): weighted, era/archetype-gatable payouts (minerals / vent / tailwind / energy); bonus-only — misses cost 0    |
 | `transmissions.json` | 44 Mission Control one-liners (issue #16), trigger- and era-tagged; see the tagging scheme below                                                                   |
 | `recipes.json`       | (M3 — not yet created) two-slot synthesis recipes                                                                                                                  |
 
@@ -29,18 +30,29 @@ Semantics worth knowing when tuning:
 - Archetype starting values must sit inside the Era-1 bands (validated).
 
 Balance-harness snapshot (2026-07-15, 1000 runs/policy, 15% mistake rate,
-after the Spore Garden landed): random dies 72% (median 44 turns, spread
-p10=8 / p90=300); greedy-safe dies 2% and Ascends 98% in ~57 turns;
-greedy-progress busts 6% on hard-fails and Ascends 93%. Seeds/run rises with
-policy skill (M2 acceptance, asserted in CI): random 1.57 vs greedy ~17.7–18.5
-(≥3× is the CI bar). **The old biosphere hotspot (issue #3) is resolved**:
-cascade blame pooled across policies is thermal 41% / biosphere 30% / hydro
-20% / atmosphere 9% — no system over the 60% bar (also asserted in CI).
-Biosphere remains the intended weakest system: the Spore Garden pushes at a
-sixth of the other machines' rate, so late floors take high levels + a high
-setpoint, and it stays the only cascade cause greedy play ever sees. Note the
-oracle-bot caveat: bots see both resolved futures before choosing; human
-Ascension rates will be far lower.
+after the Session Arc slice-A phenomena/pulse landed). Baseline policies now
+tick **19 s per turn** (was 20): 19 mod pulse-period 4 cycles every residue,
+so ordinary bots hit the tap beat at the chance level of 25% instead of the
+accidental 100% that 20 gave — baseline numbers shifted slightly with the
+extra beat income removed. The new `attentive` policy plays greedy-safe plus
+catches every phenomenon, ticking 20 s to always be on-beat. Numbers: random
+dies 72.8% (median 50 turns, spread p10=9 / p90=300), seeds/run 1.66;
+greedy-safe dies 2.2% and Ascends 97.8% in ~60 turns, seeds/run 18.58;
+greedy-progress busts 7% and Ascends 93%, seeds/run 17.76; attentive dies
+2.1% and Ascends 97.9% in ~50 turns, seeds/run 18.57. Seeds/run rises with
+policy skill (M2 acceptance, asserted in CI): random 1.66 vs skilled
+~17.8–18.6 (≥3× is the CI bar). Known saturation: attentive vs greedy-safe
+is a seeds/run tie because ~98% of both Ascend at the final era where the
+yield saturates, so the slice-A CI bar is **Seeds per TURN** (same-strategy
+comparison): attentive 0.371 vs greedy-safe 0.309 — attention pays as a
+~20% faster prestige cycle. **The old biosphere
+hotspot (issue #3) stays resolved**: cascade blame pooled across policies is
+thermal 43.5% / biosphere 27.3% / hydro 17.8% / atmosphere 11.5% — no system
+over the 60% bar (also asserted in CI). Biosphere remains the intended
+weakest system: the Spore Garden pushes at a sixth of the other machines'
+rate, so late floors take high levels + a high setpoint. Note the oracle-bot
+caveat: bots see both resolved futures before choosing; human Ascension
+rates will be far lower.
 
 Seed yield (`balance.prestige`, SPEC §2.8): `base = era·eraWeight +
 ⌊peakHab/habDivisor⌋`; collapse pays `⌊base·collapseMult⌋` (partial),
