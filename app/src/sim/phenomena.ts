@@ -12,6 +12,7 @@ import {
   type Content,
   type PhenomenonDef,
   type RunState,
+  type SystemId,
 } from './types'
 
 /** Phenomena legal for this run right now (Era range + Archetype gate). */
@@ -131,4 +132,16 @@ export function catchPhenomenon(
       break
   }
   return { run: next, caught: def }
+}
+
+/**
+ * Machine-push multiplier a live tailwind grants this system (1 = none).
+ * Passed into driftTarget by tick()/driftDirection only — offline.ts never
+ * passes it, so away-time drift can never be boosted (frozen, not banked).
+ */
+export function tailwindBoost(run: RunState, system: SystemId): number {
+  const t = run.tailwind
+  return t && t.system === system && run.activeSec < t.untilActiveSec
+    ? t.pushMult
+    : 1
 }

@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest'
 import { newRun } from '../src/sim/actions'
 import { applyOffline } from '../src/sim/offline'
-import { catchPhenomenon } from '../src/sim/phenomena'
+import { catchPhenomenon, tailwindBoost } from '../src/sim/phenomena'
 import { seedPhenoRng, seedRng } from '../src/sim/rng'
 import { tick } from '../src/sim/tick'
 import type { Content, PhenomenonDef } from '../src/sim/types'
@@ -214,5 +214,56 @@ describe('catchPhenomenon', () => {
     expect(run.nextPhenomenonAtSec).toBe(0)
     run = tick(run, content, 1)
     expect(run.nextPhenomenonAtSec).toBeGreaterThan(run.activeSec)
+  })
+})
+
+describe('tailwind boost', () => {
+  const content = makeTestContent()
+  const wind = { system: 'thermal' as const, untilActiveSec: 200, pushMult: 2 }
+
+  function windyRun() {
+    let run = newRun(content, 1, 'test-rock')
+    // A thermal machine so there is push to multiply (real fixture ids —
+    // matches what buildOrUpgrade(run, content, 'test-heater') constructs).
+    run = {
+      ...run,
+      machines: [{ id: 'm-test-heater', typeId: 'test-heater', level: 1 }],
+      activeSec: 100,
+      tailwind: wind,
+    }
+    return run
+  }
+
+  it('reports the multiplier only for the boosted system while live', () => {
+    const run = windyRun()
+    expect(tailwindBoost(run, 'thermal')).toBe(2)
+    expect(tailwindBoost(run, 'hydro')).toBe(1)
+    expect(tailwindBoost({ ...run, activeSec: 200 }, 'thermal')).toBe(1) // over
+    expect(tailwindBoost({ ...run, tailwind: null }, 'thermal')).toBe(1)
+  })
+
+  it('boosted active drift moves the system further toward setpoint', () => {
+    const boosted = tick(windyRun(), content, 30)
+    const calm = tick({ ...windyRun(), tailwind: null }, content, 30)
+    const setpoint = boosted.systems.thermal.setpoint
+    expect(Math.abs(boosted.systems.thermal.value - setpoint)).toBeLessThan(
+      Math.abs(calm.systems.thermal.value - setpoint),
+    )
+  })
+
+  it('offline drift is IDENTICAL with or without a live tailwind', () => {
+    const withWind = applyOffline(windyRun(), content, 3600_000).run
+    const without = applyOffline(
+      { ...windyRun(), tailwind: null },
+      content,
+      3600_000,
+    ).run
+    expect(withWind.systems).toEqual(without.systems)
+  })
+
+  it('stepPhenomena clears an expired tailwind', () => {
+    let run = windyRun()
+    run = tick(run, content, 150) // activeSec 100 → 250, past 200
+    expect(run.tailwind).toBeNull()
   })
 })

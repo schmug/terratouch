@@ -7,7 +7,7 @@
 // (weighted by total machine push). Exponential approach never overshoots,
 // so ticking can NEVER hard-fail a gauge — danger comes only from cards.
 
-import { stepPhenomena } from './phenomena'
+import { stepPhenomena, tailwindBoost } from './phenomena'
 import { habitability, productionRate, shiftBandsToEra } from './systems'
 import {
   SYSTEM_IDS,
@@ -50,10 +50,11 @@ export function driftTarget(
   run: RunState,
   content: Content,
   system: SystemId,
+  pushMult = 1,
 ): { target: number; rate: number } {
   const arch = archetypeOf(run, content)
   const nat = arch.systems[system]
-  const push = machinePushRate(run.machines, content, system)
+  const push = machinePushRate(run.machines, content, system) * pushMult
   const rate = nat.naturalRatePerSec + push
   if (rate <= 0) return { target: run.systems[system].value, rate: 0 }
   const target =
@@ -80,7 +81,12 @@ export function driftDirection(
   content: Content,
   system: SystemId,
 ): -1 | 0 | 1 {
-  const { target, rate } = driftTarget(run, content, system)
+  const { target, rate } = driftTarget(
+    run,
+    content,
+    system,
+    tailwindBoost(run, system),
+  )
   if (rate <= 0) return 0
   const gap = target - run.systems[system].value
   if (Math.abs(gap) < 0.5) return 0
@@ -99,7 +105,12 @@ export function tick(run: RunState, content: Content, dtSec: number): RunState {
   const systems = {} as Record<SystemId, SystemState>
   for (const id of SYSTEM_IDS) {
     const s = run.systems[id]
-    const { target, rate } = driftTarget(run, content, id)
+    const { target, rate } = driftTarget(
+      run,
+      content,
+      id,
+      tailwindBoost(run, id),
+    )
     systems[id] = { ...s, value: relax(s.value, target, rate, dtSec) }
   }
 
