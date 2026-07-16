@@ -81,15 +81,27 @@ export function ascend(run: RunState, content: Content): RunState {
   return { ...run, collapse: report }
 }
 
-/** Collect the tap pool with the active-play bonus (SPEC §2.6). */
+/** Is the activeSec clock inside the collect pulse's on-beat tick? */
+export function onBeat(run: RunState, content: Content): boolean {
+  return Math.floor(run.activeSec) % content.balance.pulse.periodSec === 0
+}
+
+/**
+ * Collect the tap pool with the active-play bonus (SPEC §2.6). Collecting
+ * on the pulse's beat upgrades the multiplier (Session Arc slice A);
+ * off-beat is exactly the pre-pulse behavior — never worse.
+ */
 export function tapCollect(
   run: RunState,
   content: Content,
-): { run: RunState; collected: number } {
+): { run: RunState; collected: number; onBeat: boolean } {
   if (run.collapse) throw new SimError('run-over')
-  const collected =
-    Math.round(run.uncollected * content.balance.tap.bonusMult * 10) / 10
-  if (collected <= 0) return { run, collected: 0 }
+  const beat = onBeat(run, content)
+  const mult = beat
+    ? content.balance.pulse.onBeatMult
+    : content.balance.tap.bonusMult
+  const collected = Math.round(run.uncollected * mult * 10) / 10
+  if (collected <= 0) return { run, collected: 0, onBeat: beat }
   return {
     run: {
       ...run,
@@ -100,6 +112,7 @@ export function tapCollect(
       },
     },
     collected,
+    onBeat: beat,
   }
 }
 
