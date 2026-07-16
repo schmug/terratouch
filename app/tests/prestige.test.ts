@@ -67,6 +67,70 @@ describe('seedYield (SPEC §2.8)', () => {
   })
 })
 
+describe('Ascension efficiency bonus (issue #28)', () => {
+  // The fixture ships with cap 0 (bonus off) so every classic-formula test
+  // stays pinned; these tests opt in with live params: ref 20, per 5, cap 3.
+  const eff = makeTestContent({
+    balance: {
+      ...content.balance,
+      prestige: {
+        ...content.balance.prestige,
+        efficiency: { refTurns: 20, perTurns: 5, cap: 3 },
+      },
+    },
+  })
+
+  /** A final-era run that arrived at turn `arrivedAt` and sits at `turns`. */
+  function arrived(arrivedAt: number | null, turns: number): RunState {
+    const run = makeRun(eff)
+    return {
+      ...run,
+      era: 1, // the fixture's final era
+      turns,
+      history: {
+        ...run.history,
+        peakHabitability: 60,
+        turnsToFinalEra: arrivedAt,
+      },
+    }
+  }
+  // Classic ascension yield for these runs: 1·2 + ⌊60/25⌋ + 5 = 9.
+
+  it('a swift climb earns the efficiency bonus on Ascension', () => {
+    // Arrived at turn 10: ⌊(20 − 10)/5⌋ = 2 extra Seeds.
+    expect(seedYield(arrived(10, 10), eff, 'ascension')).toBe(11)
+  })
+
+  it('the bonus is capped', () => {
+    // Arrived at turn 0: ⌊20/5⌋ = 4, clamped to cap 3.
+    expect(seedYield(arrived(0, 0), eff, 'ascension')).toBe(12)
+  })
+
+  it('a slow climb pays exactly the classic yield — never less', () => {
+    expect(seedYield(arrived(20, 20), eff, 'ascension')).toBe(9)
+    expect(seedYield(arrived(40, 40), eff, 'ascension')).toBe(9)
+  })
+
+  it('lingering after arrival never erodes the bonus', () => {
+    expect(seedYield(arrived(10, 60), eff, 'ascension')).toBe(
+      seedYield(arrived(10, 10), eff, 'ascension'),
+    )
+  })
+
+  it('collapse yield is untouched by efficiency', () => {
+    // Classic collapse ⌊(2 + 2)·0.5⌋ = 2, even off a bonus-worthy arrival.
+    expect(seedYield(arrived(0, 0), eff, 'collapse')).toBe(2)
+  })
+
+  it('an unstamped arrival falls back to the turn count (migrated saves)', () => {
+    expect(seedYield(arrived(null, 10), eff, 'ascension')).toBe(11)
+  })
+
+  it('cap 0 switches the bonus off entirely (the fixture default)', () => {
+    expect(seedYield(arrived(0, 0), content, 'ascension')).toBe(9)
+  })
+})
+
 describe('canAscend / ascend (voluntary Ascension at the final era)', () => {
   it('cannot ascend before the final era', () => {
     expect(canAscend(runAt(0, 80), content)).toBe(false)

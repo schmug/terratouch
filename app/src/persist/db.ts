@@ -43,7 +43,7 @@ export function migrateSave(raw: unknown): Save | null {
   switch (candidate.schemaVersion) {
     case 1: {
       // v1 → v2: add the active-play fields (Session Arc slice A) with inert
-      // defaults, then fall through to v2 validation via recursion.
+      // defaults, then continue up the chain via recursion.
       const v1 = raw as Omit<Save, 'schemaVersion' | 'run'> & {
         schemaVersion: 1
         run: (Omit<RunState, ActivePlayField> & Partial<RunState>) | null
@@ -62,6 +62,30 @@ export function migrateSave(raw: unknown): Save | null {
       return migrateSave({ ...v1, schemaVersion: 2, run })
     }
     case 2: {
+      // v2 → v3: stamp history.turnsToFinalEra (Ascension efficiency bonus,
+      // issue #28). Null = arrival unknown; seedYield then falls back to the
+      // run's turn count, which can only under-pay the bonus — never below
+      // the pre-bonus yield. (No Content here, so a run already AT the final
+      // era can't be told apart from one mid-climb; null is safe for both,
+      // and mid-climb runs get stamped properly by tick on arrival.)
+      const v2 = raw as Omit<Save, 'schemaVersion' | 'run'> & {
+        schemaVersion: 2
+        run:
+          | (Omit<RunState, 'history'> & {
+              history: Omit<RunState['history'], 'turnsToFinalEra'>
+            })
+          | null
+      }
+      const run: RunState | null =
+        v2.run === null || v2.run === undefined
+          ? null
+          : {
+              ...v2.run,
+              history: { ...v2.run.history, turnsToFinalEra: null },
+            }
+      return migrateSave({ ...v2, schemaVersion: 3, run })
+    }
+    case 3: {
       const save = raw as Save
       if (typeof save.lastSeenMs !== 'number' || save.meta === undefined)
         return null

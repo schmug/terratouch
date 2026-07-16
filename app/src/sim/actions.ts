@@ -60,7 +60,12 @@ export function newRun(
     phenomenon: null,
     tailwind: null,
     nextPhenomenonAtSec: 0,
-    history: { peakHabitability: 0, turnsOutOfBand, machinesBuilt: 0 },
+    history: {
+      peakHabitability: 0,
+      turnsOutOfBand,
+      machinesBuilt: 0,
+      turnsToFinalEra: null,
+    },
     collapse: null,
   }
 }

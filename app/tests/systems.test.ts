@@ -150,6 +150,7 @@ describe('collapse report', () => {
         peakHabitability: 61,
         turnsOutOfBand: { thermal: 9, atmosphere: 0, hydro: 1, biosphere: 0 },
         machinesBuilt: 2,
+        turnsToFinalEra: null,
       },
     }
     const report = buildCollapseReport(run, content, {

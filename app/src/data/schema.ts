@@ -72,6 +72,11 @@ export const balanceSchema = z.strictObject({
     /** Strictly below 1: collapse must never pay as well as Ascension. */
     collapseMult: z.number().nonnegative().lt(1),
     ascensionBonus: z.number().int().nonnegative(),
+    efficiency: z.strictObject({
+      refTurns: z.number().int().nonnegative(),
+      perTurns: z.number().int().positive(),
+      cap: z.number().int().nonnegative(),
+    }),
   }),
 }) satisfies z.ZodType<Balance>
 

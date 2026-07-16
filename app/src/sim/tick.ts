@@ -134,6 +134,7 @@ export function tick(run: RunState, content: Content, dtSec: number): RunState {
   // offline.ts simply does not call this.
   let era = run.era
   let eraProgressSec = run.eraProgressSec
+  let turnsToFinalEra = run.history.turnsToFinalEra
   const eraDef = content.eras[era]
   if (!eraDef) throw new Error(`unknown era ${era}`)
   const hab = habitability(systems)
@@ -151,6 +152,9 @@ export function tick(run: RunState, content: Content, dtSec: number): RunState {
         era += 1
         eraProgressSec = 0
         shiftedSystems = shiftBandsToEra(systems, content, era)
+        // Arrival at the final era: stamp the turn count for the Ascension
+        // efficiency bonus (issue #28). Eras only climb, so this fires once.
+        if (era === content.eras.length - 1) turnsToFinalEra = run.turns
       }
     } else {
       eraProgressSec = Math.max(
@@ -173,7 +177,7 @@ export function tick(run: RunState, content: Content, dtSec: number): RunState {
       era,
       eraProgressSec,
       activeSec: run.activeSec + dtSec,
-      history: { ...run.history, peakHabitability: peak },
+      history: { ...run.history, peakHabitability: peak, turnsToFinalEra },
     },
     content,
   )
