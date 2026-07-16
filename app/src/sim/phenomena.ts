@@ -6,7 +6,13 @@
 // a miss expires silently; offline never advances any of this.
 
 import { nextFloat, pickWeighted } from './rng'
-import type { Content, PhenomenonDef, RunState } from './types'
+import { gainEnergy, productionRate } from './systems'
+import {
+  SimError,
+  type Content,
+  type PhenomenonDef,
+  type RunState,
+} from './types'
 
 /** Phenomena legal for this run right now (Era range + Archetype gate). */
 export function eligiblePhenomena(
@@ -69,4 +75,60 @@ export function stepPhenomena(run: RunState, content: Content): RunState {
     },
     nextPhenomenonAtSec: 0,
   }
+}
+
+/**
+ * Tap the live phenomenon. Tolerant no-op when none is live or it just
+ * expired — the player can honestly race the tick loop, and losing that
+ * race must never throw (mirrors tapCollect's zero path).
+ */
+export function catchPhenomenon(
+  run: RunState,
+  content: Content,
+): { run: RunState; caught: PhenomenonDef | null } {
+  if (run.collapse) throw new SimError('run-over')
+  const live = run.phenomenon
+  if (!live || run.activeSec >= live.expiresAtActiveSec)
+    return { run, caught: null }
+  const def = content.phenomena.find((d) => d.id === live.defId)
+  if (!def) return { run, caught: null } // content changed under a live save
+
+  let next: RunState = { ...run, phenomenon: null }
+  const payout = def.payout
+  switch (payout.kind) {
+    case 'minerals': {
+      const gained = productionRate(next, content) * payout.productionSec
+      next = {
+        ...next,
+        resources: {
+          ...next.resources,
+          minerals: next.resources.minerals + gained,
+        },
+      }
+      break
+    }
+    case 'vent':
+      next = {
+        ...next,
+        instability: Math.max(0, next.instability - payout.amount),
+      }
+      break
+    case 'tailwind':
+      next = {
+        ...next,
+        tailwind: {
+          system: payout.system,
+          untilActiveSec: next.activeSec + payout.durationSec,
+          pushMult: payout.pushMult,
+        },
+      }
+      break
+    case 'energy':
+      next = {
+        ...next,
+        energy: gainEnergy(next.energy, payout.amount, content.balance),
+      }
+      break
+  }
+  return { run: next, caught: def }
 }

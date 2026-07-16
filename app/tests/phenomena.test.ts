@@ -4,6 +4,7 @@
 import { describe, expect, it } from 'vitest'
 import { newRun } from '../src/sim/actions'
 import { applyOffline } from '../src/sim/offline'
+import { catchPhenomenon } from '../src/sim/phenomena'
 import { seedPhenoRng, seedRng } from '../src/sim/rng'
 import { tick } from '../src/sim/tick'
 import type { Content, PhenomenonDef } from '../src/sim/types'
@@ -116,5 +117,102 @@ describe('phenomena scheduling', () => {
     let run = newRun(content, 5, 'test-rock')
     for (let i = 0; i < 300; i++) run = tick(run, content, 1)
     expect(run.phenomenon).toBeNull() // era 1: pool empty, dormant
+  })
+})
+
+/** Force a live phenomenon of the given def without ticking to it. */
+function withLive(
+  content: Content,
+  def: PhenomenonDef,
+  seed = 1,
+): ReturnType<typeof newRun> {
+  const run = newRun(content, seed, 'test-rock')
+  return {
+    ...run,
+    activeSec: 100,
+    phenomenon: { defId: def.id, expiresAtActiveSec: 112 },
+  }
+}
+
+describe('catchPhenomenon', () => {
+  it('minerals payout = productionSec × current production rate', () => {
+    const content = phenoContent([METEOR]) // fixture baseRate 1/s, no machines
+    const run = withLive(content, METEOR)
+    const { run: after, caught } = catchPhenomenon(run, content)
+    expect(caught?.id).toBe('meteor')
+    expect(after.resources.minerals).toBe(run.resources.minerals + 45)
+    expect(after.phenomenon).toBeNull()
+  })
+
+  it('vent payout floors Instability at 0', () => {
+    const VENT: PhenomenonDef = {
+      id: 'vent',
+      name: 'Vent',
+      blurb: 'x',
+      weight: 1,
+      payout: { kind: 'vent', amount: 4 },
+    }
+    const content = phenoContent([VENT])
+    const hot = { ...withLive(content, VENT), instability: 10 }
+    expect(catchPhenomenon(hot, content).run.instability).toBe(6)
+    const calm = { ...withLive(content, VENT), instability: 2 }
+    expect(catchPhenomenon(calm, content).run.instability).toBe(0)
+  })
+
+  it('energy payout respects cap + reserve', () => {
+    const SPARK: PhenomenonDef = {
+      id: 'spark',
+      name: 'Spark',
+      blurb: 'x',
+      weight: 1,
+      payout: { kind: 'energy', amount: 1 },
+    }
+    const content = phenoContent([SPARK])
+    const full = { ...withLive(content, SPARK), energy: 13 } // cap 10 + reserve 3
+    expect(catchPhenomenon(full, content).run.energy).toBe(13)
+    const nearly = { ...withLive(content, SPARK), energy: 12.5 }
+    expect(catchPhenomenon(nearly, content).run.energy).toBe(13)
+  })
+
+  it('tailwind payout arms the tailwind state', () => {
+    const WIND: PhenomenonDef = {
+      id: 'wind',
+      name: 'Wind',
+      blurb: 'x',
+      weight: 1,
+      payout: {
+        kind: 'tailwind',
+        system: 'thermal',
+        durationSec: 30,
+        pushMult: 2,
+      },
+    }
+    const content = phenoContent([WIND])
+    const { run: after } = catchPhenomenon(withLive(content, WIND), content)
+    expect(after.tailwind).toEqual({
+      system: 'thermal',
+      untilActiveSec: 130,
+      pushMult: 2,
+    })
+  })
+
+  it('is a tolerant no-op when nothing is live or it just expired', () => {
+    const content = phenoContent([METEOR])
+    const idle = newRun(content, 1, 'test-rock')
+    expect(catchPhenomenon(idle, content)).toEqual({ run: idle, caught: null })
+    const expired = {
+      ...withLive(content, METEOR),
+      activeSec: 112, // exactly at expiry ⇒ gone
+    }
+    expect(catchPhenomenon(expired, content).caught).toBeNull()
+    expect(catchPhenomenon(expired, content).run).toEqual(expired)
+  })
+
+  it('after a catch, the next tick schedules the next spawn', () => {
+    const content = phenoContent([METEOR])
+    let run = catchPhenomenon(withLive(content, METEOR), content).run
+    expect(run.nextPhenomenonAtSec).toBe(0)
+    run = tick(run, content, 1)
+    expect(run.nextPhenomenonAtSec).toBeGreaterThan(run.activeSec)
   })
 })
