@@ -12,11 +12,29 @@ import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  // Build/generated output (also .gitignored, but be explicit for local runs)
-  { ignores: ['**/dist/', 'app/dev-dist/', '**/coverage/', '.wrangler/'] },
+  // Build/generated output (also .gitignored, but be explicit for local runs).
+  // .claude/worktrees/ holds agent git worktrees — full checkouts whose own
+  // tsconfigs would otherwise be linted (and break root-dir inference below).
+  {
+    ignores: [
+      '**/dist/',
+      'app/dev-dist/',
+      '**/coverage/',
+      '.wrangler/',
+      '.claude/worktrees/**',
+    ],
+  },
 
   js.configs.recommended,
   tseslint.configs.recommended,
+
+  // Pin the parser's root explicitly: with worktrees present, auto-detection
+  // sees multiple candidate tsconfig roots and refuses to parse anything.
+  {
+    languageOptions: {
+      parserOptions: { tsconfigRootDir: import.meta.dirname },
+    },
+  },
 
   // React hooks rules for the app UI (includes the React Compiler checks)
   {
